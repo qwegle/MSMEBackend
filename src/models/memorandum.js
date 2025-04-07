@@ -1,0 +1,49 @@
+const { required } = require('joi');
+const mongoose = require('mongoose');
+
+const memorandum = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    otsFormId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'OTSForm',
+      required: true,
+    },
+
+    ackId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'AckForm',
+      required: true,
+    },
+    status: {
+      type: Number,
+      enum: [0, 1], // 0 = Rejected, 1 = Approved
+      required: true,
+    },
+    remarks: {
+      type: String,
+      required:true,
+      default:"Approved"
+    },
+    memoVersion:{
+      type: Number,
+      required:true,
+      default:1
+
+    },
+    pdfData: {
+      data: Buffer,
+      contentType: String,
+    },
+
+  },
+  { timestamps: true } 
+);
+
+const Memorandum = mongoose.model('Memos', memorandum);
+
+module.exports = Memorandum;
