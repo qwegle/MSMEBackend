@@ -40,7 +40,6 @@ exports.register_OFSC_SubAdmin = async (req, res, next) => {
 exports.logout = (req, res) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader?.split(' ')[1];
-
     if (!token) return res.status(401).json({ message: 'Token required' });
 
     blacklistToken(token);
