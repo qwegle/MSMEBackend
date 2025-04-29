@@ -23,6 +23,7 @@ const memorandum = new mongoose.Schema(
       type: Number,
       enum: [0, 1], // 0 = Rejected, 1 = Approved
       required: true,
+      default:1
     },
     remarks: {
       type: String,
