@@ -21,7 +21,8 @@ exports.getUserOTSForms = async (req, res) => {
     try {
         const forms = await OTSForm.find({ userId: req.user.id }).sort({ createdAt: -1 });
 
-        res.status(200).json({ data: forms });
+        // res.status(200).json({ data: forms });
+        res.status(200).json(forms);
     } catch (error) {
         console.error('Error fetching OTS forms:', error);
         res.status(500).json({ message: 'Error fetching forms', error: error.message });
@@ -40,7 +41,8 @@ exports.getOTSFormById = async (req, res) => {
             return res.status(404).json({ message: 'OTS form not found' });
         }
 
-        res.status(200).json({ data: form });
+        // res.status(200).json({ data: form });
+        res.status(200).json(form);
     } catch (error) {
         console.error('Error fetching OTS form:', error);
         res.status(500).json({ message: 'Error fetching form', error: error.message });
@@ -52,7 +54,7 @@ exports.getAllOTSForms = async (req, res) => {
     try {
         const forms = await OTSForm.find().populate('userId', 'first_name last_name email');
         // res.status(200).json({ data: forms });
-        res.status(200).json({ forms });
+        res.status(200).json(forms);
     } catch (error) {
         console.error('Error fetching all OTS forms:', error);
         res.status(500).json({ message: 'Error fetching all forms', error: error.message });
