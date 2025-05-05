@@ -51,7 +51,8 @@ exports.getOTSFormById = async (req, res) => {
 exports.getAllOTSForms = async (req, res) => {
     try {
         const forms = await OTSForm.find().populate('userId', 'first_name last_name email');
-        res.status(200).json({ data: forms });
+        // res.status(200).json({ data: forms });
+        res.status(200).json({ forms });
     } catch (error) {
         console.error('Error fetching all OTS forms:', error);
         res.status(500).json({ message: 'Error fetching all forms', error: error.message });
