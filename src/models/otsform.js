@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
+const sendStatusChangeEmail = require('../utils/sendStatusChangeEmail'); // adjust path as needed
 
 const otsFormSchema = new mongoose.Schema({
-    // applicationId: { type: String, required: true, unique: true }, // Unique primary key
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Foreign key referencing User table
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     first_name: { type: String, required: true },
     last_name: { type: String, required: true },
     number: { type: String, required: true },
@@ -19,10 +19,24 @@ const otsFormSchema = new mongoose.Schema({
     payment_source: { type: String, required: true },
     terms_payment: { type: String, required: true },
     any_others_particulars: { type: String },
-    status: {type: Number, required: true, default: 0},
-    status_msg:{type: String, required: true, default: "Application submitted"} // 0 - pending, 1 - accepted, -1 - rejected
+    status: { type: Number, required: true, default: 0 },
+    status_msg: { type: String, required: true, default: "Application submitted" }
 }, { timestamps: true });
 
-const OTSForm = mongoose.model('OTSForm', otsFormSchema);
+// Track the old status_msg
+otsFormSchema.pre('save', function (next) {
+    if (this.isModified('status_msg')) {
+        this._oldStatusMsg = this.get('status_msg');
+    }
+    next();
+});
 
+// After saving, send email if status_msg changed
+otsFormSchema.post('save', async function (doc) {
+    if (this._oldStatusMsg && this._oldStatusMsg !== doc.status_msg) {
+        await sendStatusChangeEmail(doc, this._oldStatusMsg, doc.status_msg);
+    }
+});
+
+const OTSForm = mongoose.model('OTSForm', otsFormSchema);
 module.exports = OTSForm;
