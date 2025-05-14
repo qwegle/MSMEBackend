@@ -24,19 +24,32 @@ const otsFormSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Track the old status_msg
-otsFormSchema.pre('save', function (next) {
-    if (this.isModified('status_msg')) {
-        this._oldStatusMsg = this.get('status_msg');
+otsFormSchema.pre('findOneAndUpdate', async function (next) {
+    const query = this.getQuery(); // filter used in the update
+    const docToUpdate = await this.model.findOne(query).lean();
+
+    if (docToUpdate) {
+        this._oldStatusMsg = docToUpdate.status_msg;
     }
+
     next();
 });
 
+
 // After saving, send email if status_msg changed
-otsFormSchema.post('save', async function (doc) {
-    if (this._oldStatusMsg && this._oldStatusMsg !== doc.status_msg) {
-        await sendStatusChangeEmail(doc, this._oldStatusMsg, doc.status_msg);
+otsFormSchema.post('findOneAndUpdate', async function (doc) {
+    if (!doc || !this._oldStatusMsg) return;
+
+    const update = this.getUpdate();
+    const newStatusMsg = update.status_msg || (update.$set && update.$set.status_msg);
+
+    if (newStatusMsg && this._oldStatusMsg !== newStatusMsg) {
+        console.log("Sending email from pre+post findOneAndUpdate hooks");
+        doc.status_msg = newStatusMsg; // make sure email gets the latest
+        await sendStatusChangeEmail(doc, this._oldStatusMsg, newStatusMsg);
     }
 });
+
 
 const OTSForm = mongoose.model('OTSForm', otsFormSchema);
 module.exports = OTSForm;
