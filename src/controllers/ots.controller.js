@@ -129,7 +129,7 @@ exports.rejectOtsApplication = async (req, res) => {
       const updatedForm = await OTSForm.findByIdAndUpdate(
         otsFormId,
         {
-          status: 0, // assuming 0 = rejected, 1 = active/in-progress/completed
+          status: 2, // assuming 2 = rejected, 1 = active/in-progress/completed
           status_msg: "OTS Application rejected"
         },
         { new: true }
