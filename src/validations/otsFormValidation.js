@@ -18,6 +18,10 @@ const otsFormSchema = Joi.object({
     reason_ots: Joi.string().required(),
     payment_source: Joi.string().required(),
     terms_payment: Joi.string().required(),
+    check_box1: Joi.boolean().required(),
+    check_box2: Joi.boolean().required(),
+    check_box3: Joi.boolean().required(),
+    check_box4: Joi.boolean().required(),
     any_others_particulars: Joi.string().allow('', null),
 });
 

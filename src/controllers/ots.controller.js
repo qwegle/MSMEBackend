@@ -5,7 +5,7 @@ exports.createOTSForm = async (req, res) => {
     try {
         const formData = req.body;
         formData.userId = req.user.id;
-
+        formData.loan_number = Date.now().toString();
         const newForm = new OTSForm(formData);
         await newForm.save();
 
@@ -157,9 +157,16 @@ exports.filterOTS = async (req, res) => {
     if (otsId) filter._id = otsId;
     if (userId) filter.userId = userId;
     if (branch) filter.branch = branch;
-    if (status !== undefined && status !== null) filter.status = status;
-
-    const results = await OTSForm.find(filter).populate('userId'); // Populate if needed
+    if (status) filter.status = status;
+    console.log(filter);
+    let results;
+    if(filter){
+        results = await OTSForm.find(filter);
+    }
+    else {
+        results = await OTSForm.find();
+        console.log("ghreuihgier");
+    }
 
     res.status(200).json({
       message: 'Filtered OTS applications fetched successfully',

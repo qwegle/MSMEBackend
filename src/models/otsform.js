@@ -20,7 +20,12 @@ const otsFormSchema = new mongoose.Schema({
     terms_payment: { type: String, required: true },
     any_others_particulars: { type: String },
     status: { type: Number, required: true, default: 0 },
-    status_msg: { type: String, required: true, default: "Application submitted" }
+    status_msg: { type: String, required: true, default: "Application submitted" },
+    loan_number:{ type: String, required: true},
+    check_box1: { type: Boolean,required: true},
+    check_box2: { type: Boolean,required: true}, 
+    check_box3: { type: Boolean,required: true},
+    check_box4: { type: Boolean,required: true} 
 }, { timestamps: true });
 
 // Track the old status_msg
