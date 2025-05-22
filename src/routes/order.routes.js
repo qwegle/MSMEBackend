@@ -7,6 +7,8 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 router.post('/uploadOrder', upload.single('pdf'), orderController.uploadSettlementOrder);
+router.get('/getOrdersById/:userId', orderController.getSettlementOrdersByUserId);
+router.get('/getAllOrders',orderController.listSettlementOrders);
 // router.get('/:id', memorandumController.getPdfById);
 // router.get('/', memorandumController.listAllPdfs);
 

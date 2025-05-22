@@ -27,6 +27,35 @@ exports.createAckForm = async (req, res) => {
   }
 };
 
+exports.getAllAckForms = async (req, res) => {
+  try {
+    const forms = await ACKForm.find().populate('ots_form_id').sort({ createdAt: -1 });
+    res.status(200).json(forms);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getAckFormsByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+
+    const forms = await ACKForm.find({ userId }).populate('ots_form_id').sort({ createdAt: -1 });
+
+    if (!forms.length) {
+      return res.status(404).json({ message: 'No acknowledgements found for this user.' });
+    }
+
+    res.status(200).json(forms);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // // Get all forms
 // exports.getAllForms = async (req, res) => {
 //   try {

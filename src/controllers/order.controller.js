@@ -47,6 +47,47 @@ exports.uploadSettlementOrder = async (req, res) => {
   }
 };
 
+exports.getSettlementOrdersByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+
+    const orders = await SettlementOrder.find({ userId })
+      .populate('otsId')
+      .populate('AckId')
+      .populate('memoId')
+      .sort({ createdAt: -1 });
+
+    if (!orders.length) {
+      return res.status(404).json({ message: 'No settlement orders found for this user.' });
+    }
+
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error('Get Settlement Orders by User ID Error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+exports.listSettlementOrders = async (req, res) => {
+  try {
+    const orders = await SettlementOrder.find()
+      .populate('userId')
+      .populate('otsId')
+      .populate('AckId')
+      .populate('memoId')
+      .sort({ createdAt: -1 }); // Optional: sort by newest first
+
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error('List Settlement Orders Error:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
 // // @desc    Get Settlement Order by ID
 // // @route   GET /settlement/:id
 // exports.getSettlementOrderById = async (req, res) => {

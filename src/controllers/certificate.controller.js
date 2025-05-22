@@ -46,6 +46,38 @@ exports.uploadCertificateOrder = async (req, res) => {
   }
 };
 
+exports.getAllCertificateOrders = async (req, res) => {
+  try {
+    const orders = await CertificateOrder.find()
+      .populate('userId otsId ackId memoId')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(orders);
+  } catch (err) {
+    console.error('Get All Certificates Error:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+exports.getCertificatesByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const orders = await CertificateOrder.find({ userId })
+      .populate('otsId ackId memoId')
+      .sort({ createdAt: -1 });
+
+    if (!orders.length) {
+      return res.status(404).json({ message: 'No certificates found for this user' });
+    }
+
+    res.status(200).json(orders);
+  } catch (err) {
+    console.error('Get Certificates by User ID Error:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
 
 // // Get certificate order by ID
 // exports.getCertificateOrderById = async (req, res) => {

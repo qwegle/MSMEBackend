@@ -107,6 +107,35 @@ const reuploadMemo = async (req, res) => {
   }
 };
 
+const getMemosByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
+
+    const memos = await Memorandum.find({ userId }).sort({ createdAt: -1 });
+
+    if (!memos.length) {
+      return res.status(404).json({ message: 'No memorandums found for this user' });
+    }
+
+    res.json(memos);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const getAllMemos = async (req, res) => {
+  try {
+    const memos = await Memorandum.find().sort({ createdAt: -1 }); // newest first
+    res.json(memos);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 
 // // Get PDF by ID (view or download)
 // const getPdfById = async (req, res) => {
@@ -143,6 +172,8 @@ module.exports = {
   uploadPdf,
   updateMemoStatus,
   reuploadMemo,
+  getMemosByUserId,
+  getAllMemos
 //   getPdfById,
 //   listAllPdfs,
 };

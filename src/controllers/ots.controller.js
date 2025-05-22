@@ -72,7 +72,7 @@ exports.getOTSFormsByBranch = async (req, res) => {
 
         const forms = await OTSForm.find({ branch }).sort({ createdAt: -1 });
 
-        res.status(200).json({ data: forms });
+        res.status(200).json(forms);
     } catch (error) {
         console.error('Error fetching OTS forms by branch:', error);
         res.status(500).json({ message: 'Error fetching forms', error: error.message });
@@ -168,11 +168,13 @@ exports.filterOTS = async (req, res) => {
         console.log("ghreuihgier");
     }
 
-    res.status(200).json({
-      message: 'Filtered OTS applications fetched successfully',
-      count: results.length,
-      data: results,
-    });
+    // res.status(200).json({
+    //   message: 'Filtered OTS applications fetched successfully',
+    //   count: results.length,
+    //   data: results,
+    // });
+
+    res.status(200).json(results);
   } catch (error) {
     console.error('Filter OTS Error:', error);
     res.status(500).json({ message: 'Server Error', error: error.message });

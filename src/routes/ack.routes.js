@@ -1,5 +1,5 @@
 const express = require('express');
-const { createAckForm } = require('../controllers/ack.controller');
+const { createAckForm, getAckFormsByUserId, getAllAckForms } = require('../controllers/ack.controller');
 const { authenticateToken } = require('../middlewares/auth.middleware');
 const validateRequest = require('../middlewares/validateRequest');
 const ackFormValidation = require('../validations/ackFormValidation');
@@ -12,5 +12,8 @@ router.post(
     validateRequest(ackFormValidation),
     createAckForm
 );
+
+router.get('/getAckById/:userId', authenticateToken, getAckFormsByUserId);
+router.get('/getAllAck', authenticateToken, getAllAckForms);
 
 module.exports = router;
