@@ -189,7 +189,7 @@ exports.filterOTS = async (req, res) => {
     // Build dynamic filter
     const filter = {};
 
-    if (otsId) filter._id = otsId;
+    if (otsId) filter.loan_number = otsId;
     if (userId) filter.userId = userId;
     if (branch) filter.branch = branch;
     if (status) filter.status = status;
