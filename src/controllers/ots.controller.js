@@ -157,11 +157,12 @@ exports.trackStatus = async (req, res) => {
 
 // reject OTS application status
 
-exports.rejectOtsApplication = async (req, res) => {
+exports.ApproveRejectOtsApplication = async (req, res) => {
     try {
-      const { otsFormId } = req.body;
-  
-      const updatedForm = await OTSForm.findByIdAndUpdate(
+      const { otsFormId, flag } = req.body;
+
+      if(flag == 2){
+        const updatedForm = await OTSForm.findByIdAndUpdate(
         otsFormId,
         {
           status: 2, // assuming 2 = rejected, 1 = active/in-progress/completed
@@ -169,12 +170,29 @@ exports.rejectOtsApplication = async (req, res) => {
         },
         { new: true }
       );
-  
       if (!updatedForm) {
         return res.status(404).json({ message: 'OTS application not found' });
       }
-  
       res.status(200).json({ message: 'OTS application rejected successfully', form: updatedForm });
+      }
+      else if(flag == 1){
+        const updatedForm = await OTSForm.findByIdAndUpdate(
+        otsFormId,
+        {
+          status: 2, // assuming 2 = rejected, 1 = active/in-progress/completed
+          status_msg: "OTS Application rejected"
+        },
+        { new: true }
+      );
+        if (!updatedForm) {
+        return res.status(404).json({ message: 'OTS application not found' });
+      }
+      res.status(200).json({ message: 'OTS application approved successfully', form: updatedForm });
+      }
+      else{
+      res.status(200).json({ message: 'Flag value must be 1(Approved) or 2(Rejected)', form: updatedForm });
+      }
+      
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

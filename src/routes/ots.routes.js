@@ -7,10 +7,9 @@ const {
     getOTSFormsByBranch,
     updateOTSForm,
     trackStatus,
-    rejectOtsApplication,
     filterOTS,
     getOTSStatusCounts,
-    approveOtsApplication
+    ApproveRejectOtsApplication
 } = require('../controllers/ots.controller');
 
 const { authenticateToken } = require('../middlewares/auth.middleware');
@@ -63,15 +62,15 @@ router.get(
     trackStatus
 );
 router.post(
-    '/rejectOTS',
+    '/ApproveRejectOTS',
     authenticateToken,
-    rejectOtsApplication
+    ApproveRejectOtsApplication
 );
-router.post(
-    '/approveOTS',
-    authenticateToken,
-    approveOtsApplication,
-);
+// router.post(
+//     '/approveOTS',
+//     authenticateToken,
+//     approveOtsApplication,
+// );
 router.post(
     '/filterOTS',
     authenticateToken,
