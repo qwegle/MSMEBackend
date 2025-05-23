@@ -43,6 +43,7 @@ exports.loginUser = async ({ email, password }) => {
         //     email: user.email,
             user_type: user.user_type,
             user_role: user.user_role,
+            branch: user.branch,
         //     user_branch: user.user_branch,
         //     no_of_OTS_form_filed: user.no_of_OTS_form_filed,
         //     no_of_OTS_form_accepted: user.no_of_OTS_form_accepted,
