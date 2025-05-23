@@ -9,6 +9,8 @@ const {
     trackStatus,
     rejectOtsApplication,
     filterOTS,
+    getOTSStatusCounts,
+    approveOtsApplication
 } = require('../controllers/ots.controller');
 
 const { authenticateToken } = require('../middlewares/auth.middleware');
@@ -66,8 +68,18 @@ router.post(
     rejectOtsApplication
 );
 router.post(
+    '/approveOTS',
+    authenticateToken,
+    approveOtsApplication,
+);
+router.post(
     '/filterOTS',
     authenticateToken,
     filterOTS
 );
+router.get(
+    '/count_applications',
+    authenticateToken,
+    getOTSStatusCounts
+)
 module.exports = router;

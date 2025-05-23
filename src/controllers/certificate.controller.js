@@ -78,6 +78,9 @@ exports.getCertificatesByUserId = async (req, res) => {
   }
 };
 
+// Get count of OTS applications by status
+
+
 
 // // Get certificate order by ID
 // exports.getCertificateOrderById = async (req, res) => {

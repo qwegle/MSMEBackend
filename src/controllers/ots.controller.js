@@ -216,6 +216,65 @@ exports.filterOTS = async (req, res) => {
   }
 };
 
+exports.getOTSStatusCounts = async (req, res) => {
+  try {
+    const counts = await OTSForm.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // Default counts
+    const statusCounts = {
+      pending: 0,     // Assuming 0 = pending
+      approved: 0,    // Assuming 1 = approved
+      rejected: 0     // Assuming 2 = rejected
+    };
+
+    counts.forEach(item => {
+      if (item._id === 0) statusCounts.pending = item.count;
+      else if (item._id === 1) statusCounts.approved = item.count;
+      else if (item._id === 2) statusCounts.rejected = item.count;
+    });
+
+    res.status(200).json({
+      message: 'OTS application status counts retrieved successfully',
+      data: statusCounts
+    });
+  } catch (error) {
+    console.error('Error getting status counts:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Approve OTS application
+exports.approveOtsApplication = async (req, res) => {
+  try {
+    const { otsFormId } = req.body;
+
+    const updatedForm = await OTSForm.findByIdAndUpdate(
+      otsFormId,
+      {
+        status: 1, // assuming 1 = approved
+        status_msg: "OTS Application approved"
+      },
+      { new: true }
+    );
+
+    if (!updatedForm) {
+      return res.status(404).json({ message: 'OTS application not found' });
+    }
+
+    res.status(200).json({ message: 'OTS application approved successfully', form: updatedForm });
+  } catch (error) {
+    console.error('Error approving OTS application:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 
 
  
