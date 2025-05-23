@@ -9,6 +9,7 @@ const upload = multer({ storage });
 router.post('/uploadCertificate', upload.single('pdf'), certificateController.uploadCertificateOrder);
 router.post('/getCertificateById/:userId', certificateController.getCertificatesByUserId);
 router.post('/getAllCertificate', certificateController.getAllCertificateOrders);
+router.post('/getCeritificateCount', certificateController.getCertificateOrderCounts);
 // router.get('/:id', memorandumController.getPdfById);
 // router.get('/', memorandumController.listAllPdfs);
 

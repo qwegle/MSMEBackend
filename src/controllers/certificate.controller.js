@@ -78,6 +78,62 @@ exports.getCertificatesByUserId = async (req, res) => {
   }
 };
 
+const CertificateOrder = require('../models/certificate');
+const mongoose = require('mongoose');
+
+exports.getCertificateOrderCounts = async (req, res) => {
+  const { branch } = req.body;
+  try {
+    const matchStage = branch
+      ? { $match: { 'otsDetails.branch': branch } }
+      : null;
+
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'otsforms',
+          localField: 'otsId',
+          foreignField: '_id',
+          as: 'otsDetails'
+        }
+      },
+      { $unwind: '$otsDetails' }
+    ];
+
+    if (matchStage) pipeline.push(matchStage);
+
+    pipeline.push({
+      $group: {
+        _id: '$otsDetails.branch',
+        count: { $sum: 1 }
+      }
+    });
+
+    const counts = await CertificateOrder.aggregate(pipeline);
+
+    if (branch && counts.length === 0) {
+      return res.status(404).json({ message: 'Invalid branch' });
+    }
+
+    const data = branch
+      ? { [branch]: counts.length ? counts[0].count : 0 }
+      : counts.reduce((acc, item) => {
+          acc[item._id] = item.count;
+          return acc;
+        }, {});
+
+    res.status(200).json({
+      message: branch
+        ? `Certificate order count for branch '${branch}' retrieved successfully`
+        : 'All certificate order counts retrieved successfully',
+      data
+    });
+  } catch (error) {
+    console.error('Error getting certificate order counts:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 // Get count of OTS applications by status
 
 

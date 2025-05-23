@@ -76,7 +76,7 @@ router.post(
     authenticateToken,
     filterOTS
 );
-router.get(
+router.post(
     '/count_applications',
     authenticateToken,
     getOTSStatusCounts

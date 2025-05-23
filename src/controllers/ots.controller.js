@@ -235,31 +235,35 @@ exports.filterOTS = async (req, res) => {
 };
 
 exports.getOTSStatusCounts = async (req, res) => {
+  const { branch } = req.body;
   try {
-    const counts = await OTSForm.aggregate([
-      {
-        $group: {
-          _id: '$status',
-          count: { $sum: 1 }
-        }
+    const matchStage = branch ? { $match: { branch } } : null;
+    const pipeline = [];
+    if (matchStage) pipeline.push(matchStage);
+    pipeline.push({
+      $group: {
+        _id: '$status',
+        count: { $sum: 1 }
       }
-    ]);
-
-    // Default counts
+    });
+    const counts = await OTSForm.aggregate(pipeline);
+    if (branch && counts.length === 0) {
+      return res.status(404).json({ message: 'Invalid branch' });
+    }
     const statusCounts = {
-      pending: 0,     // Assuming 0 = pending
-      approved: 0,    // Assuming 1 = approved
-      rejected: 0     // Assuming 2 = rejected
+      pending: 0,   
+      approved: 0,  
+      rejected: 0   
     };
-
     counts.forEach(item => {
       if (item._id === 0) statusCounts.pending = item.count;
       else if (item._id === 1) statusCounts.approved = item.count;
       else if (item._id === 2) statusCounts.rejected = item.count;
     });
-
     res.status(200).json({
-      message: 'OTS application status counts retrieved successfully',
+      message: branch
+        ? `OTS application status counts for branch '${branch}' retrieved successfully`
+        : 'All OTS application status counts retrieved successfully',
       data: statusCounts
     });
   } catch (error) {
@@ -268,7 +272,6 @@ exports.getOTSStatusCounts = async (req, res) => {
   }
 };
 
-// Approve OTS application
 exports.approveOtsApplication = async (req, res) => {
   try {
     const { otsFormId } = req.body;
