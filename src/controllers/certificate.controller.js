@@ -78,9 +78,6 @@ exports.getCertificatesByUserId = async (req, res) => {
   }
 };
 
-const CertificateOrder = require('../models/certificate');
-const mongoose = require('mongoose');
-
 exports.getCertificateOrderCounts = async (req, res) => {
   const { branch } = req.body;
   try {
