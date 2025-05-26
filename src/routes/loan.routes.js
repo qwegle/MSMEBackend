@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const loanController = require('../controllers/loanController');
+const loanController = require('../controllers/loan.controller');
 const { authenticateToken } = require('../middlewares/auth.middleware');
 
 // router.post('/', loanController.createLoan);
