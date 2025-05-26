@@ -63,19 +63,19 @@ exports.filterAckForms = async (req, res) => {
     const pipeline = [
       {
         $lookup: {
-          from: 'otsforms', // Ensure this matches the actual MongoDB collection name
+          from: 'otsforms',
           localField: 'ots_form_id',
           foreignField: '_id',
           as: 'otsDetails'
         }
       },
-      { $unwind: '$otsDetails' }
+      { $unwind: '$otsDetails' },
     ];
 
     const matchConditions = {};
 
     if (userId) {
-      matchConditions.userId = userId;
+      matchConditions['otsDetails.userId'] = userId;
     }
     if (loan_number) {
       matchConditions['otsDetails.loan_number'] = loan_number;
@@ -87,6 +87,17 @@ exports.filterAckForms = async (req, res) => {
     if (Object.keys(matchConditions).length > 0) {
       pipeline.push({ $match: matchConditions });
     }
+
+    // Add projection stage to return only required fields
+    pipeline.push({
+      $project: {
+        _id: 0,
+        first_name: '$otsDetails.first_name',
+        last_name: '$otsDetails.last_name',
+        loan_number: '$otsDetails.loan_number',
+        img_link_sign_stamp: 1
+      }
+    });
 
     const forms = await ACKForm.aggregate(pipeline).sort({ createdAt: -1 });
 
