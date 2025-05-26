@@ -108,21 +108,23 @@ exports.getCertificateOrderCounts = async (req, res) => {
 
     const counts = await CertificateOrder.aggregate(pipeline);
 
-    if (branch && counts.length === 0) {
-      return res.status(404).json({ message: 'Invalid branch' });
+    // If branch is specified but it doesn't exist in OTS, treat it as 0 count
+    if (branch) {
+      const matchingCount = counts.find(item => item._id === branch);
+      return res.status(200).json({
+        message: `Certificate order count for branch '${branch}' retrieved successfully`,
+        data: { [branch]: matchingCount ? matchingCount.count : 0 }
+      });
     }
 
-    const data = branch
-      ? { [branch]: counts.length ? counts[0].count : 0 }
-      : counts.reduce((acc, item) => {
-          acc[item._id] = item.count;
-          return acc;
-        }, {});
+    // If all branches, construct count map
+    const data = counts.reduce((acc, item) => {
+      acc[item._id] = item.count;
+      return acc;
+    }, {});
 
     res.status(200).json({
-      message: branch
-        ? `Certificate order count for branch '${branch}' retrieved successfully`
-        : 'All certificate order counts retrieved successfully',
+      message: 'All certificate order counts retrieved successfully',
       data
     });
   } catch (error) {
