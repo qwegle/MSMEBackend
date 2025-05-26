@@ -105,7 +105,7 @@ exports.filterAckForms = async (req, res) => {
       message: Object.keys(matchConditions).length > 0
         ? 'Filtered acknowledgement forms retrieved successfully'
         : 'All acknowledgement forms retrieved successfully',
-      data: forms
+      forms
     });
 
   } catch (error) {
