@@ -77,9 +77,8 @@ exports.getCertificatesByUserId = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
-
 exports.getCertificateOrderCounts = async (req, res) => {
-  const { branch } = req.body;
+  const { branch, startDate, endDate } = req.body;
 
   try {
     const pipeline = [
@@ -93,25 +92,47 @@ exports.getCertificateOrderCounts = async (req, res) => {
       },
       { $unwind: '$otsDetails' }
     ];
-
     if (branch) {
       pipeline.push({ $match: { 'otsDetails.branch': branch } });
     }
+    if (startDate || endDate) {
+      const dateMatch = {};
 
+      if (startDate && endDate && startDate === endDate) {
+        const start = new Date(startDate);
+        const end = new Date(startDate);
+        end.setHours(23, 59, 59, 999);
+        dateMatch.$gte = start;
+        dateMatch.$lte = end;
+      } else {
+        if (startDate) {
+          dateMatch.$gte = new Date(startDate);
+        }
+        if (endDate) {
+          const end = new Date(endDate);
+          end.setHours(23, 59, 59, 999);
+          dateMatch.$lte = end;
+        }
+      }
+
+      pipeline.push({
+        $match: {
+          createdAt: dateMatch
+        }
+      });
+    }
     pipeline.push({
       $group: {
         _id: null,
-        count: { $sum: 1 },
-      },
+        count: { $sum: 1 }
+      }
     });
 
     const result = await CertificateOrder.aggregate(pipeline);
     const count = result.length > 0 ? result[0].count : 0;
-
     const message = branch
       ? `Certificate order count for branch '${branch}' retrieved successfully`
       : 'Total certificate order count retrieved successfully';
-
     return res.status(200).json({
       message,
       data: { issued: count }
@@ -125,6 +146,7 @@ exports.getCertificateOrderCounts = async (req, res) => {
     });
   }
 };
+
 
 
 
