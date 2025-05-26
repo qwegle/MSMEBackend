@@ -10,6 +10,7 @@ router.post('/uploadCertificate', upload.single('pdf'), certificateController.up
 router.post('/getCertificateById/:userId', certificateController.getCertificatesByUserId);
 router.post('/getAllCertificate', certificateController.getAllCertificateOrders);
 router.post('/getCeritificateCount', certificateController.getCertificateOrderCounts);
+router.get('/getCertificateCount7Days', certificateController.getCertificateCountsLast7Days);
 // router.get('/:id', memorandumController.getPdfById);
 // router.get('/', memorandumController.listAllPdfs);
 

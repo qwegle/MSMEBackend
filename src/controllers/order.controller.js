@@ -3,7 +3,7 @@ const OTSForm = require('../models/otsform'); // Make sure the path is correct
 
 exports.uploadSettlementOrder = async (req, res) => {
   try {
-    const { userId, otsId, AckId, memoId, status } = req.body;
+    const { userId, otsId, AckId, memoId } = req.body;
 
     if (!req.file) {
       return res.status(400).json({ message: 'PDF file is required.' });
@@ -15,7 +15,6 @@ exports.uploadSettlementOrder = async (req, res) => {
       otsId,
       AckId,
       memoId,
-      status,
       pdf: {
         data: req.file.buffer,
         contentType: req.file.mimetype,

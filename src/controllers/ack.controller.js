@@ -114,6 +114,55 @@ exports.filterAckForms = async (req, res) => {
   }
 };
 
+exports.getCertificateCountsLast7Days = async (req, res) => {
+  try {
+    const timezone = 'Asia/Kolkata';
+    const end   = new Date();     
+    end.setHours(23, 59, 59, 999);
+
+    const start = new Date(end);
+    start.setDate(end.getDate() - 6);
+    start.setHours(0, 0, 0, 0);
+    const raw = await CertificateOrder.aggregate([
+      { $match: { createdAt: { $gte: start, $lte: end } } },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: '%d/%m/%Y',
+              date: '$createdAt',
+              timezone  
+            }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $project: { _id: 0, date: '$_id', count: 1 } }
+    ]);
+    const lookup = Object.fromEntries(raw.map(o => [o.date, o.count]));
+    const response = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(end);
+      d.setDate(end.getDate() - i);
+      const dateStr = d
+        .toLocaleDateString('en-GB', { timeZone: timezone })
+        .split('/')
+        .map(s => s.padStart(2, '0'))
+        .join('/');
+      response.push({
+        date: dateStr,
+        count: lookup[dateStr] ?? 0
+      });
+    }
+
+    return res.status(200).json(response);
+  } catch (err) {
+    console.error('Error getting 7-day certificate counts:', err);
+    return res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+
 
 
 // // Get all forms

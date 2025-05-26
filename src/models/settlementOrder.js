@@ -22,11 +22,11 @@ const settlementOrderSchema = new mongoose.Schema(
       ref: 'Memos', // Assuming your memorandum model is named 'Pdf'
       required: true,
     },
-    status: {
-      type: Number,
-      enum: [0, 1], // 0 = Rejected, 1 = Approved
-      required: true,
-    },
+    // status: {
+    //   type: Number,
+    //   enum: [0, 1], // 0 = Rejected, 1 = Approved
+    //   required: true,
+    // },
     pdf: {
       data: Buffer,
       contentType: String,
