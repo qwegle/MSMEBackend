@@ -56,6 +56,55 @@ exports.getAckFormsByUserId = async (req, res) => {
   }
 };
 
+exports.filterAckForms = async (req, res) => {
+  const { userId, loan_number, branch } = req.body;
+
+  try {
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'otsforms', // Ensure this matches the actual MongoDB collection name
+          localField: 'ots_form_id',
+          foreignField: '_id',
+          as: 'otsDetails'
+        }
+      },
+      { $unwind: '$otsDetails' }
+    ];
+
+    const matchConditions = {};
+
+    if (userId) {
+      matchConditions.userId = userId;
+    }
+    if (loan_number) {
+      matchConditions['otsDetails.loan_number'] = loan_number;
+    }
+    if (branch) {
+      matchConditions['otsDetails.branch'] = branch;
+    }
+
+    if (Object.keys(matchConditions).length > 0) {
+      pipeline.push({ $match: matchConditions });
+    }
+
+    const forms = await ACKForm.aggregate(pipeline).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      message: Object.keys(matchConditions).length > 0
+        ? 'Filtered acknowledgement forms retrieved successfully'
+        : 'All acknowledgement forms retrieved successfully',
+      data: forms
+    });
+
+  } catch (error) {
+    console.error('Error filtering acknowledgement forms:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+
+
 // // Get all forms
 // exports.getAllForms = async (req, res) => {
 //   try {
