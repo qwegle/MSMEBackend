@@ -6,6 +6,7 @@ const ackRoutes = require('./ack.routes');
 const memoRoutes = require('./memo.route');
 const orderRoutes = require('./order.routes');
 const certificateRoutes = require('./certificate.routes');
+const existingLoan = require('./loan.routes');
 
 const router = express.Router();
 
@@ -16,5 +17,6 @@ router.use('/ack', ackRoutes);
 router.use('/memo', memoRoutes);
 router.use('/order', orderRoutes);
 router.use('/certificate', certificateRoutes);
+router.use('/loan', existingLoan)
 
 module.exports = router;
