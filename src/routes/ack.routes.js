@@ -15,6 +15,6 @@ router.post(
 
 router.get('/getAckById/:userId', authenticateToken, getAckFormsByUserId);
 router.get('/getAllAck', authenticateToken, getAllAckForms);
-router.post('filterAckForms', authenticateToken, filterAckForms)
+router.post('/filterAckForms', authenticateToken, filterAckForms)
 
 module.exports = router;
