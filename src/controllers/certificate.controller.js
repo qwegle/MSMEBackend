@@ -80,58 +80,67 @@ exports.getCertificatesByUserId = async (req, res) => {
 
 exports.getCertificateOrderCounts = async (req, res) => {
   const { branch } = req.body;
-  try {
-    const matchStage = branch
-      ? { $match: { 'otsDetails.branch': branch } }
-      : null;
 
+  try {
+    // Step 1: Lookup and unwind OTS form
     const pipeline = [
       {
         $lookup: {
           from: 'otsforms',
           localField: 'otsId',
           foreignField: '_id',
-          as: 'otsDetails'
-        }
+          as: 'otsDetails',
+        },
       },
-      { $unwind: '$otsDetails' }
+      { $unwind: '$otsDetails' },
     ];
 
-    if (matchStage) pipeline.push(matchStage);
+    // Step 2: Optionally filter by branch
+    if (branch) {
+      pipeline.push({ $match: { 'otsDetails.branch': branch } });
+    }
 
+    // Step 3: Group by branch
     pipeline.push({
       $group: {
         _id: '$otsDetails.branch',
-        count: { $sum: 1 }
-      }
+        count: { $sum: 1 },
+      },
     });
 
     const counts = await CertificateOrder.aggregate(pipeline);
 
-    // If branch is specified but it doesn't exist in OTS, treat it as 0 count
     if (branch) {
-      const matchingCount = counts.find(item => item._id === branch);
+      // If specific branch is queried
+      const countObj = counts.find(item => item._id === branch);
       return res.status(200).json({
         message: `Certificate order count for branch '${branch}' retrieved successfully`,
-        data: { [branch]: matchingCount ? matchingCount.count : 0 }
+        data: { [branch]: countObj ? countObj.count : 0 },
+      });
+    } else {
+      // If all branches: preload known branches from OTSForm
+      const allBranches = await OTSForm.distinct('branch');
+
+      const data = {};
+      allBranches.forEach(b => {
+        data[b] = 0; // Default count
+      });
+
+      counts.forEach(item => {
+        data[item._id] = item.count;
+      });
+
+      return res.status(200).json({
+        message: 'All certificate order counts retrieved successfully',
+        data,
       });
     }
-
-    // If all branches, construct count map
-    const data = counts.reduce((acc, item) => {
-      acc[item._id] = item.count;
-      return acc;
-    }, {});
-
-    res.status(200).json({
-      message: 'All certificate order counts retrieved successfully',
-      data
-    });
   } catch (error) {
     console.error('Error getting certificate order counts:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    return res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
 
 // Get count of OTS applications by status
 
