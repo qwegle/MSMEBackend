@@ -101,12 +101,12 @@ exports.filterAckForms = async (req, res) => {
 
     const forms = await ACKForm.aggregate(pipeline).sort({ createdAt: -1 });
 
-    res.status(200).json({
-      message: Object.keys(matchConditions).length > 0
-        ? 'Filtered acknowledgement forms retrieved successfully'
-        : 'All acknowledgement forms retrieved successfully',
+    res.status(200).json(
+      // message: Object.keys(matchConditions).length > 0
+      //   ? 'Filtered acknowledgement forms retrieved successfully'
+      //   : 'All acknowledgement forms retrieved successfully',
       forms
-    });
+    );
 
   } catch (error) {
     console.error('Error filtering acknowledgement forms:', error);
