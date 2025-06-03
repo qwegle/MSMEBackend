@@ -44,20 +44,20 @@ exports.getLoansByCustomerId = async (req, res) => {
 
 // Filter loans
 exports.filterLoans = async (req, res) => {
-  const { loanType, loanStatus, customerName, minOverdue, maxOverdue } = req.body;
+  const { loanType, loanStatus, customerName, minOverdue, maxOverdue, branch } = req.body;
 
   try {
     const query = {};
-
     if (loanType) query.loanType = loanType;
     if (loanStatus) query.loanStatus = loanStatus;
+    if (branch) query.branch = branch;
     if (customerName) query.customerName = { $regex: new RegExp(customerName, 'i') };
-    if (minOverdue !== undefined || maxOverdue !== undefined) {
+    if (minOverdue !== "" || maxOverdue !== "") {
       query.overdueAmount = {};
-      if (minOverdue !== undefined) query.overdueAmount.$gte = minOverdue;
-      if (maxOverdue !== undefined) query.overdueAmount.$lte = maxOverdue;
+      if (minOverdue !== "") query.overdueAmount.$gte = minOverdue;
+      if (maxOverdue !== "") query.overdueAmount.$lte = maxOverdue;
     }
-
+    console.log(query,"iufgeruigiuergfuierwhferuifweriuhgergye89gyer89gh9er8fgyh9egerghr9eg9r8ege989egh9ergyre9gyer98gyer98yre9ger98th98er98er98gh98erghgherghe0[r");
     const loans = await Loan.find(query).sort({ createdAt: -1 });
 
     res.status(200).json(loans);

@@ -51,7 +51,7 @@ exports.loginUser = async ({ email, password }) => {
         //     no_of_OTS_form_pending: user.no_of_OTS_form_pending,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt
-        }
+        } 
     };
 };
 
