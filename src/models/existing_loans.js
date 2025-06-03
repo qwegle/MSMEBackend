@@ -55,9 +55,14 @@ const loanSchema = new mongoose.Schema({
   overdueAmount: {
     type: Number,
     required: true,
+  },
+  branch: {
+    type: String,
+    enum: ['khorda', 'paradip'],
+    required: true,
   }
 }, {
-  timestamps: true // Optional: Adds createdAt and updatedAt fields
+  timestamps: true
 });
 
 module.exports = mongoose.model('Loan', loanSchema);
