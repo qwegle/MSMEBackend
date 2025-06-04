@@ -37,8 +37,8 @@ const memorandum = new mongoose.Schema(
 
     },
     pdfData: {
-      data: Buffer,
-      contentType: String,
+      type: String,
+      required: true
     },
 
   },

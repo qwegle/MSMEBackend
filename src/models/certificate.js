@@ -33,8 +33,8 @@ const certificateOrderSchema = new mongoose.Schema(
       required: true,
     },
     certificate: {
-      data: Buffer,
-      contentType: String,
+      type: String,
+      required: true
     },
   },
   { timestamps: true }

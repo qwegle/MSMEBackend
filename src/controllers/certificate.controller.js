@@ -3,48 +3,51 @@ const OTSForm = require('../models/otsform'); // adjust the path if needed
 
 exports.uploadCertificateOrder = async (req, res) => {
   try {
-    const { userId, otsId, ackId, memoId, orderId, payment_status } = req.body;
+    const filePath = req.file ? `/uploads/${req.file.filename}` : null;
 
-    if (!req.file) {
-      return res.status(400).json({ message: 'PDF file is required' });
+    if (!filePath) {
+      return res.status(400).json({ error: 'PDF file is required' });
     }
 
-    // Save the certificate order
+    const { userId, otsId, ackId, memoId, orderId, payment_status } = req.body;
+
     const newOrder = new CertificateOrder({
       userId,
       otsId,
       ackId,
       memoId,
-      payment_status,
       orderId,
-      certificate: {
-        data: req.file.buffer,
-        contentType: req.file.mimetype,
-      },
+      payment_status,
+      certificate_link: filePath, // assumes your schema uses certificate_link for file path
     });
 
     await newOrder.save();
 
-    // Update status in OTSForm
-    const updatedOTS = await OTSForm.findByIdAndUpdate(
-      otsId,
-      {
-        status_msg: 'Completed',
-        status: 1,
-      },
-      { new: true }
-    );
+    if (otsId) {
+      const updatedOTS = await OTSForm.findByIdAndUpdate(
+        otsId,
+        {
+          status_msg: 'Completed',
+          status: 1,
+        },
+        { new: true }
+      );
 
-    if (!updatedOTS) {
-      return res.status(404).json({ message: 'OTS Form not found for status update' });
+      if (!updatedOTS) {
+        return res.status(404).json({ message: 'OTS Form not found for status update' });
+      }
     }
 
-    res.status(201).json({ message: 'Certificate order uploaded and status updated successfully', data: newOrder._id });
+    res.status(201).json({
+      message: 'Certificate order uploaded and status updated successfully',
+      data: newOrder,
+    });
   } catch (err) {
     console.error('Certificate Order Upload Error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
 
 exports.getAllCertificateOrders = async (req, res) => {
   try {

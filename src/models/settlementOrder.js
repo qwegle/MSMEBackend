@@ -28,8 +28,8 @@ const settlementOrderSchema = new mongoose.Schema(
     //   required: true,
     // },
     pdf: {
-      data: Buffer,
-      contentType: String,
+    type: String,
+    required: true
     },
   },
   { timestamps: true }

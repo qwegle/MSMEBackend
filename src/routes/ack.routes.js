@@ -9,6 +9,7 @@ const router = express.Router();
 router.post(
     '/submitAck',
     authenticateToken,
+     upload.single('file'),
     validateRequest(ackFormValidation),
     createAckForm
 );
