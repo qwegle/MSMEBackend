@@ -25,7 +25,7 @@ const ackFormValidation = Joi.object({
       'string.pattern.base': 'date must be in YYYY-MM-DD format'
     }),
 
-  img_link_sign_stamp: Joi.string().uri().required(),
+  // img_link_sign_stamp: Joi.string().uri().required(),
 
   name_of_recieving_officer: Joi.string().required(),
 
