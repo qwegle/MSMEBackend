@@ -70,7 +70,7 @@ exports.filterAckForms = async (req, res) => {
           as: 'otsDetails'
         }
       },
-      { $unwind: '$otsDetails' },//gbcuigciu
+      { $unwind: '$otsDetails' },
     ];
 
     const matchConditions = {};
@@ -88,8 +88,6 @@ exports.filterAckForms = async (req, res) => {
     if (Object.keys(matchConditions).length > 0) {
       pipeline.push({ $match: matchConditions });
     }
-
-    // Add projection stage to return only required fields
     pipeline.push({
       $project: {
         _id: 0,
