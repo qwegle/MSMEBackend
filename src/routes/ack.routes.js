@@ -3,13 +3,13 @@ const { createAckForm, getAckFormsByUserId, getAllAckForms, filterAckForms } = r
 const { authenticateToken } = require('../middlewares/auth.middleware');
 const validateRequest = require('../middlewares/validateRequest');
 const ackFormValidation = require('../validations/ackFormValidation');
-
+const upload = require("../middlewares/fileUploadHandler");
 const router = express.Router();
 
 router.post(
     '/submitAck',
     authenticateToken,
-     upload.single('file'),
+    upload.single('file'),
     validateRequest(ackFormValidation),
     createAckForm
 );

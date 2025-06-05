@@ -1,6 +1,5 @@
 const Loan = require('../models/existing_loans.js');
 
-// Create a loan
 exports.createLoan = async (req, res) => {
   try {
     const loan = new Loan(req.body);
@@ -11,7 +10,7 @@ exports.createLoan = async (req, res) => {
   }
 };
 
-// Get all loans
+
 exports.getAllLoans = async (req, res) => {
   try {
     const loans = await Loan.find().sort({ createdAt: -1 });
@@ -21,7 +20,6 @@ exports.getAllLoans = async (req, res) => {
   }
 };
 
-// Get loans by customerId
 exports.getLoansByCustomerId = async (req, res) => {
   try {
     const { customerId } = req.params;

@@ -27,11 +27,6 @@ const certificateOrderSchema = new mongoose.Schema(
       ref: 'SettlementOrder',
       required: true,
     },
-    payment_status: {
-      type: Number,
-      enum: [0, 1], // 0 = not done, 1 = done
-      required: true,
-    },
     certificate: {
       type: String,
       required: true

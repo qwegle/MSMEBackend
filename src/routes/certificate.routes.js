@@ -2,9 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const router = express.Router();
 const certificateController = require('../controllers/certificate.controller');
-
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = require("../middlewares/fileUploadHandler");
 
 router.post('/uploadCertificate', upload.single('pdf'), certificateController.uploadCertificateOrder);
 router.post('/getCertificateById/:userId', certificateController.getCertificatesByUserId);

@@ -1,41 +1,61 @@
 const CertificateOrder = require('../models/certificate');
-const OTSForm = require('../models/otsform'); // adjust the path if needed
+const OTSForm = require('../models/otsform');
+const AckForm = require('../models/acknowledgement');
+const Memorandum = require('../models/memorandum');
+const SettlementOrder = require('../models/settlementOrder');
 
 exports.uploadCertificateOrder = async (req, res) => {
   try {
     const filePath = req.file ? `/uploads/${req.file.filename}` : null;
-
     if (!filePath) {
       return res.status(400).json({ error: 'PDF file is required' });
     }
 
-    const { userId, otsId, ackId, memoId, orderId, payment_status } = req.body;
-
+    const { loan_number } = req.body;
+    if (!loan_number) {
+      return res.status(400).json({ error: 'loan_number is required' });
+    }
+    const otsForm = await OTSForm.findOne({ loan_number });
+    if (!otsForm) {
+      return res.status(404).json({ error: 'OTSForm not found for provided loan_number' });
+    }
+    const userId = otsForm.userId;
+    const otsId = otsForm._id;
+    const ackForm = await AckForm.findOne({ ots_form_id: otsId });
+    if (!ackForm) {
+      return res.status(404).json({ error: 'AckForm not found for this OTSForm' });
+    }
+    const ackId = ackForm._id;
+    const memo = await Memorandum.findOne({ ackId });
+    if (!memo) {
+      return res.status(404).json({ error: 'Memorandum not found for this AckForm' });
+    }
+    const memoId = memo._id;
+    const settlement = await SettlementOrder.findOne({ memoId });
+    if (!settlement) {
+      return res.status(404).json({ error: 'Settlement Order not found for this Memorandum' });
+    }
+    const orderId = settlement._id;
     const newOrder = new CertificateOrder({
       userId,
       otsId,
       ackId,
       memoId,
       orderId,
-      payment_status,
-      certificate_link: filePath, // assumes your schema uses certificate_link for file path
+      certificate_link: filePath,
     });
-
     await newOrder.save();
+    const updatedOTS = await OTSForm.findByIdAndUpdate(
+      otsId,
+      {
+        status_msg: 'Completed',
+        status: 1,
+      },
+      { new: true }
+    );
 
-    if (otsId) {
-      const updatedOTS = await OTSForm.findByIdAndUpdate(
-        otsId,
-        {
-          status_msg: 'Completed',
-          status: 1,
-        },
-        { new: true }
-      );
-
-      if (!updatedOTS) {
-        return res.status(404).json({ message: 'OTS Form not found for status update' });
-      }
+    if (!updatedOTS) {
+      return res.status(404).json({ message: 'OTS Form not found for status update' });
     }
 
     res.status(201).json({
@@ -48,7 +68,6 @@ exports.uploadCertificateOrder = async (req, res) => {
   }
 };
 
-
 exports.getAllCertificateOrders = async (req, res) => {
   try {
     const orders = await CertificateOrder.find()
@@ -60,7 +79,7 @@ exports.getAllCertificateOrders = async (req, res) => {
         path: 'otsId',
         select: 'loan_number number'
       })
-      .populate('ackId memoId') // no change here, you can also limit these if needed
+      .populate('ackId memoId')
       .sort({ createdAt: -1 });
 
     res.status(200).json(orders);

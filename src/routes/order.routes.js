@@ -2,9 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const router = express.Router();
 const orderController = require('../controllers/order.controller');
-
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = require("../middlewares/fileUploadHandler");
 
 router.post('/uploadOrder', upload.single('pdf'), orderController.uploadSettlementOrder);
 router.get('/getOrdersById/:userId', orderController.getSettlementOrdersByUserId);
