@@ -42,10 +42,11 @@ exports.getLoansByCustomerId = async (req, res) => {
 
 // Filter loans
 exports.filterLoans = async (req, res) => {
-  const { loanType, loanStatus, customerName, minOverdue, maxOverdue, branch } = req.body;
+  const { loan_id, loanType, loanStatus, customerName, minOverdue, maxOverdue, branch } = req.body;
 
   try {
     const query = {};
+    if (loan_id) query._id = loan_id;
     if (loanType) query.loanType = loanType;
     if (loanStatus) query.loanStatus = loanStatus;
     if (branch) query.branch = branch;

@@ -236,6 +236,83 @@ exports.getCertificateCountsLast7Days = async (req, res) => {
   }
 };
 
+exports.filterCertificateOrders = async (req, res) => {
+  try {
+    const { loan_number, branch, userId } = req.query;
+
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'otsforms',
+          localField: 'otsId',
+          foreignField: '_id',
+          as: 'otsDetails'
+        }
+      },
+      { $unwind: '$otsDetails' }
+    ];
+
+    // Match stage dynamically built
+    const matchStage = {};
+
+    if (loan_number) {
+      matchStage['otsDetails.loan_number'] = loan_number;
+    }
+
+    if (branch) {
+      matchStage['otsDetails.branch'] = branch;
+    }
+
+    if (userId) {
+      matchStage['userId'] = new mongoose.Types.ObjectId(userId);
+    }
+
+    if (Object.keys(matchStage).length > 0) {
+      pipeline.push({ $match: matchStage });
+    }
+
+    // Optional: Join user for enrichment (not required for filtering)
+    pipeline.push({
+      $lookup: {
+        from: 'users',
+        localField: 'userId',
+        foreignField: '_id',
+        as: 'userDetails'
+      }
+    });
+    pipeline.push({ $unwind: '$userDetails' });
+
+    // Optional: Add final projection if needed
+    pipeline.push({
+      $project: {
+        certificate: 1,
+        createdAt: 1,
+        userId: 1,
+        otsId: 1,
+        ackId: 1,
+        memoId: 1,
+        orderId: 1,
+        'otsDetails.loan_number': 1,
+        'otsDetails.branch': 1,
+        'userDetails.username': 1,
+        'userDetails.email': 1
+      }
+    });
+
+    const result = await CertificateOrder.aggregate(pipeline);
+
+    if (!result.length) {
+      return res.status(404).json({ message: 'No certificates found matching the filters' });
+    }
+
+    return res.status(200).json({ message: 'Filtered certificates retrieved', data: result });
+
+  } catch (err) {
+    console.error('Error filtering certificate orders:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
 
 
 // Get count of OTS applications by status
