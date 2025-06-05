@@ -34,7 +34,7 @@ const uploadPdf = async (req, res) => {
       userId,
       otsFormId,
       ackId,
-      pdf_link: filePath,
+      pdfData: filePath,
     });
 
     await newMemo.save();

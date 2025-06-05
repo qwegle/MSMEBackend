@@ -27,7 +27,7 @@ const settlementOrderSchema = new mongoose.Schema(
     //   enum: [0, 1], // 0 = Rejected, 1 = Approved
     //   required: true,
     // },
-    pdf: {
+    pdfData: {
     type: String,
     required: true
     },

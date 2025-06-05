@@ -35,7 +35,7 @@ exports.uploadSettlementOrder = async (req, res) => {
       otsId,
       AckId,
       memoId,
-      pdf_link: filePath,
+      pdfData: filePath,
     });
     const savedOrder = await newOrder.save();
     await OTSForm.findByIdAndUpdate(

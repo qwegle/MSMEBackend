@@ -42,7 +42,7 @@ exports.uploadCertificateOrder = async (req, res) => {
       ackId,
       memoId,
       orderId,
-      certificate_link: filePath,
+      certificate: filePath,
     });
     await newOrder.save();
     const updatedOTS = await OTSForm.findByIdAndUpdate(
