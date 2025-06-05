@@ -238,7 +238,7 @@ exports.getCertificateCountsLast7Days = async (req, res) => {
 
 exports.filterCertificateOrders = async (req, res) => {
   try {
-    const { loan_number, branch, userId } = req.query;
+    const { loan_number, branch, userId } = req.body;
 
     const pipeline = [
       {
