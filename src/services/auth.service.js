@@ -38,7 +38,7 @@ exports.loginUser = async ({ email, password }) => {
         user: {
             id: user._id,
             username: user.username,
-        //     email: user.email,
+            email: user.email,
             user_type: user.user_type,
             user_role: user.user_role,
             branch: user.branch,
