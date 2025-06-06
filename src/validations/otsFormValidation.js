@@ -27,7 +27,7 @@ const otsFormSchema = Joi.object({
     reason_for_settlement: Joi.string().required(),
     sources_of_payment: Joi.string().required(),
 
-    // loan_number: Joi.string().required(),
+    loan_number: Joi.string().optional(),
 
     status: Joi.number().optional(), // default handled in Mongoose
     status_msg: Joi.string().optional(), // default handled in Mongoose
