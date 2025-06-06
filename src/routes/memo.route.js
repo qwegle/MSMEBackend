@@ -7,7 +7,7 @@ router.post('/uploadMemorandum', upload.single('pdf'), memorandumController.uplo
 router.post('/reuploadMemo', upload.single('pdf'), memorandumController.reuploadMemo);
 router.post('/updateMemoStatus', upload.single('pdf'), memorandumController.updateMemoStatus);
 router.get('/getMemoById/:userId', memorandumController.getMemosByUserId);
-router.get('/getAllMemos', memorandumController.getAllMemos);
+router.post('/filterMemos', memorandumController.getAllMemos);
 // router.get('/:id', memorandumController.getPdfById);
 // router.get('/', memorandumController.listAllPdfs);
 

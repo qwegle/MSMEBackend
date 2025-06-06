@@ -182,16 +182,12 @@ exports.getCertificateOrderCounts = async (req, res) => {
 exports.getCertificateCountsLast7Days = async (req, res) => {
   try {
     const timezone = 'Asia/Kolkata';
-
-    // Build the date window: today 23:59:59.999 back to 6 days ago 00:00:00
     const end   = new Date();                         // now
     end.setHours(23, 59, 59, 999);
 
     const start = new Date(end);
-    start.setDate(end.getDate() - 6);                 // 6 days back = 7 days total
+    start.setDate(end.getDate() - 6);
     start.setHours(0, 0, 0, 0);
-
-    // Aggregate counts per day already containing at least one doc
     const raw = await CertificateOrder.aggregate([
       { $match: { createdAt: { $gte: start, $lte: end } } },
       {
@@ -200,7 +196,7 @@ exports.getCertificateCountsLast7Days = async (req, res) => {
             $dateToString: {
               format: '%d/%m/%Y',
               date: '$createdAt',
-              timezone              // Asia/Kolkata
+              timezone 
             }
           },
           count: { $sum: 1 }
@@ -208,19 +204,15 @@ exports.getCertificateCountsLast7Days = async (req, res) => {
       },
       { $project: { _id: 0, date: '$_id', count: 1 } }
     ]);
-
-    // Convert aggregation result to a lookup map: { '19/05/2025': 3, … }
     const lookup = Object.fromEntries(raw.map(o => [o.date, o.count]));
-
-    // Build the 7-element response, filling gaps with 0
     const response = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date(end);
       d.setDate(end.getDate() - i);
       const dateStr = d
-        .toLocaleDateString('en-GB', { timeZone: timezone }) // DD/MM/YYYY
+        .toLocaleDateString('en-GB', { timeZone: timezone })
         .split('/')
-        .map(s => s.padStart(2, '0'))                        // zero-pad day/month
+        .map(s => s.padStart(2, '0'))
         .join('/');
 
       response.push({
@@ -239,7 +231,6 @@ exports.getCertificateCountsLast7Days = async (req, res) => {
 exports.filterCertificateOrders = async (req, res) => {
   try {
     const { loan_number, branch, userId } = req.body;
-
     const pipeline = [
       {
         $lookup: {
@@ -251,8 +242,6 @@ exports.filterCertificateOrders = async (req, res) => {
       },
       { $unwind: '$otsDetails' }
     ];
-
-    // Match stage dynamically built
     const matchStage = {};
 
     if (loan_number) {
@@ -270,8 +259,6 @@ exports.filterCertificateOrders = async (req, res) => {
     if (Object.keys(matchStage).length > 0) {
       pipeline.push({ $match: matchStage });
     }
-
-    // Optional: Join user for enrichment (not required for filtering)
     pipeline.push({
       $lookup: {
         from: 'users',
@@ -281,8 +268,6 @@ exports.filterCertificateOrders = async (req, res) => {
       }
     });
     pipeline.push({ $unwind: '$userDetails' });
-
-    // Optional: Add final projection if needed
     pipeline.push({
       $project: {
         certificate: 1,

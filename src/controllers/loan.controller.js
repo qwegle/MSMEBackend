@@ -42,13 +42,14 @@ exports.getLoansByCustomerId = async (req, res) => {
 
 // Filter loans
 exports.filterLoans = async (req, res) => {
-  const { loan_id, loanType, loanStatus, customerName, minOverdue, maxOverdue, branch } = req.body;
+  const { loan_id, loanType, loanStatus, customerName, minOverdue, maxOverdue, branch, aadharNumber } = req.body;
 
   try {
     const query = {};
-    if (loan_id) query._id = loan_id;
+    if (loan_id) query.loanId = loan_id;
     if (loanType) query.loanType = loanType;
     if (loanStatus) query.loanStatus = loanStatus;
+    if (aadharNumber) query.aadharNumber = aadharNumber;
     if (branch) query.branch = branch;
     if (customerName) query.customerName = { $regex: new RegExp(customerName, 'i') };
     if (minOverdue !== "" || maxOverdue !== "") {

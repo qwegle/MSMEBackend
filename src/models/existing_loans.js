@@ -60,6 +60,10 @@ const loanSchema = new mongoose.Schema({
     type: String,
     enum: ['khorda', 'paradip'],
     required: true,
+  },
+  aadharNumber:{
+    type: String,
+    required: true
   }
 }, {
   timestamps: true

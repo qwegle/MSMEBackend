@@ -118,7 +118,6 @@ exports.getCertificateCountsLast7Days = async (req, res) => {
     const timezone = 'Asia/Kolkata';
     const end   = new Date();     
     end.setHours(23, 59, 59, 999);
-
     const start = new Date(end);
     start.setDate(end.getDate() - 6);
     start.setHours(0, 0, 0, 0);

@@ -137,15 +137,51 @@ const getMemosByUserId = async (req, res) => {
   }
 };
 
-const getAllMemos = async (req, res) => {
+// const getAllMemos = async (req, res) => {
+//   try {
+//     const memos = await Memorandum.find().sort({ createdAt: -1 });
+//     res.json(memos);
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// };
+  const getAllMemos = async (req, res) => {
   try {
-    const memos = await Memorandum.find().sort({ createdAt: -1 }); // newest first
+    const { loan_number, userId, branch } = req.body;
+    const otsFilter = {};
+    const userFilter = {};
+    if (loan_number) {
+      otsFilter.loan_number = loan_number;
+    }
+    if (branch) {
+      userFilter.branch = branch;
+    }
+    if (userId) {
+      userFilter._id = userId;
+    }
+    let matchedUserIds = [];
+    if (Object.keys(userFilter).length > 0) {
+      const users = await User.find(userFilter).select('_id');
+      matchedUserIds = users.map(user => user._id);
+    }
+    if (matchedUserIds.length > 0) {
+      otsFilter.userId = { $in: matchedUserIds };
+    }
+    let matchedOtsForms = [];
+    if (Object.keys(otsFilter).length > 0) {
+      matchedOtsForms = await OTSForm.find(otsFilter).select('_id');
+    }
+    const matchedOtsIds = matchedOtsForms.map(ots => ots._id);
+    const memoFilter = {};
+    if (matchedOtsIds.length > 0) {
+      memoFilter.otsId = { $in: matchedOtsIds };
+    }
+    const memos = await Memorandum.find(memoFilter).sort({ createdAt: -1 });
     res.json(memos);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
-
 
 // // Get PDF by ID (view or download)
 // const getPdfById = async (req, res) => {
