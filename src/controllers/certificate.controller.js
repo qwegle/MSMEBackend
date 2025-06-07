@@ -231,7 +231,9 @@ exports.getCertificateCountsLast7Days = async (req, res) => {
 exports.filterCertificateOrders = async (req, res) => {
   try {
     const { loan_number, branch, userId } = req.body;
+
     const pipeline = [
+      // Lookup OTS Form details
       {
         $lookup: {
           from: 'otsforms',
@@ -240,49 +242,55 @@ exports.filterCertificateOrders = async (req, res) => {
           as: 'otsDetails'
         }
       },
-      { $unwind: '$otsDetails' }
+      { $unwind: '$otsDetails' },
+
+      // Optional match filters
+      {
+        $match: {
+          ...(loan_number && { 'otsDetails.loan_number': loan_number }),
+          ...(branch && { 'otsDetails.branch': branch }),
+          ...(userId && { userId: new mongoose.Types.ObjectId(userId) })
+        }
+      },
+
+      // Lookup basic User info (from 'users')
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'userDetails'
+        }
+      },
+      { $unwind: '$userDetails' },
+
+      // Lookup extended UserDetails
+      {
+        $lookup: {
+          from: 'userdetails',
+          localField: 'userId',
+          foreignField: 'userId',
+          as: 'userExtraDetails'
+        }
+      },
+      { $unwind: { path: '$userExtraDetails', preserveNullAndEmptyArrays: true } },
+
+      // Final projection
+      {
+        $project: {
+          certificate: 1,
+          createdAt: 1,
+          userId: 1,
+          otsId: 1,
+          ackId: 1,
+          memoId: 1,
+          orderId: 1,
+          otsDetails: 1, // Full populated OTS form
+          userDetails: 1, // Basic user (username, email, etc.)
+          userExtraDetails: 1 // Full UserDetails schema
+        }
+      }
     ];
-    const matchStage = {};
-
-    if (loan_number) {
-      matchStage['otsDetails.loan_number'] = loan_number;
-    }
-
-    if (branch) {
-      matchStage['otsDetails.branch'] = branch;
-    }
-
-    if (userId) {
-      matchStage['userId'] = new mongoose.Types.ObjectId(userId);
-    }
-
-    if (Object.keys(matchStage).length > 0) {
-      pipeline.push({ $match: matchStage });
-    }
-    pipeline.push({
-      $lookup: {
-        from: 'users',
-        localField: 'userId',
-        foreignField: '_id',
-        as: 'userDetails'
-      }
-    });
-    pipeline.push({ $unwind: '$userDetails' });
-    pipeline.push({
-      $project: {
-        certificate: 1,
-        createdAt: 1,
-        userId: 1,
-        otsId: 1,
-        ackId: 1,
-        memoId: 1,
-        orderId: 1,
-        'otsDetails.loan_number': 1,
-        'otsDetails.branch': 1,
-        'userDetails.username': 1,
-        'userDetails.email': 1
-      }
-    });
 
     const result = await CertificateOrder.aggregate(pipeline);
 
@@ -290,13 +298,13 @@ exports.filterCertificateOrders = async (req, res) => {
       return res.status(404).json({ message: 'No certificates found matching the filters' });
     }
 
-    return res.status(200).json({ message: 'Filtered certificates retrieved', data: result });
-
+    return res.status(200).json(result);
   } catch (err) {
     console.error('Error filtering certificate orders:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
 
 
 
