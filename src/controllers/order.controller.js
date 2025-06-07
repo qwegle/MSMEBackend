@@ -5,7 +5,8 @@ const Memorandum = require('../models/memorandum');
 
 exports.uploadSettlementOrder = async (req, res) => {
   try {
-    const filePath = req.file ? `/uploads/${req.file.filename}` : null;
+    const filePath = req.file ?`${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
+
     if (!filePath) {
       return res.status(400).json({ message: 'PDF file is required.' });
     }

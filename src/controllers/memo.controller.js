@@ -5,7 +5,8 @@ const User = require('../models/user');
 
 const uploadPdf = async (req, res) => {
   try {
-    const filePath = req.file ? `/uploads/${req.file.filename}` : null;
+    const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
+
 
     if (!filePath) {
       return res.status(400).json({ error: 'PDF file is required' });
