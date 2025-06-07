@@ -142,57 +142,58 @@ const getMemosByUserId = async (req, res) => {
   try {
     const { loan_number, userId, branch } = req.body;
 
-    const otsFilter = {};
-    const userFilter = {};
+    let memoFilter = {};
 
     if (loan_number) {
-      otsFilter.loan_number = loan_number;
+      // Directly find the OTSForm by unique loan_number
+      const otsForm = await OTSForm.findOne({ loan_number });
+
+      if (!otsForm) {
+        return res.status(404).json({ error: 'No OTS Form found for the given loan number' });
+      }
+
+      memoFilter.otsFormId = otsForm._id;
+    } else {
+      // Build user filter if loan_number is not present
+      const userFilter = {};
+      if (userId) userFilter._id = userId;
+      if (branch) userFilter.branch = branch;
+
+      let matchedUserIds = [];
+      if (Object.keys(userFilter).length > 0) {
+        const users = await User.find(userFilter).select('_id');
+        matchedUserIds = users.map(user => user._id);
+      }
+
+      const otsFilter = {};
+      if (matchedUserIds.length > 0) {
+        otsFilter.userId = { $in: matchedUserIds };
+      }
+
+      const matchedOtsForms = await OTSForm.find(otsFilter).select('_id');
+      const matchedOtsIds = matchedOtsForms.map(ots => ots._id);
+
+      if (matchedOtsIds.length > 0) {
+        memoFilter.otsFormId = { $in: matchedOtsIds };
+      } else {
+        // No matching OTSForms, return early
+        return res.json([]);
+      }
     }
 
-    if (branch) {
-      userFilter.branch = branch;
-    }
-
-    if (userId) {
-      userFilter._id = userId;
-    }
-
-    let matchedUserIds = [];
-
-    if (Object.keys(userFilter).length > 0) {
-      const users = await User.find(userFilter).select('_id');
-      matchedUserIds = users.map(user => user._id);
-    }
-
-    if (matchedUserIds.length > 0) {
-      otsFilter.userId = { $in: matchedUserIds };
-    }
-
-    let matchedOtsForms = [];
-
-    if (Object.keys(otsFilter).length > 0) {
-      matchedOtsForms = await OTSForm.find(otsFilter).select('_id');
-    }
-
-    const matchedOtsIds = matchedOtsForms.map(ots => ots._id);
-
-    const memoFilter = {};
-    if (matchedOtsIds.length > 0) {
-      memoFilter.otsFormId = { $in: matchedOtsIds }; // fixed: should be otsFormId not otsId
-    }
-
-    // Fetch memos and populate user details
+    // Fetch and populate
     const memos = await Memorandum.find(memoFilter)
       .sort({ createdAt: -1 })
-      .populate('userId', 'username email user_type user_role branch aadharNumber') // Only select relevant user fields
-      .populate('otsFormId') // optional: if you want full otsForm too
-      .populate('ackId');    // optional: if you want full ackForm too
+      .populate('userId', 'username email user_type user_role branch aadharNumber')
+      .populate('otsFormId')
+      .populate('ackId');
 
     res.json(memos);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 
 // // Get PDF by ID (view or download)
