@@ -144,7 +144,7 @@ const getMemosByUserId = async (req, res) => {
 // };
   const getAllMemos = async (req, res) => {
   try {
-    const { loan_number, userId, branch } = req.body;
+    const { loan_number, userId, branch, status } = req.body;
 
     let memoFilter = {};
 
@@ -162,7 +162,7 @@ const getMemosByUserId = async (req, res) => {
       const userFilter = {};
       if (userId) userFilter._id = userId;
       if (branch) userFilter.branch = branch;
-
+      if (status) memoFilter.status = status;
       let matchedUserIds = [];
       if (Object.keys(userFilter).length > 0) {
         const users = await User.find(userFilter).select('_id');
