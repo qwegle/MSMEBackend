@@ -5,6 +5,7 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 const routes = require('./routes');
 const errorHandler = require('./middlewares/errorHandler');
+const path = require('path');
 
 const app = express();
 
@@ -13,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 // Serve uploaded files
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api', routes);
 app.use(errorHandler);
