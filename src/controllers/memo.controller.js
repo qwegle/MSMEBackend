@@ -6,8 +6,6 @@ const User = require('../models/user');
 const uploadPdf = async (req, res) => {
   try {
     const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
-
-
     if (!filePath) {
       return res.status(400).json({ error: 'PDF file is required' });
     }
@@ -47,7 +45,7 @@ const uploadPdf = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
+// super admin api
 const updateMemoStatus = async (req, res) => {
   try {
     const { memoId, status, remarks } = req.body;
@@ -61,15 +59,20 @@ const updateMemoStatus = async (req, res) => {
     if (!updatedMemo) {
       return res.status(404).json({ message: 'Memorandum not found' });
     }
-    if (status === 0) {
+    if (status === 2) {
       await OTSForm.findByIdAndUpdate(
         updatedMemo.otsFormId,
         { status_msg: "application is rejected by head office" }
       );
-    } else if (status === 1) {
+    } else if (status === 0) {
       await OTSForm.findByIdAndUpdate(
         updatedMemo.otsFormId,
         { status_msg: "Application is being processed by admin office" }
+      );
+    } else {
+        await OTSForm.findByIdAndUpdate(
+        updatedMemo.otsFormId,
+        { status_msg: "Application has been approved.." }
       );
     }
 

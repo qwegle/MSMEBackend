@@ -21,9 +21,9 @@ const memorandum = new mongoose.Schema(
     },
     status: {
       type: Number,
-      enum: [0, 1], // 0 = Rejected, 1 = Approved
+      enum: [0, 1, 2], // 0 = pending, 1 = Approved, 2 = Rejected
       required: true,
-      default:1
+      default:0
     },
     remarks: {
       type: String,
