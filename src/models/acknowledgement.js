@@ -29,7 +29,7 @@ const acknowledgementSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  date: {
+  rac_date: {
     type: String,
     required: true,
     validate: {

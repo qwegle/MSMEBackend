@@ -1,5 +1,7 @@
 const OTSForm = require('../models/otsform');
-
+const AckForm = require('../models/acknowledgement');
+const Memorandum = require('../models/memorandum');
+const CertificateOrder = require('../models/certificate');
 // Create a new OTS form
 exports.createOTSForm = async (req, res) => {
     try {
@@ -203,34 +205,27 @@ exports.ApproveRejectOtsApplication = async (req, res) => {
 exports.filterOTS = async (req, res) => {
   try {
     const { otsId, userId, branch, status } = req.body;
-
-    // Build dynamic filter
     const filter = {};
-
-    if (otsId) filter.loan_number = otsId;
+    if (otsId) filter._id = otsId;
     if (userId) filter.userId = userId;
     if (branch) filter.branch = branch;
     if (status) filter.status = status;
-    console.log(filter);
-    let results;
-    if(filter){
-        results = await OTSForm.find(filter);
-    }
-    else {
-        results = await OTSForm.find();
-        console.log("ghreuihgier");
-    }
-
-    // res.status(200).json({
-    //   message: 'Filtered OTS applications fetched successfully',
-    //   count: results.length,
-    //   data: results,
-    // });
-
-    res.status(200).json(results);
+    const otsForms = await OTSForm.find(filter);
+    const enrichedResults = await Promise.all(otsForms.map(async (ots) => {
+      const ack = await AckForm.findOne({ ots_form_id: ots._id }, 'img_link_sign_stamp');
+      const memo = await Memorandum.findOne({ otsFormId: ots._id }, 'pdfData');
+      const certificate = await CertificateOrder.findOne({ otsId: ots._id }, 'certificate');
+      return {
+        ots,
+        ackFile: ack?.img_link_sign_stamp || null,
+        memoFile: memo?.pdfData || null,
+        certificateFile: certificate?.certificate || null
+      };
+    }));
+    return res.status(200).json(enrichedResults);
   } catch (error) {
     console.error('Filter OTS Error:', error);
-    res.status(500).json({ message: 'Server Error', error: error.message });
+    return res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
 
