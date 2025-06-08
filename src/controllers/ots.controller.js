@@ -2,16 +2,33 @@ const OTSForm = require('../models/otsform');
 const AckForm = require('../models/acknowledgement');
 const Memorandum = require('../models/memorandum');
 const CertificateOrder = require('../models/certificate');
-// Create a new OTS form
 
 exports.createOTSForm = async (req, res) => {
     try {
         const formData = req.body;
         formData.userId = req.user.id;
-        formData.loan_number = Date.now().toString();
-        const newForm = new OTSForm(formData);
-        await newForm.save();
-
+        const baseTimestamp = Date.now();
+        let newForm;
+        let saved = false;
+        let attempt = 0;
+        while (!saved && attempt < 10) {
+            const loanNumber = baseTimestamp.toString().slice(0, 12) + attempt;
+            formData.loan_number = loanNumber;
+            try {
+                newForm = new OTSForm(formData);
+                await newForm.save();
+                saved = true;
+            } catch (err) {
+                if (err.code === 11000 && err.message.includes('loan_number')) {
+                    attempt++;
+                } else {
+                    throw err;
+                }
+            }
+        }
+        if (!saved) {
+            return res.status(500).json({ message: 'Server busy. Please try again.' });
+        }
         res.status(201).json({ message: 'OTS Form submitted successfully', data: newForm });
     } catch (error) {
         console.error('Error creating OTS Form:', error);
@@ -19,12 +36,9 @@ exports.createOTSForm = async (req, res) => {
     }
 };
 
-// Get all OTS forms for the logged-in user
 exports.getUserOTSForms = async (req, res) => {
     try {
         const forms = await OTSForm.find({ userId: req.user.id }).sort({ createdAt: -1 });
-
-        // res.status(200).json({ data: forms });
         res.status(200).json(forms);
     } catch (error) {
         console.error('Error fetching OTS forms:', error);
@@ -32,7 +46,6 @@ exports.getUserOTSForms = async (req, res) => {
     }
 };
 
-// Get a single OTS form by ID for the logged-in user
 exports.getOTSFormById = async (req, res) => {
     try {
         const form = await OTSForm.findOne({
@@ -43,8 +56,6 @@ exports.getOTSFormById = async (req, res) => {
         if (!form) {
             return res.status(404).json({ message: 'OTS form not found' });
         }
-
-        // res.status(200).json({ data: form });
         res.status(200).json(form);
     } catch (error) {
         console.error('Error fetching OTS form:', error);
@@ -52,7 +63,6 @@ exports.getOTSFormById = async (req, res) => {
     }
 };
 
-// (Optional) Admin - Get all OTS forms (use role check middleware if needed)
 exports.getAllOTSForms = async (req, res) => {
     try {
         const forms = await OTSForm.find().populate('userId', 'first_name last_name email');
@@ -63,43 +73,7 @@ exports.getAllOTSForms = async (req, res) => {
         res.status(500).json({ message: 'Error fetching all forms', error: error.message });
     }
 };
-// exports.getAllOTSForms = async (req, res) => {
-//   try {
-//     // Extract pagination parameters from the query string, with default values
-//     const page = parseInt(req.query.page) || 1; // Default to page 1
-//     const pageSize = parseInt(req.query.pageSize) || 10; // Default to 10 items per page
 
-//     // Calculate the number of documents to skip
-//     const skip = (page - 1) * pageSize;
-
-//     // Retrieve the total count of documents
-//     const totalCount = await OTSForm.countDocuments();
-
-//     // Fetch the paginated data with population
-//     const forms = await OTSForm.find()
-//       .populate('userId', 'first_name last_name email')
-//       .skip(skip)
-//       .limit(pageSize);
-
-//     // Construct next and previous page URLs
-//     const baseUrl = `${req.protocol}://${req.get('host')}${req.path}`;
-//     const nextPage = (skip + pageSize) < totalCount ? `${baseUrl}?page=${page + 1}&pageSize=${pageSize}` : null;
-//     const previousPage = page > 1 ? `${baseUrl}?page=${page - 1}&pageSize=${pageSize}` : null;
-
-//     // Send the paginated response
-//     res.status(200).json({
-//       count: totalCount,
-//       next: nextPage,
-//       previous: previousPage,
-//       results: forms,
-//     });
-//   } catch (error) {
-//     console.error('Error fetching paginated OTS forms:', error);
-//     res.status(500).json({ message: 'Error fetching forms', error: error.message });
-//   }
-// };
-
-// Get all OTS forms filtered by branch
 exports.getOTSFormsByBranch = async (req, res) => {
     try {
         const { branch } = req.query;
@@ -141,12 +115,12 @@ exports.updateOTSForm = async (req, res) => {
 // Track application status.
 exports.trackStatus = async (req, res) => {
     try {
-        const appId = req.query.appId;
-        if (!appId) {
+        const {loan_number} = req.body;
+        if (!loan_number) {
             return res.status(400).json({ message: 'Application ID is required (query parameter: appId)' });
         }
 
-        const application = await OTSForm.findById(appId);
+        const application = await OTSForm.findById(loan_number);
         if (!application) {
             return res.status(404).json({ message: 'Application not found' });
         }

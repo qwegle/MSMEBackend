@@ -56,7 +56,7 @@ router.get(
     getOTSFormsByBranch,
 );
 
-router.get(
+router.post(
     '/trackStatus',
     authenticateToken,
     trackStatus

@@ -27,7 +27,7 @@ const otsFormSchema = new mongoose.Schema({
     reason_for_settlement: {type: String, required:true},
     sources_of_payment:{type: String, required:true},
     status_msg: { type: String, required: true, default: "Application submitted" },
-    loan_number:{ type: String, required: true},
+    loan_number:{ type: String, required: true, unique:true},
     check_box1: { type: Boolean,required: true},
     check_box2: { type: Boolean,required: true}, 
     check_box3: { type: Boolean,required: true},
