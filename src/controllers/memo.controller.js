@@ -50,37 +50,38 @@ const updateMemoStatus = async (req, res) => {
   try {
     const { memoId, status, remarks } = req.body;
 
+    if (!memoId || status === undefined) {
+      return res.status(400).json({ message: 'memoId and status are required' });
+    }
+    const validStatuses = [0, 1, 2];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Invalid status value' });
+    }
     const updatedMemo = await Memorandum.findByIdAndUpdate(
       memoId,
       { status, remarks },
       { new: true }
     );
-
     if (!updatedMemo) {
       return res.status(404).json({ message: 'Memorandum not found' });
     }
-    if (status === "2") {
-      await OTSForm.findByIdAndUpdate(
-        updatedMemo.otsFormId,
-        { status_msg: "application is rejected by head office" }
-      );
-    } else if (status === "0") {
-      await OTSForm.findByIdAndUpdate(
-        updatedMemo.otsFormId,
-        { status_msg: "Application is being processed by admin office" }
-      );
-    } else {
-        await OTSForm.findByIdAndUpdate(
-        updatedMemo.otsFormId,
-        { status_msg: "Application has been approved.." }
-      );
-    }
+    const otsStatusMsgMap = {
+      0: "Application is being processed by admin office",
+      1: "Application has been approved..",
+      2: "Application is rejected by head office"
+    };
+    await OTSForm.findByIdAndUpdate(
+      updatedMemo.otsFormId,
+      { status_msg: otsStatusMsgMap[status] }
+    );
 
     res.json({ message: 'Memo status updated successfully', memo: updatedMemo });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error updating memo status:", err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 const reuploadMemo = async (req, res) => {
   try {
     const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
