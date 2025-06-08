@@ -35,7 +35,7 @@ exports.createAckForm = async (req, res) => {
       deposit_date,
       deposit_type,
       ofsc_no,
-      rac_date: racdate,
+      rac_date: rac_date,
       img_link_sign_stamp: filePath,
       name_of_recieving_officer,
       date_of_signature
