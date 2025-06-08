@@ -25,8 +25,6 @@ const ackFormValidation = Joi.object({
       'string.pattern.base': 'date must be in YYYY-MM-DD format'
     }),
 
-  file: Joi.string().uri().required(),
-
   name_of_recieving_officer: Joi.string().required(),
 
   date_of_signature: Joi.string()
