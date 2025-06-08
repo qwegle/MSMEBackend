@@ -1,7 +1,7 @@
 const Joi = require('joi');
 
 const ackFormValidation = Joi.object({
-  ots_form_id: Joi.string().hex().length(24).required(),
+  loan_number: Joi.string().required(),
 
   deposit_amount: Joi.number().positive().required(),
 
@@ -25,7 +25,7 @@ const ackFormValidation = Joi.object({
       'string.pattern.base': 'date must be in YYYY-MM-DD format'
     }),
 
-  // img_link_sign_stamp: Joi.string().uri().required(),
+  file: Joi.string().uri().required(),
 
   name_of_recieving_officer: Joi.string().required(),
 
