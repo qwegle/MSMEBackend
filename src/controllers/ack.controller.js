@@ -16,7 +16,7 @@ exports.createAckForm = async (req, res) => {
       deposit_date,
       deposit_type,
       ofsc_no,
-      date, 
+      rac_date, 
       name_of_recieving_officer,
       date_of_signature
     } = req.body;
