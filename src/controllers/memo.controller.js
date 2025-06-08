@@ -59,12 +59,12 @@ const updateMemoStatus = async (req, res) => {
     if (!updatedMemo) {
       return res.status(404).json({ message: 'Memorandum not found' });
     }
-    if (status === 2) {
+    if (status === "2") {
       await OTSForm.findByIdAndUpdate(
         updatedMemo.otsFormId,
         { status_msg: "application is rejected by head office" }
       );
-    } else if (status === 0) {
+    } else if (status === "0") {
       await OTSForm.findByIdAndUpdate(
         updatedMemo.otsFormId,
         { status_msg: "Application is being processed by admin office" }
