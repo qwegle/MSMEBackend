@@ -108,6 +108,7 @@ exports.getCertificatesByUserId = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
 exports.getCertificateOrderCounts = async (req, res) => {
   const { branch, startDate, endDate } = req.body;
 
