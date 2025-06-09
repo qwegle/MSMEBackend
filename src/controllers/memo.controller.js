@@ -181,7 +181,7 @@ const getMemosByUserId = async (req, res) => {
     const { loan_number, userId, branch, status } = req.body;
 
     let memoFilter = {};
-
+    let otsFilter = {}
     if (loan_number) {
       // Directly find the OTSForm by unique loan_number
       const otsForm = await OTSForm.findOne({ loan_number });
@@ -193,9 +193,9 @@ const getMemosByUserId = async (req, res) => {
       memoFilter.otsFormId = otsForm._id;
     } else {
       // Build user filter if loan_number is not present
-      const userFilter = {};
+      let userFilter = {};
       if (userId) userFilter._id = userId;
-      if (branch) userFilter.branch = branch;
+      if (branch) otsFilter.branch = branch;
       if (status) memoFilter.status = status;
       let matchedUserIds = [];
       if (Object.keys(userFilter).length > 0) {
@@ -203,7 +203,6 @@ const getMemosByUserId = async (req, res) => {
         matchedUserIds = users.map(user => user._id);
       }
 
-      const otsFilter = {};
       if (matchedUserIds.length > 0) {
         otsFilter.userId = { $in: matchedUserIds };
       }
