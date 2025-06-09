@@ -10,7 +10,7 @@ const {
     filterOTS,
     getOTSStatusCounts,
     ApproveRejectOtsApplication,
-    getUserApplicationStats 
+    getUserStats
 } = require('../controllers/ots.controller');
 
 const { authenticateToken } = require('../middlewares/auth.middleware');
@@ -86,7 +86,7 @@ router.post(
 router.post(
     '/user_stats',
     authenticateToken,
-    getUserApplicationStats 
+    getUserStats 
 )
 
 module.exports = router;

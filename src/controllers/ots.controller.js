@@ -3,6 +3,7 @@ const AckForm = require('../models/acknowledgement');
 const Memorandum = require('../models/memorandum');
 const CertificateOrder = require('../models/certificate');
 const { sendApplicationSubmittedEmail } = require('../utils/sendStatusChangeEmail');
+const mongoose = require('mongoose');
 exports.createOTSForm = async (req, res) => {
     try {
         const formData = req.body;
@@ -267,49 +268,48 @@ exports.approveOtsApplication = async (req, res) => {
   }
 };
 
-exports.getUserApplicationStats = async (req, res) => {
+exports.getUserStats = async (req, res) => {
   try {
     const { userId } = req.body;
-
-    if (!userId) {
-      return res.status(400).json({ message: 'userId is required in the request body' });
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Invalid or missing userId' });
     }
-    const statusCounts = await OTSForm.aggregate([
-      { $match: { userId: new mongoose.Types.ObjectId(userId) } },
+    const objectId = mongoose.Types.ObjectId.createFromHexString(userId);
+    const otsCounts = await OTSForm.aggregate([
+      { $match: { userId: objectId } },
       {
         $group: {
-          _id: "$status",
+          _id: '$status',
           count: { $sum: 1 }
         }
       }
     ]);
-    const stats = {
+    const statusCounts = {
       pending: 0,
       approved: 0,
       rejected: 0,
-      totalOTSApplications: 0,
-      totalCertificatesIssued: 0
+      total: 0
     };
-    statusCounts.forEach(item => {
-      if (item._id === 0) stats.pending = item.count;
-      else if (item._id === 1) stats.approved = item.count;
-      else if (item._id === 2) stats.rejected = item.count;
-      stats.totalOTSApplications += item.count;
+    otsCounts.forEach(item => {
+      if (item._id === 0) statusCounts.pending = item.count;
+      else if (item._id === 1) statusCounts.approved = item.count;
+      else if (item._id === 2) statusCounts.rejected = item.count;
+      statusCounts.total += item.count;
     });
-
-    const certificateCount = await CertificateOrder.countDocuments({ userId });
-
-    stats.totalCertificatesIssued = certificateCount;
-
+    const certificateCount = await CertificateOrder.countDocuments({ userId: objectId });
     res.status(200).json({
-      message: 'User OTS and certificate stats fetched successfully',
-      data: stats
+      message: 'User stats retrieved successfully',
+      data: {
+        ...statusCounts,
+        certificatesIssued: certificateCount
+      }
     });
   } catch (error) {
-    console.error('Error fetching user stats:', error);
+    console.error('Error getting user stats:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
 
 
 
