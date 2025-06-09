@@ -92,4 +92,54 @@ async function sendStatusChangeEmail(form, oldStatusMsg, newStatusMsg) {
     }
 }
 
-module.exports = sendStatusChangeEmail;
+async function sendApplicationSubmittedEmail(form) {
+    const subject = `Application Submitted Successfully - Loan No: ${form.loan_number}`;
+
+    const html = `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <h2 style="color: #0d6efd;">🎉 Application Received!</h2>
+
+            <p>Dear <strong>${form.first_name}</strong>,</p>
+
+            <p>Thank you for submitting your <strong>OTS Application</strong>. We have successfully received your details. Below is a summary of your submission:</p>
+
+            <table style="width: 100%; max-width: 600px; margin: 20px 0; border-collapse: collapse;">
+                <tr><td style="padding: 8px; border: 1px solid #ccc;"><strong>OTS Form ID</strong></td><td style="padding: 8px; border: 1px solid #ccc;">${form._id}</td></tr>
+                <tr><td style="padding: 8px; border: 1px solid #ccc;"><strong>Loan Number</strong></td><td style="padding: 8px; border: 1px solid #ccc;">${form.loan_number}</td></tr>
+                <tr><td style="padding: 8px; border: 1px solid #ccc;"><strong>Name</strong></td><td style="padding: 8px; border: 1px solid #ccc;">${form.first_name} ${form.last_name}</td></tr>
+                <tr><td style="padding: 8px; border: 1px solid #ccc;"><strong>Email</strong></td><td style="padding: 8px; border: 1px solid #ccc;">${form.email}</td></tr>
+                <!-- Add more fields if needed -->
+            </table>
+
+            <p style="background-color: #fff3cd; padding: 10px; border-left: 4px solid #ffc107;">
+                <strong>Important:</strong> Please use your <strong style="color: #d63384;">Loan Number (${form.loan_number})</strong> for any communication or acknowledgment of payment at the <strong>nearest branch office</strong>.
+            </p>
+
+            <p>Our team will review your application and contact you if any further information is required.</p>
+
+            <p>We appreciate your trust in OFSC.</p>
+
+            <p style="margin-top: 30px;">
+                Best regards,<br>
+                <strong style="color:#0d6efd;">OFSC Support Team</strong><br>
+                <small>This is an automated message. Please do not reply to this email.</small>
+            </p>
+        </div>
+    `;
+
+    const mailOptions = {
+        from: `"OFSC Support" <${process.env.EMAIL_USER}>`,
+        to: form.email,
+        subject: subject,
+        html: html,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log('Application submission email sent to user.');
+    } catch (err) {
+        console.error('Error sending application submitted email:', err);
+    }
+}
+
+module.exports = {sendStatusChangeEmail, sendApplicationSubmittedEmail };

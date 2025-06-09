@@ -2,7 +2,7 @@ const OTSForm = require('../models/otsform');
 const AckForm = require('../models/acknowledgement');
 const Memorandum = require('../models/memorandum');
 const CertificateOrder = require('../models/certificate');
-
+const sendApplicationSubmittedEmail = require('../utils/sendStatusChangeEmail');
 exports.createOTSForm = async (req, res) => {
     try {
         const formData = req.body;
@@ -18,6 +18,7 @@ exports.createOTSForm = async (req, res) => {
                 newForm = new OTSForm(formData);
                 await newForm.save();
                 saved = true;
+                await sendApplicationSubmittedEmail(newForm)
             } catch (err) {
                 if (err.code === 11000 && err.message.includes('loan_number')) {
                     attempt++;
