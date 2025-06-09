@@ -2,7 +2,7 @@ const OTSForm = require('../models/otsform');
 const AckForm = require('../models/acknowledgement');
 const Memorandum = require('../models/memorandum');
 const CertificateOrder = require('../models/certificate');
-const sendApplicationSubmittedEmail = require('../utils/sendStatusChangeEmail');
+const { sendApplicationSubmittedEmail } = require('../utils/sendStatusChangeEmail');
 exports.createOTSForm = async (req, res) => {
     try {
         const formData = req.body;
@@ -118,7 +118,7 @@ exports.trackStatus = async (req, res) => {
     try {
         const {loan_number} = req.body;
         if (!loan_number) {
-            return res.status(400).json({ message: 'Application ID is required (query parameter: appId)' });
+            return res.status(400).json({ message: 'Loan number is required' });
         }
 
         const application = await OTSForm.findById(loan_number);
