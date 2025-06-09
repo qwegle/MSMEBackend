@@ -116,23 +116,26 @@ exports.updateOTSForm = async (req, res) => {
 };
 // Track application status.
 exports.trackStatus = async (req, res) => {
-    try {
-        const {loan_number} = req.body;
-        if (!loan_number) {
-            return res.status(400).json({ message: 'Loan number is required' });
-        }
+  try {
+    const { loan_number } = req.body;
 
-        const application = await OTSForm.findById(loan_number);
-        if (!application) {
-            return res.status(404).json({ message: 'Application not found' });
-        }
-
-        res.status(200).json({ status: application.status_msg });
-    } catch (error) {
-        console.error('Error tracking status:', error);
-        res.status(500).json({ message: 'Error tracking status', error: error.message });
+    if (!loan_number) {
+      return res.status(400).json({ message: 'Loan number is required' });
     }
+
+    const application = await OTSForm.findOne({ loan_number });
+
+    if (!application) {
+      return res.status(404).json({ message: 'Application not found' });
+    }
+
+    res.status(200).json({ status: application.status_msg });
+  } catch (error) {
+    console.error('Error tracking status:', error);
+    res.status(500).json({ message: 'Error tracking status', error: error.message });
+  }
 };
+
 
 // reject OTS application status
 
