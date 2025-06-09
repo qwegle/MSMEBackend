@@ -267,6 +267,51 @@ exports.approveOtsApplication = async (req, res) => {
   }
 };
 
+exports.getUserApplicationStats = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ message: 'userId is required in the request body' });
+    }
+    const statusCounts = await OTSForm.aggregate([
+      { $match: { userId: new mongoose.Types.ObjectId(userId) } },
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+    const stats = {
+      pending: 0,
+      approved: 0,
+      rejected: 0,
+      totalOTSApplications: 0,
+      totalCertificatesIssued: 0
+    };
+    statusCounts.forEach(item => {
+      if (item._id === 0) stats.pending = item.count;
+      else if (item._id === 1) stats.approved = item.count;
+      else if (item._id === 2) stats.rejected = item.count;
+      stats.totalOTSApplications += item.count;
+    });
+
+    const certificateCount = await CertificateOrder.countDocuments({ userId });
+
+    stats.totalCertificatesIssued = certificateCount;
+
+    res.status(200).json({
+      message: 'User OTS and certificate stats fetched successfully',
+      data: stats
+    });
+  } catch (error) {
+    console.error('Error fetching user stats:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+
 
 
  
