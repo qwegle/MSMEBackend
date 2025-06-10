@@ -31,7 +31,7 @@ exports.uploadSettlementOrder = async (req, res) => {
     if (!memo) {
       return res.status(404).json({ error: 'Memorandum not found for this AckForm.' });
     }
-    if(memo.status == 1){
+    if(memo.status !== 1){
       return res.status(400).json({ error: 'Memorandum has not been approved for this Loan Number please approve before uploading settlement order' });
     }
     const existingOrder = await SettlementOrder.findOne({otsId});
