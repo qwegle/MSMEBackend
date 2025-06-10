@@ -28,7 +28,7 @@ const memorandum = new mongoose.Schema(
     remarks: {
       type: String,
       required:true,
-      default:"Approved"
+      default:"Pending"
     },
     memoVersion:{
       type: Number,

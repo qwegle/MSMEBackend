@@ -97,6 +97,45 @@ exports.listSettlementOrders = async (req, res) => {
   }
 };
 
+exports.filterSettlementOrders = async (req, res) => {
+  try {
+    const { userId, loan_number } = req.body;
+    let filter = {};
+    if (userId && loan_number) {
+      const ots = await OTSForm.findOne({ userId, loan_number });
+      if (!ots) {
+        return res.status(404).json({ message: 'No matching OTSForm found for provided userId and loan_number.' });
+      }
+      filter.userId = userId;
+      filter.otsId = ots._id;
+    }
+    else if (userId) {
+      filter.userId = userId;
+    }
+    else if (loan_number) {
+      const ots = await OTSForm.findOne({ loan_number });
+      if (!ots) {
+        return res.status(404).json({ message: 'No OTSForm found for the provided loan_number.' });
+      }
+      filter.otsId = ots._id;
+    }
+    const orders = await SettlementOrder.find(filter)
+      .populate('userId')
+      .populate('otsId')
+      .populate('AckId')
+      .populate('memoId')
+      .sort({ createdAt: -1 });
+
+    if (!orders.length) {
+      return res.status(404).json({ message: 'No settlement orders found for the provided filters.' });
+    }
+
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error('Filter Settlement Orders Error:', error);
+    res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  }
+};
 // // @desc    Get Settlement Order by ID
 // // @route   GET /settlement/:id
 // exports.getSettlementOrderById = async (req, res) => {
