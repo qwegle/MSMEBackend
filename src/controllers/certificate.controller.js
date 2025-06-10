@@ -34,7 +34,7 @@ exports.uploadCertificateOrder = async (req, res) => {
     const memoId = memo._id;
     const settlement = await SettlementOrder.findOne({ memoId });
     if (!settlement) {
-      return res.status(404).json({ error: 'Settlement Order not found for this Memorandum' });
+      return res.status(404).json({ error: 'Settlement Order not found for this Certificate' });
     }
     const existingCertificate = await CertificateOrder.findOne({ otsId });
     if(existingCertificate){
