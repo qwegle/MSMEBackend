@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const sendStatusChangeEmail = require('../utils/sendStatusChangeEmail'); // adjust path as needed
+const {sendStatusChangeEmail} = require('../utils/sendStatusChangeEmail'); // adjust path as needed
 
 const otsFormSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

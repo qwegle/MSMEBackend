@@ -23,6 +23,12 @@ const uploadPdf = async (req, res) => {
     if (!ackForm) {
       return res.status(404).json({ error: 'Acknowledgement form not found for this OTSForm' });
     }
+    const existingMemo = await Memorandum.findOne({ otsFormId });
+    if (existingMemo) {
+      return res.status(400).json({ 
+        error: 'Memorandum already exists for this loan number' 
+      });
+    }
     const ackId = ackForm._id;
     const newMemo = new Memorandum({
       userId,

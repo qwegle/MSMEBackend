@@ -5,30 +5,38 @@ const Memorandum = require('../models/memorandum');
 
 exports.uploadSettlementOrder = async (req, res) => {
   try {
+
     const filePath = req.file ?`${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
 
     if (!filePath) {
-      return res.status(400).json({ message: 'PDF file is required.' });
+      return res.status(400).json({ error: 'PDF file is required.' });
     }
 
     const { loan_number } = req.body;
     if (!loan_number) {
-      return res.status(400).json({ message: 'loan_number is required.' });
+      return res.status(400).json({ error: 'loan_number is required.' });
     }
     const otsForm = await OTSForm.findOne({ loan_number });
     if (!otsForm) {
-      return res.status(404).json({ message: 'OTSForm not found for provided loan_number.' });
+      return res.status(404).json({ error: 'OTSForm not found for provided loan_number.' });
     }
     const userId = otsForm.userId;
     const otsId = otsForm._id;
     const ackForm = await AckForm.findOne({ ots_form_id: otsId });
     if (!ackForm) {
-      return res.status(404).json({ message: 'AckForm not found for this OTSForm.' });
+      return res.status(404).json({ error: 'AckForm not found for this OTSForm.' });
     }
     const AckId = ackForm._id;
     const memo = await Memorandum.findOne({ ackId: AckId });
     if (!memo) {
-      return res.status(404).json({ message: 'Memorandum not found for this AckForm.' });
+      return res.status(404).json({ error: 'Memorandum not found for this AckForm.' });
+    }
+    if(memo.status == 1){
+      return res.status(400).json({ error: 'Memorandum has not been approved for this Loan Number please approve before uploading settlement order' });
+    }
+    const existingOrder = await SettlementOrder.findOne({otsId});
+    if(existingOrder){
+      return res.status(404).json({ error: 'Settlement Order Already exists for this Loan Number.' });
     }
     const memoId = memo._id;
     const newOrder = new SettlementOrder({

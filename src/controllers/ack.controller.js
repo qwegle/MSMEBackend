@@ -29,6 +29,10 @@ exports.createAckForm = async (req, res) => {
     if (!otsForm) {
       return res.status(404).json({ error: 'OTS Form not found for the given loan number' });
     }
+    const existingAck = await ACKForm.findOne({ots_form_id: otsForm._id});
+    if(existingAck){
+      return res.status(400).json({error: "Acknowledgement already Exists for this given Loan Number"});
+    }
     const ackForm = new ACKForm({
       ots_form_id: otsForm._id,
       deposit_amount,
