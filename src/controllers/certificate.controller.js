@@ -72,6 +72,42 @@ exports.uploadCertificateOrder = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+exports.reuploadCertificateOrder = async (req, res) => {
+  try {
+    const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
+
+    if (!filePath) {
+      return res.status(400).json({ error: 'PDF file is required.' });
+    }
+
+    const { loan_number } = req.body;
+    if (!loan_number) {
+      return res.status(400).json({ error: 'loan_number is required.' });
+    }
+
+    const otsForm = await OTSForm.findOne({ loan_number });
+    if (!otsForm) {
+      return res.status(404).json({ error: 'OTSForm not found for provided loan_number.' });
+    }
+
+    const existingCertificate = await CertificateOrder.findOne({ otsId: otsForm._id });
+    if (!existingCertificate) {
+      return res.status(404).json({ error: 'Certificate not found for this loan_number.' });
+    }
+
+    existingCertificate.certificate = filePath;
+    await existingCertificate.save();
+
+    return res.status(200).json({
+      message: 'Certificate reuploaded successfully.',
+      updatedCertificate: existingCertificate
+    });
+
+  } catch (error) {
+    console.error('Certificate Reupload Error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
 
 exports.getAllCertificateOrders = async (req, res) => {
   try {

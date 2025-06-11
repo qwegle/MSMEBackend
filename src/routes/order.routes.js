@@ -8,6 +8,7 @@ router.post('/uploadOrder', upload.single('pdf'), orderController.uploadSettleme
 router.get('/getOrdersById/:userId', orderController.getSettlementOrdersByUserId);
 router.get('/getAllOrders',orderController.listSettlementOrders);
 router.post('/filterOrders',orderController.filterSettlementOrders);
+router.post('/reuploadOrder',upload.single('pdf'),orderController.reuploadSettlementOrder);
 // router.get('/:id', memorandumController.getPdfById);
 // router.get('/', memorandumController.listAllPdfs);
 

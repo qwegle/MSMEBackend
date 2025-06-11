@@ -59,6 +59,43 @@ exports.createAckForm = async (req, res) => {
   }
 };
 
+exports.reuploadAckSignature = async (req, res) => {
+  try {
+    const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
+
+    if (!filePath) {
+      return res.status(400).json({ error: 'Image is required for re-upload' });
+    }
+
+    const { loan_number } = req.body;
+
+    if (!loan_number) {
+      return res.status(400).json({ error: 'Loan number is required' });
+    }
+
+    const otsForm = await OTSForm.findOne({ loan_number });
+    if (!otsForm) {
+      return res.status(404).json({ error: 'OTS Form not found for this loan number' });
+    }
+
+    const ackForm = await ACKForm.findOne({ ots_form_id: otsForm._id });
+
+    if (!ackForm) {
+      return res.status(404).json({ error: 'Acknowledgement not found for this loan number' });
+    }
+
+    ackForm.img_link_sign_stamp = filePath;
+    await ackForm.save();
+
+    return res.status(200).json({ message: 'Signature/stamp re-uploaded successfully', ackForm });
+
+  } catch (error) {
+    console.error('Error in reuploadAckSignature:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
 exports.getAllAckForms = async (req, res) => {
   try {
     const forms = await ACKForm.find().populate('ots_form_id').sort({ createdAt: -1 });

@@ -5,13 +5,10 @@ const Memorandum = require('../models/memorandum');
 
 exports.uploadSettlementOrder = async (req, res) => {
   try {
-
     const filePath = req.file ?`${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
-
     if (!filePath) {
       return res.status(400).json({ error: 'PDF file is required.' });
     }
-
     const { loan_number } = req.body;
     if (!loan_number) {
       return res.status(400).json({ error: 'loan_number is required.' });

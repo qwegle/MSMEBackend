@@ -10,6 +10,7 @@ router.post('/getAllCertificate', certificateController.getAllCertificateOrders)
 router.post('/getCeritificateCount', certificateController.getCertificateOrderCounts);
 router.get('/getCertificateCount7Days', certificateController.getCertificateCountsLast7Days);
 router.post('/filterCertificates', certificateController.filterCertificateOrders);
+router.post('/reuploadCertificate', upload.single('pdf'),certificateController.reuploadCertificateOrder);
 // router.get('/:id', memorandumController.getPdfById);
 // router.get('/', memorandumController.listAllPdfs);
 
