@@ -60,6 +60,43 @@ exports.uploadSettlementOrder = async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 };
+exports.reuploadSettlementOrder = async (req, res) => {
+  try {
+    const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
+    const { loan_number } = req.body;
+
+    if (!filePath) {
+      return res.status(400).json({ error: 'PDF file is required.' });
+    }
+
+    if (!loan_number) {
+      return res.status(400).json({ error: 'loan_number is required.' });
+    }
+
+    // Find OTSForm
+    const otsForm = await OTSForm.findOne({ loan_number });
+    if (!otsForm) {
+      return res.status(404).json({ error: 'OTSForm not found for provided loan_number.' });
+    }
+
+    const existingOrder = await SettlementOrder.findOne({ otsId: otsForm._id });
+    if (!existingOrder) {
+      return res.status(404).json({ error: 'No existing Settlement Order found to update.' });
+    }
+
+    // Update pdfData (file path)
+    existingOrder.pdfData = filePath;
+    await existingOrder.save();
+
+    res.status(200).json({
+      message: 'Settlement Order PDF reuploaded successfully.',
+      id: existingOrder._id,
+    });
+  } catch (error) {
+    console.error('Reupload Settlement Order Error:', error);
+    res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  }
+};
 
 exports.getSettlementOrdersByUserId = async (req, res) => {
   try {

@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 
 // Define the upload directory
-const uploadDir = path.join(__dirname, '..', 'uploads'); // adjust path based on file location
+const uploadDir = path.join(__dirname, '..', 'uploads');
 
 // Ensure upload directory exists
 if (!fs.existsSync(uploadDir)) {
@@ -21,23 +21,38 @@ const storage = multer.diskStorage({
   }
 });
 
+// Common file filter for PDFs only
+const fileFilter = function (req, file, cb) {
+  const allowedMimeTypes = ['application/pdf'];
+  if (
+    allowedMimeTypes.includes(file.mimetype) &&
+    path.extname(file.originalname).toLowerCase() === '.pdf'
+  ) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only PDF files are allowed!'));
+  }
+};
+
+// Create base upload instance
 const upload = multer({
   storage,
-  fileFilter: function (req, file, cb) {
-    const allowedMimeTypes = ['application/pdf'];
-
-    if (
-      allowedMimeTypes.includes(file.mimetype) &&
-      path.extname(file.originalname).toLowerCase() === '.pdf'
-    ) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only PDF files are allowed!'));
-    }
-  },
+  fileFilter,
   limits: {
-    fileSize: 2 * 1024 * 1024 // limit to 5MB or adjust as needed
+    fileSize: 2 * 1024 * 1024 // 2MB
   }
 });
 
-module.exports = upload;
+// Single PDF upload (e.g., memorandum)
+const singlePdfUpload = upload.single('pdf');
+
+// Two PDF fields for supply order
+const supplyOrderUpload = upload.fields([
+  { name: 'proof_of_supply', maxCount: 1 },
+  { name: 'invoice_submission', maxCount: 1 }
+]);
+
+module.exports = {
+  singlePdfUpload,
+  supplyOrderUpload
+};
