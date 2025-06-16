@@ -3,13 +3,13 @@ const { createAckForm, getAckFormsByUserId, getAllAckForms, filterAckForms, reup
 const { authenticateToken } = require('../middlewares/auth.middleware');
 const validateRequest = require('../middlewares/validateRequest');
 const ackFormValidation = require('../validations/ackFormValidation');
-const upload = require("../middlewares/fileUploadHandler");
+const {singlePdfUpload} = require("../middlewares/fileUploadHandler");
 const router = express.Router();
 
 router.post(
     '/submitAck',
     authenticateToken,
-    upload.single('file'),
+    singlePdfUpload,
     validateRequest(ackFormValidation),
     createAckForm
 );
@@ -17,6 +17,6 @@ router.post(
 router.get('/getAckById/:userId', authenticateToken, getAckFormsByUserId);
 router.get('/getAllAck', authenticateToken, getAllAckForms);
 router.post('/filterAckForms', authenticateToken, filterAckForms);
-router.post('/reuploadAck', upload.single('file'), authenticateToken, reuploadAckSignature);
+router.post('/reuploadAck', singlePdfUpload, authenticateToken, reuploadAckSignature);
 
 module.exports = router;
