@@ -35,14 +35,14 @@ export const filterGovernmentOrders = async (req, res) => {
   try {
     const filters = {};
 
-    if (req.query.departmentName) {
-      filters.departmentName = new RegExp(req.query.departmentName, 'i'); // case-insensitive match
+    if (req.body.departmentName) {
+      filters.departmentName = new RegExp(req.body.departmentName, 'i'); // case-insensitive match
     }
-    if (req.query.pointOfContact) {
-      filters.pointOfContact = new RegExp(req.query.pointOfContact, 'i');
+    if (req.body.pointOfContact) {
+      filters.pointOfContact = new RegExp(req.body.pointOfContact, 'i');
     }
-    if (req.query.letterNumber) {
-      filters.letterNumber = req.query.letterNumber;
+    if (req.body.letterNumber) {
+      filters.letterNumber = req.body.letterNumber;
     }
 
     const orders = await GovernmentOrder.find(filters).sort({ createdAt: -1 });
@@ -85,11 +85,11 @@ export const filterFloatTenders = async (req, res) => {
   try {
     const filters = {};
 
-    if (req.query.project_title) {
-      filters.project_title = new RegExp(req.query.project_title, 'i');
+    if (req.body.project_title) {
+      filters.project_title = new RegExp(req.body.project_title, 'i');
     }
-    if (req.query.tender_number) {
-      filters.tender_number = req.query.tender_number;
+    if (req.body.tender_number) {
+      filters.tender_number = req.body.tender_number;
     }
 
     const tenders = await FloatTender.find(filters).sort({ createdAt: -1 });
@@ -131,11 +131,11 @@ export const filterTenderResults = async (req, res) => {
   try {
     const filters = {};
 
-    if (req.query.tender_number) {
-      filters.tender_number = req.query.tender_number;
+    if (req.body.tender_number) {
+      filters.tender_number = req.body.tender_number;
     }
-    if (req.query.name) {
-      filters.name = new RegExp(req.query.name, 'i');
+    if (req.body.name) {
+      filters.name = new RegExp(req.body.name, 'i');
     }
 
     const results = await TenderResult.find(filters).sort({ createdAt: -1 });
@@ -218,8 +218,8 @@ export const filterSupplyOrders = async (req, res) => {
   try {
     const filters = {};
 
-    if (req.query.supply_details) {
-      filters.supply_details = new RegExp(req.query.supply_details, 'i');
+    if (req.body.supply_details) {
+      filters.supply_details = new RegExp(req.body.supply_details, 'i');
     }
 
     const orders = await SupplyOrder.find(filters).sort({ createdAt: -1 });
