@@ -47,7 +47,7 @@ export const filterGovernmentOrders = async (req, res) => {
 
     const orders = await GovernmentOrder.find(filters).sort({ createdAt: -1 });
 
-    res.json({ results: orders });
+    res.json(orders);
   } catch (err) {
     res.status(500).json({ error: 'Error filtering government orders' });
   }
@@ -93,7 +93,7 @@ export const filterFloatTenders = async (req, res) => {
     }
 
     const tenders = await FloatTender.find(filters).sort({ createdAt: -1 });
-    res.json({ results: tenders });
+    res.json(tenders);
   } catch (err) {
     res.status(500).json({ error: 'Error filtering tenders' });
   }
@@ -139,7 +139,7 @@ export const filterTenderResults = async (req, res) => {
     }
 
     const results = await TenderResult.find(filters).sort({ createdAt: -1 });
-    res.json({ results });
+    res.json(results);
   } catch (err) {
     res.status(500).json({ error: 'Error filtering results' });
   }
@@ -223,7 +223,7 @@ export const filterSupplyOrders = async (req, res) => {
     }
 
     const orders = await SupplyOrder.find(filters).sort({ createdAt: -1 });
-    res.json({ results: orders });
+    res.json(orders);
   } catch (err) {
     res.status(500).json({ error: 'Error filtering supply orders' });
   }
