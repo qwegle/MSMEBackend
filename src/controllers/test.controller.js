@@ -16,7 +16,7 @@ export const getPaginatedUsers = async (req, res) => {
     const paginatedData = dummyData.slice(startIndex, endIndex);
 
     res.status(200).json({
-      data: paginatedData,
+      paginatedData,
       page,
       limit,
       totalItems: dummyData.length,
