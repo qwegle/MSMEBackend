@@ -8,6 +8,7 @@ const orderRoutes = require('./order.routes');
 const certificateRoutes = require('./certificate.routes');
 const existingLoan = require('./loan.routes');
 const OSIC = require('./osic.routes');
+const test = require('./test.route');
 const router = express.Router();
 
 router.use('/auth', authRoutes);
@@ -19,5 +20,6 @@ router.use('/order', orderRoutes);
 router.use('/certificate', certificateRoutes);
 router.use('/loan', existingLoan);
 router.use('/osic', OSIC);
+router.use('/test', test);
 
 module.exports = router;
