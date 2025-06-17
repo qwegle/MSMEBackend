@@ -229,3 +229,24 @@ export const filterSupplyOrders = async (req, res) => {
   }
 };
 
+export const getDashboardCounts = async (req, res) => {
+  try {
+    const [govOrderCount, floatTenderCount, tenderResultCount, supplyOrderCount] = await Promise.all([
+      GovernmentOrder.countDocuments(),
+      FloatTender.countDocuments(),
+      TenderResult.countDocuments(),
+      SupplyOrder.countDocuments(),
+    ]);
+
+    res.json({
+      governmentOrders: govOrderCount,
+      floatTenders: floatTenderCount,
+      tenderResults: tenderResultCount,
+      supplyOrders: supplyOrderCount,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch counts' });
+  }
+};
+

@@ -22,4 +22,6 @@ router.post('/createSupplyOrder', supplyOrderUpload, govController.createSupplyO
 router.put('/updateSupplyOrder', govController.updateSupplyOrder);
 router.post('/filterSupplyOrders', govController.filterSupplyOrders);
 
+router.get('/dashboardCounts', govController.getDashboardCounts);
+
 module.exports = router;
