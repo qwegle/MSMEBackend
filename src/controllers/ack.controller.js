@@ -127,8 +127,23 @@ exports.getAckFormsByUserId = async (req, res) => {
 
 exports.filterAckForms = async (req, res) => {
   const { userId, loan_number, branch } = req.body;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
 
   try {
+    const matchConditions = {};
+
+    if (userId) {
+      matchConditions['otsDetails.userId'] = new mongoose.Types.ObjectId(userId);
+    }
+    if (loan_number) {
+      matchConditions['otsDetails.loan_number'] = loan_number;
+    }
+    if (branch) {
+      matchConditions['otsDetails.branch'] = branch;
+    }
+
     const pipeline = [
       {
         $lookup: {
@@ -139,47 +154,48 @@ exports.filterAckForms = async (req, res) => {
         }
       },
       { $unwind: '$otsDetails' },
+      ...(Object.keys(matchConditions).length > 0 ? [{ $match: matchConditions }] : []),
+      {
+        $project: {
+          _id: 0,
+          first_name: '$otsDetails.first_name',
+          last_name: '$otsDetails.last_name',
+          loan_number: '$otsDetails.loan_number',
+          img_link_sign_stamp: 1,
+          createdAt: 1
+        }
+      },
+      {
+        $facet: {
+          paginatedData: [
+            { $sort: { createdAt: -1 } },
+            { $skip: skip },
+            { $limit: limit }
+          ],
+          totalCount: [{ $count: 'count' }]
+        }
+      }
     ];
 
-    const matchConditions = {};
+    const result = await ACKForm.aggregate(pipeline);
+    const paginatedData = result[0].paginatedData;
+    const totalCount = result[0].totalCount[0]?.count || 0;
+    const totalPages = Math.ceil(totalCount / limit);
 
-    if (userId) {
-      matchConditions['otsDetails.userId'] = userId;
-    }
-    if (loan_number) {
-      matchConditions['otsDetails.loan_number'] = loan_number;
-    }
-    if (branch) {
-      matchConditions['otsDetails.branch'] = branch;
-    }
-
-    if (Object.keys(matchConditions).length > 0) {
-      pipeline.push({ $match: matchConditions });
-    }
-    pipeline.push({
-      $project: {
-        _id: 0,
-        first_name: '$otsDetails.first_name',
-        last_name: '$otsDetails.last_name',
-        loan_number: '$otsDetails.loan_number',
-        img_link_sign_stamp: 1
-      }
+    return res.status(200).json({
+      paginatedData,
+      page,
+      limit,
+      totalItems: totalCount,
+      totalPages
     });
-
-    const forms = await ACKForm.aggregate(pipeline).sort({ createdAt: -1 });
-
-    res.status(200).json(
-      // message: Object.keys(matchConditions).length > 0
-      //   ? 'Filtered acknowledgement forms retrieved successfully'
-      //   : 'All acknowledgement forms retrieved successfully',
-      forms
-    );
 
   } catch (error) {
     console.error('Error filtering acknowledgement forms:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
 
 exports.getCertificateCountsLast7Days = async (req, res) => {
   try {

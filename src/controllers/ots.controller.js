@@ -185,29 +185,52 @@ exports.ApproveRejectOtsApplication = async (req, res) => {
 exports.filterOTS = async (req, res) => {
   try {
     const { otsId, userId, branch, status } = req.body;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
     const filter = {};
-    if (otsId) filter.loan_number= otsId;
+    if (otsId) filter.loan_number = otsId;
     if (userId) filter.userId = userId;
     if (branch) filter.branch = branch;
     if (status) filter.status = status;
-    const otsForms = await OTSForm.find(filter);
-    const enrichedResults = await Promise.all(otsForms.map(async (ots) => {
-      const ack = await AckForm.findOne({ ots_form_id: ots._id }, 'img_link_sign_stamp');
-      const memo = await Memorandum.findOne({ otsFormId: ots._id }, 'pdfData');
-      const certificate = await CertificateOrder.findOne({ otsId: ots._id }, 'certificate');
-      return {
-        ots,
-        ackFile: ack?.img_link_sign_stamp || null,
-        memoFile: memo?.pdfData || null,
-        certificateFile: certificate?.certificate || null
-      };
-    }));
-    return res.status(200).json(enrichedResults);
+
+    const totalItems = await OTSForm.countDocuments(filter);
+    const totalPages = Math.ceil(totalItems / limit);
+    const startIndex = (page - 1) * limit;
+
+    const otsForms = await OTSForm.find(filter)
+      .skip(startIndex)
+      .limit(limit)
+      .sort({ createdAt: -1 }); // optional: sorts by most recent first
+
+    const enrichedResults = await Promise.all(
+      otsForms.map(async (ots) => {
+        const ack = await AckForm.findOne({ ots_form_id: ots._id }, 'img_link_sign_stamp');
+        const memo = await Memorandum.findOne({ otsFormId: ots._id }, 'pdfData');
+        const certificate = await CertificateOrder.findOne({ otsId: ots._id }, 'certificate');
+
+        return {
+          ots,
+          ackFile: ack?.img_link_sign_stamp || null,
+          memoFile: memo?.pdfData || null,
+          certificateFile: certificate?.certificate || null
+        };
+      })
+    );
+
+    return res.status(200).json({
+      paginatedData: enrichedResults,
+      page,
+      limit,
+      totalItems,
+      totalPages
+    });
   } catch (error) {
     console.error('Filter OTS Error:', error);
     return res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
+
 
 exports.getOTSStatusCounts = async (req, res) => {
   const { branch } = req.body;

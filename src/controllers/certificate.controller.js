@@ -273,9 +273,17 @@ exports.getCertificateCountsLast7Days = async (req, res) => {
 exports.filterCertificateOrders = async (req, res) => {
   try {
     const { loan_number, branch, userId } = req.body;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const matchStage = {
+      ...(loan_number && { 'otsDetails.loan_number': loan_number }),
+      ...(branch && { 'otsDetails.branch': branch }),
+      ...(userId && { userId: new mongoose.Types.ObjectId(userId) })
+    };
 
     const pipeline = [
-      // Lookup OTS Form details
       {
         $lookup: {
           from: 'otsforms',
@@ -285,17 +293,7 @@ exports.filterCertificateOrders = async (req, res) => {
         }
       },
       { $unwind: '$otsDetails' },
-
-      // Optional match filters
-      {
-        $match: {
-          ...(loan_number && { 'otsDetails.loan_number': loan_number }),
-          ...(branch && { 'otsDetails.branch': branch }),
-          ...(userId && { userId: new mongoose.Types.ObjectId(userId) })
-        }
-      },
-
-      // Lookup basic User info (from 'users')
+      { $match: matchStage },
       {
         $lookup: {
           from: 'users',
@@ -305,8 +303,6 @@ exports.filterCertificateOrders = async (req, res) => {
         }
       },
       { $unwind: '$userDetails' },
-
-      // Lookup extended UserDetails
       {
         $lookup: {
           from: 'userdetails',
@@ -315,9 +311,12 @@ exports.filterCertificateOrders = async (req, res) => {
           as: 'userExtraDetails'
         }
       },
-      { $unwind: { path: '$userExtraDetails', preserveNullAndEmptyArrays: true } },
-
-      // Final projection
+      {
+        $unwind: {
+          path: '$userExtraDetails',
+          preserveNullAndEmptyArrays: true
+        }
+      },
       {
         $project: {
           certificate: 1,
@@ -327,25 +326,41 @@ exports.filterCertificateOrders = async (req, res) => {
           ackId: 1,
           memoId: 1,
           orderId: 1,
-          otsDetails: 1, // Full populated OTS form
-          userDetails: 1, // Basic user (username, email, etc.)
-          userExtraDetails: 1 // Full UserDetails schema
+          otsDetails: 1,
+          userDetails: 1,
+          userExtraDetails: 1
+        }
+      },
+      {
+        $facet: {
+          paginatedData: [{ $skip: skip }, { $limit: limit }],
+          totalCount: [{ $count: 'count' }]
         }
       }
     ];
 
     const result = await CertificateOrder.aggregate(pipeline);
+    const paginatedData = result[0].paginatedData;
+    const totalCount = result[0].totalCount[0]?.count || 0;
+    const totalPages = Math.ceil(totalCount / limit);
 
-    if (!result.length) {
+    if (!paginatedData.length) {
       return res.status(404).json({ message: 'No certificates found matching the filters' });
     }
 
-    return res.status(200).json(result);
+    return res.status(200).json({
+      paginatedData,
+      page,
+      limit,
+      totalItems: totalCount,
+      totalPages
+    });
   } catch (err) {
     console.error('Error filtering certificate orders:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
 
 
 

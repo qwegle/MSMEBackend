@@ -182,27 +182,27 @@ const getMemosByUserId = async (req, res) => {
 //     res.status(500).json({ error: err.message });
 //   }
 // };
-  const getAllMemos = async (req, res) => {
+const getAllMemos = async (req, res) => {
   try {
     const { loan_number, userId, branch, status } = req.body;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
 
     let memoFilter = {};
-    let otsFilter = {}
-    if (loan_number) {
-      // Directly find the OTSForm by unique loan_number
-      const otsForm = await OTSForm.findOne({ loan_number });
+    let otsFilter = {};
 
+    if (loan_number) {
+      const otsForm = await OTSForm.findOne({ loan_number });
       if (!otsForm) {
         return res.status(404).json({ error: 'No OTS Form found for the given loan number' });
       }
-
       memoFilter.otsFormId = otsForm._id;
     } else {
-      // Build user filter if loan_number is not present
       let userFilter = {};
       if (userId) userFilter._id = userId;
       if (branch) otsFilter.branch = branch;
       if (status) memoFilter.status = status;
+
       let matchedUserIds = [];
       if (Object.keys(userFilter).length > 0) {
         const users = await User.find(userFilter).select('_id');
@@ -219,23 +219,40 @@ const getMemosByUserId = async (req, res) => {
       if (matchedOtsIds.length > 0) {
         memoFilter.otsFormId = { $in: matchedOtsIds };
       } else {
-        // No matching OTSForms, return early
-        return res.json([]);
+        return res.json({
+          paginatedData: [],
+          page,
+          limit,
+          totalItems: 0,
+          totalPages: 0
+        });
       }
     }
 
-    // Fetch and populate
+    const totalItems = await Memorandum.countDocuments(memoFilter);
+    const totalPages = Math.ceil(totalItems / limit);
+    const startIndex = (page - 1) * limit;
+
     const memos = await Memorandum.find(memoFilter)
       .sort({ createdAt: -1 })
+      .skip(startIndex)
+      .limit(limit)
       .populate('userId', 'username email user_type user_role branch aadharNumber')
       .populate('otsFormId')
       .populate('ackId');
 
-    res.json(memos);
+    res.json({
+      paginatedData: memos,
+      page,
+      limit,
+      totalItems,
+      totalPages
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 
 
