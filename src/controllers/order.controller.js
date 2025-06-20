@@ -191,13 +191,17 @@ exports.filterSettlementOrders = async (req, res) => {
       page,
       limit,
       totalItems,
-      totalPages
+      totalPages,
+      previousPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null,
+      currentPageCount: orders.length
     });
   } catch (error) {
     console.error('Filter Settlement Orders Error:', error);
     res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 };
+
 
 // // @desc    Get Settlement Order by ID
 // // @route   GET /settlement/:id

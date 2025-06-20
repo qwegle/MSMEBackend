@@ -201,7 +201,7 @@ exports.filterOTS = async (req, res) => {
     const otsForms = await OTSForm.find(filter)
       .skip(startIndex)
       .limit(limit)
-      .sort({ createdAt: -1 }); // optional: sorts by most recent first
+      .sort({ createdAt: -1 });
 
     const enrichedResults = await Promise.all(
       otsForms.map(async (ots) => {
@@ -223,13 +223,17 @@ exports.filterOTS = async (req, res) => {
       page,
       limit,
       totalItems,
-      totalPages
+      totalPages,
+      previousPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null,
+      currentPageCount: enrichedResults.length
     });
   } catch (error) {
     console.error('Filter OTS Error:', error);
     return res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
+
 
 
 exports.getOTSStatusCounts = async (req, res) => {

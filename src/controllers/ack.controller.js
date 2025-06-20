@@ -187,7 +187,10 @@ exports.filterAckForms = async (req, res) => {
       page,
       limit,
       totalItems: totalCount,
-      totalPages
+      totalPages,
+      previousPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null,
+      currentPageCount: paginatedData.length
     });
 
   } catch (error) {

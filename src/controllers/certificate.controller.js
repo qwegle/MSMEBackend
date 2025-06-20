@@ -353,13 +353,17 @@ exports.filterCertificateOrders = async (req, res) => {
       page,
       limit,
       totalItems: totalCount,
-      totalPages
+      totalPages,
+      previousPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null,
+      currentPageCount: paginatedData.length
     });
   } catch (err) {
     console.error('Error filtering certificate orders:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
 
 
 

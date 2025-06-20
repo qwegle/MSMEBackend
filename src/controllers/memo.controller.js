@@ -224,7 +224,10 @@ const getAllMemos = async (req, res) => {
           page,
           limit,
           totalItems: 0,
-          totalPages: 0
+          totalPages: 0,
+          previousPage: null,
+          nextPage: null,
+          currentPageCount: 0
         });
       }
     }
@@ -246,7 +249,10 @@ const getAllMemos = async (req, res) => {
       page,
       limit,
       totalItems,
-      totalPages
+      totalPages,
+      previousPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null,
+      currentPageCount: memos.length
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
