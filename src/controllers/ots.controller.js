@@ -185,8 +185,8 @@ exports.ApproveRejectOtsApplication = async (req, res) => {
 exports.filterOTS = async (req, res) => {
   try {
     const { otsId, userId, branch, status } = req.body;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.body.page) || 1;
+    const limit = parseInt(req.body.limit) || 10;
 
     const filter = {};
     if (otsId) filter.loan_number = otsId;

@@ -273,8 +273,8 @@ exports.getCertificateCountsLast7Days = async (req, res) => {
 exports.filterCertificateOrders = async (req, res) => {
   try {
     const { loan_number, branch, userId } = req.body;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.body.page) || 1;
+    const limit = parseInt(req.body.limit) || 10;
     const skip = (page - 1) * limit;
 
     const matchStage = {

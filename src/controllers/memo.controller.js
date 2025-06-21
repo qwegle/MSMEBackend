@@ -185,8 +185,8 @@ const getMemosByUserId = async (req, res) => {
 const getAllMemos = async (req, res) => {
   try {
     const { loan_number, userId, branch, status } = req.body;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.body.page) || 1;
+    const limit = parseInt(req.body.limit) || 10;
 
     let memoFilter = {};
     let otsFilter = {};

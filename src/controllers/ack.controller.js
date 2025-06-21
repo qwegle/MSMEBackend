@@ -127,8 +127,8 @@ exports.getAckFormsByUserId = async (req, res) => {
 
 exports.filterAckForms = async (req, res) => {
   const { userId, loan_number, branch } = req.body;
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
+  const page = parseInt(req.body.page) || 1;
+  const limit = parseInt(req.body.limit) || 10;
   const skip = (page - 1) * limit;
 
   try {
