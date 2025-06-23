@@ -1,344 +1,214 @@
+const mongoose = require('mongoose');
 const OTSForm = require('../models/otsform');
 const AckForm = require('../models/acknowledgement');
 const Memorandum = require('../models/memorandum');
 const CertificateOrder = require('../models/certificate');
 const { sendApplicationSubmittedEmail } = require('../utils/sendStatusChangeEmail');
-const mongoose = require('mongoose');
-exports.createOTSForm = async (req, res) => {
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/AppError');
+
+// Create OTS Form
+exports.createOTSForm = catchAsync(async (req, res, next) => {
+  const formData = { ...req.body, userId: req.user.id };
+  const baseTimestamp = Date.now();
+  let attempt = 0;
+
+  while (attempt < 10) {
+    formData.loan_number = `${baseTimestamp}`.slice(0, 12) + attempt;
     try {
-        const formData = req.body;
-        formData.userId = req.user.id;
-        const baseTimestamp = Date.now();
-        let newForm;
-        let saved = false;
-        let attempt = 0;
-        while (!saved && attempt < 10) {
-            const loanNumber = baseTimestamp.toString().slice(0, 12) + attempt;
-            formData.loan_number = loanNumber;
-            try {
-                newForm = new OTSForm(formData);
-                await newForm.save();
-                saved = true;
-                await sendApplicationSubmittedEmail(newForm)
-            } catch (err) {
-                if (err.code === 11000 && err.message.includes('loan_number')) {
-                    attempt++;
-                } else {
-                    throw err;
-                }
-            }
-        }
-        if (!saved) {
-            return res.status(500).json({ message: 'Server busy. Please try again.' });
-        }
-        res.status(201).json({ message: 'OTS Form submitted successfully', data: newForm });
-    } catch (error) {
-        console.error('Error creating OTS Form:', error);
-        res.status(500).json({ message: 'Error submitting form', error: error.message });
+      const newForm = new OTSForm(formData);
+      await newForm.save();
+      await sendApplicationSubmittedEmail(newForm);
+      return res.status(201).json({ message: 'OTS Form submitted successfully', data: newForm });
+    } catch (err) {
+      if (err.code === 11000 && err.message.includes('loan_number')) {
+        attempt++;
+      } else {
+        return next(new AppError(err.message, 500));
+      }
     }
-};
-
-exports.getUserOTSForms = async (req, res) => {
-    try {
-        const forms = await OTSForm.find({ userId: req.user.id }).sort({ createdAt: -1 });
-        res.status(200).json(forms);
-    } catch (error) {
-        console.error('Error fetching OTS forms:', error);
-        res.status(500).json({ message: 'Error fetching forms', error: error.message });
-    }
-};
-
-exports.getOTSFormById = async (req, res) => {
-    try {
-        const form = await OTSForm.findOne({
-            _id: req.params.id,
-            userId: req.user.id
-        });
-
-        if (!form) {
-            return res.status(404).json({ message: 'OTS form not found' });
-        }
-        res.status(200).json(form);
-    } catch (error) {
-        console.error('Error fetching OTS form:', error);
-        res.status(500).json({ message: 'Error fetching form', error: error.message });
-    }
-};
-
-exports.getAllOTSForms = async (req, res) => {
-    try {
-        const forms = await OTSForm.find().populate('userId', 'first_name last_name email');
-        // res.status(200).json({ data: forms });
-        res.status(200).json(forms);
-    } catch (error) {
-        console.error('Error fetching all OTS forms:', error);
-        res.status(500).json({ message: 'Error fetching all forms', error: error.message });
-    }
-};
-
-exports.getOTSFormsByBranch = async (req, res) => {
-    try {
-        const { branch } = req.query;
-
-        if (!branch) {
-            return res.status(400).json({ message: 'Branch is required as query parameter' });
-        }
-
-        const forms = await OTSForm.find({ branch }).sort({ createdAt: -1 });
-
-        res.status(200).json(forms);
-    } catch (error) {
-        console.error('Error fetching OTS forms by branch:', error);
-        res.status(500).json({ message: 'Error fetching forms', error: error.message });
-    }
-};
-
-// Update an existing OTS form (only by owner)
-exports.updateOTSForm = async (req, res) => {
-    try {
-        const formId = req.params.id;
-        const userId = req.user.id;
-        const updatedForm = await OTSForm.findOneAndUpdate(
-            { _id: formId, userId }, // Ensure user owns the form
-            req.body,
-            { new: true, runValidators: true }
-        );
-
-        if (!updatedForm) {
-            return res.status(404).json({ message: 'OTS form not found or unauthorized' });
-        }
-
-        res.status(200).json({ message: 'OTS form updated successfully', data: updatedForm });
-    } catch (error) {
-        console.error('Error updating OTS form:', error);
-        res.status(500).json({ message: 'Error updating form', error: error.message });
-    }
-};
-// Track application status.
-exports.trackStatus = async (req, res) => {
-  try {
-    const { loan_number } = req.body;
-
-    if (!loan_number) {
-      return res.status(400).json({ message: 'Loan number is required' });
-    }
-
-    const application = await OTSForm.findOne({ loan_number });
-
-    if (!application) {
-      return res.status(404).json({ message: 'Application not found' });
-    }
-
-    res.status(200).json({ status: application.status_msg });
-  } catch (error) {
-    console.error('Error tracking status:', error);
-    res.status(500).json({ message: 'Error tracking status', error: error.message });
   }
-};
+  return next(new AppError('Server busy. Please try again.', 500));
+});
 
+// Get user's OTS forms
+exports.getUserOTSForms = catchAsync(async (req, res) => {
+  const forms = await OTSForm.find({ userId: req.user.id }).sort({ createdAt: -1 });
+  res.status(200).json(forms);
+});
 
-// reject OTS application status
+// Get OTS Form by ID (only if owned)
+exports.getOTSFormById = catchAsync(async (req, res, next) => {
+  const form = await OTSForm.findOne({ _id: req.params.id, userId: req.user.id });
+  if (!form) return next(new AppError('OTS form not found', 404));
+  res.status(200).json(form);
+});
 
-exports.ApproveRejectOtsApplication = async (req, res) => {
-    try {
-      const { otsFormId, flag } = req.body;
+// Admin: Get all OTS Forms
+exports.getAllOTSForms = catchAsync(async (req, res) => {
+  const forms = await OTSForm.find().populate('userId', 'first_name last_name email');
+  res.status(200).json(forms);
+});
 
-      if(flag == 2){
-        const updatedForm = await OTSForm.findByIdAndUpdate(
-        otsFormId,
-        {
-          status: 2, // assuming 2 = rejected, 1 = active/in-progress/completed
-          status_msg: "OTS Application rejected"
-        },
-        { new: true }
-      );
-      if (!updatedForm) {
-        return res.status(404).json({ message: 'OTS application not found' });
-      }
-      res.status(200).json({ message: 'OTS application rejected successfully', form: updatedForm });
-      }
-      else if(flag == 1){
-        const updatedForm = await OTSForm.findByIdAndUpdate(
-        otsFormId,
-        {
-          status: 2, // assuming 2 = rejected, 1 = active/in-progress/completed
-          status_msg: "OTS Application rejected"
-        },
-        { new: true }
-      );
-        if (!updatedForm) {
-        return res.status(404).json({ message: 'OTS application not found' });
-      }
-      res.status(200).json({ message: 'OTS application approved successfully', form: updatedForm });
-      }
-      else{
-      res.status(200).json({ message: 'Flag value must be 1(Approved) or 2(Rejected)', form: updatedForm });
-      }
-      
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  };
+// Get forms by branch
+exports.getOTSFormsByBranch = catchAsync(async (req, res, next) => {
+  const { branch } = req.query;
+  if (!branch) return next(new AppError('Branch is required as query parameter', 400));
+  const forms = await OTSForm.find({ branch }).sort({ createdAt: -1 });
+  res.status(200).json(forms);
+});
 
-  // filter OTS application
+// Update OTS Form (only by owner)
+exports.updateOTSForm = catchAsync(async (req, res, next) => {
+  const updatedForm = await OTSForm.findOneAndUpdate(
+    { _id: req.params.id, userId: req.user.id },
+    req.body,
+    { new: true, runValidators: true }
+  );
+  if (!updatedForm) return next(new AppError('OTS form not found or unauthorized', 404));
+  res.status(200).json({ message: 'OTS form updated successfully', data: updatedForm });
+});
 
-exports.filterOTS = async (req, res) => {
-  try {
-    const { otsId, userId, branch, status } = req.body;
-    const page = parseInt(req.body.page) || 1;
-    const limit = parseInt(req.body.limit) || 10;
+// Track status by loan number
+exports.trackStatus = catchAsync(async (req, res, next) => {
+  const { loan_number } = req.body;
+  if (!loan_number) return next(new AppError('Loan number is required', 400));
 
-    const filter = {};
-    if (otsId) filter.loan_number = otsId;
-    if (userId) filter.userId = userId;
-    if (branch) filter.branch = branch;
-    if (status) filter.status = status;
+  const application = await OTSForm.findOne({ loan_number });
+  if (!application) return next(new AppError('Application not found', 404));
 
-    const totalItems = await OTSForm.countDocuments(filter);
-    const totalPages = Math.ceil(totalItems / limit);
-    const startIndex = (page - 1) * limit;
+  res.status(200).json({ status: application.status_msg });
+});
 
-    const otsForms = await OTSForm.find(filter)
-      .skip(startIndex)
-      .limit(limit)
-      .sort({ createdAt: -1 });
-
-    const enrichedResults = await Promise.all(
-      otsForms.map(async (ots) => {
-        const ack = await AckForm.findOne({ ots_form_id: ots._id }, 'img_link_sign_stamp');
-        const memo = await Memorandum.findOne({ otsFormId: ots._id }, 'pdfData');
-        const certificate = await CertificateOrder.findOne({ otsId: ots._id }, 'certificate');
-
-        return {
-          ots,
-          ackFile: ack?.img_link_sign_stamp || null,
-          memoFile: memo?.pdfData || null,
-          certificateFile: certificate?.certificate || null
-        };
-      })
-    );
-
-    return res.status(200).json({
-      paginatedData: enrichedResults,
-      page,
-      limit,
-      totalItems,
-      totalPages,
-      previousPage: page > 1 ? page - 1 : null,
-      nextPage: page < totalPages ? page + 1 : null,
-      currentPageCount: enrichedResults.length
-    });
-  } catch (error) {
-    console.error('Filter OTS Error:', error);
-    return res.status(500).json({ message: 'Server Error', error: error.message });
+// Admin: Approve or reject OTS form
+exports.ApproveRejectOtsApplication = catchAsync(async (req, res, next) => {
+  const { otsFormId, flag } = req.body;
+  if (![1, 2].includes(flag)) {
+    return next(new AppError('Flag value must be 1 (Approved) or 2 (Rejected)', 400));
   }
-};
 
+  const status_msg = flag === 1 ? 'OTS Application approved' : 'OTS Application rejected';
 
+  const updatedForm = await OTSForm.findByIdAndUpdate(
+    otsFormId,
+    { status: flag, status_msg },
+    { new: true }
+  );
 
-exports.getOTSStatusCounts = async (req, res) => {
+  if (!updatedForm) return next(new AppError('OTS application not found', 404));
+  res.status(200).json({ message: status_msg, form: updatedForm });
+});
+
+// Dedicated approve route (optional)
+exports.approveOtsApplication = catchAsync(async (req, res, next) => {
+  const { otsFormId } = req.body;
+  const updatedForm = await OTSForm.findByIdAndUpdate(
+    otsFormId,
+    { status: 1, status_msg: 'OTS Application approved' },
+    { new: true }
+  );
+  if (!updatedForm) return next(new AppError('OTS application not found', 404));
+  res.status(200).json({ message: 'OTS application approved successfully', form: updatedForm });
+});
+
+// Filter OTS Forms
+exports.filterOTS = catchAsync(async (req, res) => {
+  const { otsId, userId, branch, status, page = 1, limit = 10 } = req.body;
+
+  const filter = {};
+  if (otsId) filter.loan_number = otsId;
+  if (userId) filter.userId = userId;
+  if (branch) filter.branch = branch;
+  if (status !== undefined) filter.status = status;
+
+  const totalItems = await OTSForm.countDocuments(filter);
+  const forms = await OTSForm.find(filter)
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .sort({ createdAt: -1 });
+
+  const enriched = await Promise.all(forms.map(async (ots) => {
+    const ack = await AckForm.findOne({ ots_form_id: ots._id }, 'img_link_sign_stamp');
+    const memo = await Memorandum.findOne({ otsFormId: ots._id }, 'pdfData');
+    const certificate = await CertificateOrder.findOne({ otsId: ots._id }, 'certificate');
+    return {
+      ots,
+      ackFile: ack?.img_link_sign_stamp || null,
+      memoFile: memo?.pdfData || null,
+      certificateFile: certificate?.certificate || null
+    };
+  }));
+
+  res.status(200).json({
+    paginatedData: enriched,
+    page,
+    limit,
+    totalItems,
+    totalPages: Math.ceil(totalItems / limit),
+    previousPage: page > 1 ? page - 1 : null,
+    nextPage: page * limit < totalItems ? page + 1 : null,
+    currentPageCount: enriched.length
+  });
+});
+
+// Count status for OTS applications
+exports.getOTSStatusCounts = catchAsync(async (req, res) => {
   const { branch } = req.body;
-  try {
-    const matchStage = branch ? { $match: { branch } } : null;
-    const pipeline = [];
-    if (matchStage) pipeline.push(matchStage);
-    pipeline.push({
-      $group: {
-        _id: '$status',
-        count: { $sum: 1 }
-      }
-    });
-    const counts = await OTSForm.aggregate(pipeline);
-    if (branch && counts.length === 0) {
-      return res.status(404).json({ message: 'Invalid branch' });
-    }
-    const statusCounts = {
-      pending: 0,   
-      approved: 0,  
-      rejected: 0   
-    };
-    counts.forEach(item => {
-      if (item._id === 0) statusCounts.pending = item.count;
-      else if (item._id === 1) statusCounts.approved = item.count;
-      else if (item._id === 2) statusCounts.rejected = item.count;
-    });
-    res.status(200).json({
-      message: branch
-        ? `OTS application status counts for branch '${branch}' retrieved successfully`
-        : 'All OTS application status counts retrieved successfully',
-      data: statusCounts
-    });
-  } catch (error) {
-    console.error('Error getting status counts:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+
+  const pipeline = [];
+  if (branch) pipeline.push({ $match: { branch } });
+  pipeline.push({ $group: { _id: '$status', count: { $sum: 1 } } });
+
+  const counts = await OTSForm.aggregate(pipeline);
+
+  const statusCounts = { pending: 0, approved: 0, rejected: 0 };
+  counts.forEach(({ _id, count }) => {
+    if (_id === 0) statusCounts.pending = count;
+    if (_id === 1) statusCounts.approved = count;
+    if (_id === 2) statusCounts.rejected = count;
+  });
+
+  res.status(200).json({
+    message: branch
+      ? `OTS application status counts for branch '${branch}' retrieved successfully`
+      : 'All OTS application status counts retrieved successfully',
+    data: statusCounts
+  });
+});
+
+// Get stats for a user (dashboard)
+exports.getUserStats = catchAsync(async (req, res, next) => {
+  const { userId } = req.body;
+  if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+    return next(new AppError('Invalid or missing userId', 400));
   }
-};
 
-exports.approveOtsApplication = async (req, res) => {
-  try {
-    const { otsFormId } = req.body;
+  const objectId = new mongoose.Types.ObjectId(userId);
 
-    const updatedForm = await OTSForm.findByIdAndUpdate(
-      otsFormId,
-      {
-        status: 1, // assuming 1 = approved
-        status_msg: "OTS Application approved"
-      },
-      { new: true }
-    );
+  const counts = await OTSForm.aggregate([
+    { $match: { userId: objectId } },
+    { $group: { _id: '$status', count: { $sum: 1 } } }
+  ]);
 
-    if (!updatedForm) {
-      return res.status(404).json({ message: 'OTS application not found' });
+  const summary = { pending: 0, approved: 0, rejected: 0, total: 0 };
+  counts.forEach(({ _id, count }) => {
+    if (_id === 0) summary.pending = count;
+    if (_id === 1) summary.approved = count;
+    if (_id === 2) summary.rejected = count;
+    summary.total += count;
+  });
+
+  const certificateCount = await CertificateOrder.countDocuments({ userId: objectId });
+
+  res.status(200).json({
+    message: 'User stats retrieved successfully',
+    data: {
+      ...summary,
+      certificatesIssued: certificateCount
     }
+  });
+});
 
-    res.status(200).json({ message: 'OTS application approved successfully', form: updatedForm });
-  } catch (error) {
-    console.error('Error approving OTS application:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
-
-exports.getUserStats = async (req, res) => {
-  try {
-    const { userId } = req.body;
-    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: 'Invalid or missing userId' });
-    }
-    const objectId = mongoose.Types.ObjectId.createFromHexString(userId);
-    const otsCounts = await OTSForm.aggregate([
-      { $match: { userId: objectId } },
-      {
-        $group: {
-          _id: '$status',
-          count: { $sum: 1 }
-        }
-      }
-    ]);
-    const statusCounts = {
-      pending: 0,
-      approved: 0,
-      rejected: 0,
-      total: 0
-    };
-    otsCounts.forEach(item => {
-      if (item._id === 0) statusCounts.pending = item.count;
-      else if (item._id === 1) statusCounts.approved = item.count;
-      else if (item._id === 2) statusCounts.rejected = item.count;
-      statusCounts.total += item.count;
-    });
-    const certificateCount = await CertificateOrder.countDocuments({ userId: objectId });
-    res.status(200).json({
-      message: 'User stats retrieved successfully',
-      data: {
-        ...statusCounts,
-        certificatesIssued: certificateCount
-      }
-    });
-  } catch (error) {
-    console.error('Error getting user stats:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
 
 
 

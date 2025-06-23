@@ -13,7 +13,7 @@ const {
     getUserStats
 } = require('../controllers/ots.controller');
 
-const { authenticateToken } = require('../middlewares/auth.middleware');
+const { authenticateToken, authorizeRoles } = require('../middlewares/auth.middleware');
 const validateRequest = require('../middlewares/validateRequest');
 const otsFormSchema = require('../validations/otsFormValidation');
 
@@ -65,6 +65,7 @@ router.post(
 router.post(
     '/ApproveRejectOTS',
     authenticateToken,
+    authorizeRoles(0,1),
     ApproveRejectOtsApplication
 );
 // router.post(

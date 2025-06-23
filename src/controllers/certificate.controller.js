@@ -1,400 +1,307 @@
+const mongoose = require('mongoose');
+const AppError = require('../utils/AppError');
+const catchAsync = require('../utils/catchAsync');
 const CertificateOrder = require('../models/certificate');
 const OTSForm = require('../models/otsform');
 const AckForm = require('../models/acknowledgement');
 const Memorandum = require('../models/memorandum');
 const SettlementOrder = require('../models/settlementOrder');
 
-exports.uploadCertificateOrder = async (req, res) => {
-  try {
-    const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
 
-    if (!filePath) {
-      return res.status(400).json({ error: 'PDF file is required' });
-    }
+exports.uploadCertificateOrder = catchAsync(async (req, res, next) => {
+  const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
+  if (!filePath) return next(new AppError('PDF file is required', 400));
 
-    const { loan_number } = req.body;
-    if (!loan_number) {
-      return res.status(400).json({ error: 'loan_number is required' });
-    }
-    const otsForm = await OTSForm.findOne({ loan_number });
-    if (!otsForm) {
-      return res.status(404).json({ error: 'OTSForm not found for provided loan_number' });
-    }
-    const userId = otsForm.userId;
-    const otsId = otsForm._id;
-    const ackForm = await AckForm.findOne({ ots_form_id: otsId });
-    if (!ackForm) {
-      return res.status(404).json({ error: 'AckForm not found for this OTSForm' });
-    }
-    const ackId = ackForm._id;
-    const memo = await Memorandum.findOne({ ackId });
-    if (!memo) {
-      return res.status(404).json({ error: 'Memorandum not found for this AckForm' });
-    }
-    const memoId = memo._id;
-    const settlement = await SettlementOrder.findOne({ memoId });
-    if (!settlement) {
-      return res.status(404).json({ error: 'Settlement Order not found for this Certificate' });
-    }
-    const existingCertificate = await CertificateOrder.findOne({ otsId });
-    if(existingCertificate){
-      return res.status(400).json({ error: 'Certificate is already issued for this Loan Number' })
-    }
-    const orderId = settlement._id;
-    const newOrder = new CertificateOrder({
-      userId,
-      otsId,
-      ackId,
-      memoId,
-      orderId,
-      certificate: filePath,
-    });
-    await newOrder.save();
-    const updatedOTS = await OTSForm.findByIdAndUpdate(
-      otsId,
-      {
-        status_msg: 'Completed',
-        status: 1,
-      },
-      { new: true }
-    );
+  const { loan_number } = req.body;
+  if (!loan_number) return next(new AppError('loan_number is required', 400));
 
-    if (!updatedOTS) {
-      return res.status(404).json({ message: 'OTS Form not found for status update' });
-    }
+  const otsForm = await OTSForm.findOne({ loan_number });
+  if (!otsForm) return next(new AppError('OTSForm not found for provided loan_number', 404));
 
-    res.status(201).json({
-      message: 'Certificate order uploaded and status updated successfully',
-      data: newOrder,
-    });
-  } catch (err) {
-    console.error('Certificate Order Upload Error:', err);
-    res.status(500).json({ message: 'Server error', error: err.message });
+  const userId = otsForm.userId;
+  const otsId = otsForm._id;
+
+  const ackForm = await AckForm.findOne({ ots_form_id: otsId });
+  if (!ackForm) return next(new AppError('AckForm not found for this OTSForm', 404));
+
+  const memo = await Memorandum.findOne({ ackId: ackForm._id });
+  if (!memo) return next(new AppError('Memorandum not found for this AckForm', 404));
+
+  const settlement = await SettlementOrder.findOne({ memoId: memo._id });
+  if (!settlement) return next(new AppError('Settlement Order not found for this Certificate', 404));
+
+  const existingCertificate = await CertificateOrder.findOne({ otsId });
+  if (existingCertificate) {
+    return next(new AppError('Certificate is already issued for this Loan Number', 400));
   }
-};
-exports.reuploadCertificateOrder = async (req, res) => {
-  try {
-    const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
 
-    if (!filePath) {
-      return res.status(400).json({ error: 'PDF file is required.' });
-    }
+  const newOrder = new CertificateOrder({
+    userId,
+    otsId,
+    ackId: ackForm._id,
+    memoId: memo._id,
+    orderId: settlement._id,
+    certificate: filePath,
+  });
 
-    const { loan_number } = req.body;
-    if (!loan_number) {
-      return res.status(400).json({ error: 'loan_number is required.' });
-    }
+  await newOrder.save();
 
-    const otsForm = await OTSForm.findOne({ loan_number });
-    if (!otsForm) {
-      return res.status(404).json({ error: 'OTSForm not found for provided loan_number.' });
-    }
+  const updatedOTS = await OTSForm.findByIdAndUpdate(
+    otsId,
+    { status_msg: 'Completed', status: 1 },
+    { new: true }
+  );
 
-    const existingCertificate = await CertificateOrder.findOne({ otsId: otsForm._id });
-    if (!existingCertificate) {
-      return res.status(404).json({ error: 'Certificate not found for this loan_number.' });
-    }
-
-    existingCertificate.certificate = filePath;
-    await existingCertificate.save();
-
-    return res.status(200).json({
-      message: 'Certificate reuploaded successfully.',
-      updatedCertificate: existingCertificate
-    });
-
-  } catch (error) {
-    console.error('Certificate Reupload Error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+  if (!updatedOTS) {
+    return next(new AppError('OTS Form not found for status update', 404));
   }
-};
 
-exports.getAllCertificateOrders = async (req, res) => {
-  try {
-    const orders = await CertificateOrder.find()
-      .populate({
-        path: 'userId',
-        select: 'username email'
-      })
-      .populate({
-        path: 'otsId',
-        select: 'loan_number number'
-      })
-      .populate('ackId memoId')
-      .sort({ createdAt: -1 });
+  res.status(201).json({
+    message: 'Certificate order uploaded and status updated successfully',
+    data: newOrder,
+  });
+});
 
-    res.status(200).json(orders);
-  } catch (err) {
-    console.error('Get All Certificates Error:', err);
-    res.status(500).json({ message: 'Server error', error: err.message });
+exports.reuploadCertificateOrder = catchAsync(async (req, res, next) => {
+  const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
+  if (!filePath) return next(new AppError('PDF file is required.', 400));
+
+  const { loan_number } = req.body;
+  if (!loan_number) return next(new AppError('loan_number is required.', 400));
+
+  const otsForm = await OTSForm.findOne({ loan_number });
+  if (!otsForm) return next(new AppError('OTSForm not found for provided loan_number.', 404));
+
+  const existingCertificate = await CertificateOrder.findOne({ otsId: otsForm._id });
+  if (!existingCertificate) {
+    return next(new AppError('Certificate not found for this loan_number.', 404));
   }
-};
 
-exports.getCertificatesByUserId = async (req, res) => {
-  try {
-    const { userId } = req.params;
+  existingCertificate.certificate = filePath;
+  await existingCertificate.save();
 
-    const orders = await CertificateOrder.find({ userId })
-      .populate('otsId ackId memoId')
-      .sort({ createdAt: -1 });
+  res.status(200).json({
+    message: 'Certificate reuploaded successfully.',
+    updatedCertificate: existingCertificate,
+  });
+});
 
-    if (!orders.length) {
-      return res.status(404).json({ message: 'No certificates found for this user' });
-    }
+exports.getAllCertificateOrders = catchAsync(async (req, res) => {
+  const orders = await CertificateOrder.find()
+    .populate({ path: 'userId', select: 'username email' })
+    .populate({ path: 'otsId', select: 'loan_number number' })
+    .populate('ackId memoId')
+    .sort({ createdAt: -1 });
 
-    res.status(200).json(orders);
-  } catch (err) {
-    console.error('Get Certificates by User ID Error:', err);
-    res.status(500).json({ message: 'Server error', error: err.message });
+  res.status(200).json(orders);
+});
+
+exports.getCertificatesByUserId = catchAsync(async (req, res, next) => {
+  const { userId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return next(new AppError('Invalid user ID format', 400));
   }
-};
 
-exports.getCertificateOrderCounts = async (req, res) => {
+  const orders = await CertificateOrder.find({ userId })
+    .populate('otsId ackId memoId')
+    .sort({ createdAt: -1 });
+
+  if (!orders.length) {
+    return next(new AppError('No certificates found for this user', 404));
+  }
+
+  res.status(200).json(orders);
+});
+
+exports.getCertificateOrderCounts = catchAsync(async (req, res) => {
   const { branch, startDate, endDate } = req.body;
 
-  try {
-    const pipeline = [
-      {
-        $lookup: {
-          from: 'otsforms',
-          localField: 'otsId',
-          foreignField: '_id',
-          as: 'otsDetails',
-        },
+  const pipeline = [
+    {
+      $lookup: {
+        from: 'otsforms',
+        localField: 'otsId',
+        foreignField: '_id',
+        as: 'otsDetails',
       },
-      { $unwind: '$otsDetails' }
-    ];
-    if (branch) {
-      pipeline.push({ $match: { 'otsDetails.branch': branch } });
-    }
-    if (startDate || endDate) {
-      const dateMatch = {};
+    },
+    { $unwind: '$otsDetails' },
+  ];
 
-      if (startDate && endDate && startDate === endDate) {
-        const start = new Date(startDate);
-        const end = new Date(startDate);
+  if (branch) {
+    pipeline.push({ $match: { 'otsDetails.branch': branch } });
+  }
+
+  if (startDate || endDate) {
+    const dateMatch = {};
+    if (startDate && endDate && startDate === endDate) {
+      const start = new Date(startDate);
+      const end = new Date(startDate);
+      end.setHours(23, 59, 59, 999);
+      dateMatch.$gte = start;
+      dateMatch.$lte = end;
+    } else {
+      if (startDate) dateMatch.$gte = new Date(startDate);
+      if (endDate) {
+        const end = new Date(endDate);
         end.setHours(23, 59, 59, 999);
-        dateMatch.$gte = start;
         dateMatch.$lte = end;
-      } else {
-        if (startDate) {
-          dateMatch.$gte = new Date(startDate);
-        }
-        if (endDate) {
-          const end = new Date(endDate);
-          end.setHours(23, 59, 59, 999);
-          dateMatch.$lte = end;
-        }
       }
-
-      pipeline.push({
-        $match: {
-          createdAt: dateMatch
-        }
-      });
     }
-    pipeline.push({
-      $group: {
-        _id: null,
-        count: { $sum: 1 }
-      }
-    });
 
-    const result = await CertificateOrder.aggregate(pipeline);
-    const count = result.length > 0 ? result[0].count : 0;
-    const message = branch
+    pipeline.push({ $match: { createdAt: dateMatch } });
+  }
+
+  pipeline.push({
+    $group: { _id: null, count: { $sum: 1 } },
+  });
+
+  const result = await CertificateOrder.aggregate(pipeline);
+  const count = result.length > 0 ? result[0].count : 0;
+
+  res.status(200).json({
+    message: branch
       ? `Certificate order count for branch '${branch}' retrieved successfully`
-      : 'Total certificate order count retrieved successfully';
-    return res.status(200).json({
-      message,
-      data: { issued: count }
-    });
+      : 'Total certificate order count retrieved successfully',
+    data: { issued: count },
+  });
+});
 
-  } catch (error) {
-    console.error('Error getting certificate order counts:', error);
-    return res.status(500).json({
-      message: 'Server error',
-      error: error.message
-    });
-  }
-};
+exports.getCertificateCountsLast7Days = catchAsync(async (req, res) => {
+  const timezone = 'Asia/Kolkata';
+  const end = new Date();
+  end.setHours(23, 59, 59, 999);
+  const start = new Date(end);
+  start.setDate(end.getDate() - 6);
+  start.setHours(0, 0, 0, 0);
 
-// controllers/certificateOrders.js  (add this to your existing file)
-
-exports.getCertificateCountsLast7Days = async (req, res) => {
-  try {
-    const timezone = 'Asia/Kolkata';
-    const end   = new Date();                         // now
-    end.setHours(23, 59, 59, 999);
-
-    const start = new Date(end);
-    start.setDate(end.getDate() - 6);
-    start.setHours(0, 0, 0, 0);
-    const raw = await CertificateOrder.aggregate([
-      { $match: { createdAt: { $gte: start, $lte: end } } },
-      {
-        $group: {
-          _id: {
-            $dateToString: {
-              format: '%d/%m/%Y',
-              date: '$createdAt',
-              timezone 
-            }
+  const raw = await CertificateOrder.aggregate([
+    { $match: { createdAt: { $gte: start, $lte: end } } },
+    {
+      $group: {
+        _id: {
+          $dateToString: {
+            format: '%d/%m/%Y',
+            date: '$createdAt',
+            timezone,
           },
-          count: { $sum: 1 }
-        }
+        },
+        count: { $sum: 1 },
       },
-      { $project: { _id: 0, date: '$_id', count: 1 } }
-    ]);
-    const lookup = Object.fromEntries(raw.map(o => [o.date, o.count]));
-    const response = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(end);
-      d.setDate(end.getDate() - i);
-      const dateStr = d
-        .toLocaleDateString('en-GB', { timeZone: timezone })
-        .split('/')
-        .map(s => s.padStart(2, '0'))
-        .join('/');
+    },
+    { $project: { _id: 0, date: '$_id', count: 1 } },
+  ]);
 
-      response.push({
-        date: dateStr,
-        count: lookup[dateStr] ?? 0
-      });
-    }
+  const lookup = Object.fromEntries(raw.map(o => [o.date, o.count]));
+  const response = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(end);
+    d.setDate(end.getDate() - i);
+    const dateStr = d
+      .toLocaleDateString('en-GB', { timeZone: timezone })
+      .split('/')
+      .map(s => s.padStart(2, '0'))
+      .join('/');
 
-    return res.status(200).json(response);
-  } catch (err) {
-    console.error('Error getting 7-day certificate counts:', err);
-    return res.status(500).json({ message: 'Server error', error: err.message });
+    response.push({ date: dateStr, count: lookup[dateStr] ?? 0 });
   }
-};
 
-exports.filterCertificateOrders = async (req, res) => {
-  try {
-    const { loan_number, branch, userId } = req.body;
-    const page = parseInt(req.body.page) || 1;
-    const limit = parseInt(req.body.limit) || 10;
-    const skip = (page - 1) * limit;
+  res.status(200).json(response);
+});
 
-    const matchStage = {
-      ...(loan_number && { 'otsDetails.loan_number': loan_number }),
-      ...(branch && { 'otsDetails.branch': branch }),
-      ...(userId && { userId: new mongoose.Types.ObjectId(userId) })
-    };
+exports.filterCertificateOrders = catchAsync(async (req, res, next) => {
+  const { loan_number, branch, userId } = req.body;
+  const page = parseInt(req.body.page) || 1;
+  const limit = parseInt(req.body.limit) || 10;
+  const skip = (page - 1) * limit;
 
-    const pipeline = [
-      {
-        $lookup: {
-          from: 'otsforms',
-          localField: 'otsId',
-          foreignField: '_id',
-          as: 'otsDetails'
-        }
-      },
-      { $unwind: '$otsDetails' },
-      { $match: matchStage },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'userId',
-          foreignField: '_id',
-          as: 'userDetails'
-        }
-      },
-      { $unwind: '$userDetails' },
-      {
-        $lookup: {
-          from: 'userdetails',
-          localField: 'userId',
-          foreignField: 'userId',
-          as: 'userExtraDetails'
-        }
-      },
-      {
-        $unwind: {
-          path: '$userExtraDetails',
-          preserveNullAndEmptyArrays: true
-        }
-      },
-      {
-        $project: {
-          certificate: 1,
-          createdAt: 1,
-          userId: 1,
-          otsId: 1,
-          ackId: 1,
-          memoId: 1,
-          orderId: 1,
-          otsDetails: 1,
-          userDetails: 1,
-          userExtraDetails: 1
-        }
-      },
-      {
-        $facet: {
-          paginatedData: [{ $skip: skip }, { $limit: limit }],
-          totalCount: [{ $count: 'count' }]
-        }
-      }
-    ];
+  const matchStage = {
+    ...(loan_number && { 'otsDetails.loan_number': loan_number }),
+    ...(branch && { 'otsDetails.branch': branch }),
+  };
 
-    const result = await CertificateOrder.aggregate(pipeline);
-    const paginatedData = result[0].paginatedData;
-    const totalCount = result[0].totalCount[0]?.count || 0;
-    const totalPages = Math.ceil(totalCount / limit);
-
-    if (!paginatedData.length) {
-      return res.status(404).json({ message: 'No certificates found matching the filters' });
+  if (userId) {
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return next(new AppError('Invalid userId format', 400));
     }
-
-    return res.status(200).json({
-      paginatedData,
-      page,
-      limit,
-      totalItems: totalCount,
-      totalPages,
-      previousPage: page > 1 ? page - 1 : null,
-      nextPage: page < totalPages ? page + 1 : null,
-      currentPageCount: paginatedData.length
-    });
-  } catch (err) {
-    console.error('Error filtering certificate orders:', err);
-    res.status(500).json({ message: 'Server error', error: err.message });
+    matchStage.userId = new mongoose.Types.ObjectId(userId);
   }
-};
 
+  const pipeline = [
+    {
+      $lookup: {
+        from: 'otsforms',
+        localField: 'otsId',
+        foreignField: '_id',
+        as: 'otsDetails',
+      },
+    },
+    { $unwind: '$otsDetails' },
+    { $match: matchStage },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'userId',
+        foreignField: '_id',
+        as: 'userDetails',
+      },
+    },
+    { $unwind: '$userDetails' },
+    {
+      $lookup: {
+        from: 'userdetails',
+        localField: 'userId',
+        foreignField: 'userId',
+        as: 'userExtraDetails',
+      },
+    },
+    {
+      $unwind: {
+        path: '$userExtraDetails',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $project: {
+        certificate: 1,
+        createdAt: 1,
+        userId: 1,
+        otsId: 1,
+        ackId: 1,
+        memoId: 1,
+        orderId: 1,
+        otsDetails: 1,
+        userDetails: 1,
+        userExtraDetails: 1,
+      },
+    },
+    {
+      $facet: {
+        paginatedData: [{ $skip: skip }, { $limit: limit }],
+        totalCount: [{ $count: 'count' }],
+      },
+    },
+  ];
 
+  const result = await CertificateOrder.aggregate(pipeline);
+  const paginatedData = result[0].paginatedData;
+  const totalCount = result[0].totalCount[0]?.count || 0;
+  const totalPages = Math.ceil(totalCount / limit);
 
+  if (!paginatedData.length) {
+    return next(new AppError('No certificates found matching the filters', 404));
+  }
 
+  res.status(200).json({
+    paginatedData,
+    page,
+    limit,
+    totalItems: totalCount,
+    totalPages,
+    previousPage: page > 1 ? page - 1 : null,
+    nextPage: page < totalPages ? page + 1 : null,
+    currentPageCount: paginatedData.length,
+  });
+});
 
-
-// Get count of OTS applications by status
-
-
-
-// // Get certificate order by ID
-// exports.getCertificateOrderById = async (req, res) => {
-//   try {
-//     const order = await CertificateOrder.findById(req.params.id).populate('userId otsId ackId memoId');
-
-//     if (!order) {
-//       return res.status(404).json({ message: 'Certificate order not found' });
-//     }
-
-//     res.set('Content-Type', order.certificate.contentType);
-//     res.send(order.certificate.data);
-//   } catch (err) {
-//     res.status(500).json({ message: 'Server error', error: err.message });
-//   }
-// };
-
-// // List all certificate orders
-// exports.listCertificateOrders = async (req, res) => {
-//   try {
-//     const orders = await CertificateOrder.find().populate('userId otsId ackId memoId');
-//     res.status(200).json(orders);
-//   } catch (err) {
-//     res.status(500).json({ message: 'Server error', error: err.message });
-//   }
-// };

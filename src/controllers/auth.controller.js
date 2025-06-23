@@ -1,51 +1,49 @@
-const { registerUser, loginUser, register_ofsc_superadmin, register_ofsc_subadmin } = require('../services/auth.service');
+const {
+  registerUser,
+  loginUser,
+  register_ofsc_superadmin,
+  register_ofsc_subadmin
+} = require('../services/auth.service');
 const { blacklistToken } = require('../utils/tokenBlacklist');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/AppError');
 
-exports.register = async (req, res, next) => {
-    try {
-        const result = await registerUser(req.body);
-        res.status(201).json(result);
-    } catch (error) {
-        next(error);
-    }
+// Register Normal User
+exports.register = catchAsync(async (req, res) => {
+  const result = await registerUser(req.body);
+  res.status(201).json(result);
+});
+
+// Login
+exports.login = catchAsync(async (req, res) => {
+  const result = await loginUser(req.body);
+  res.status(200).json(result);
+});
+
+// Register OFSC Super Admin
+exports.register_OFSC_SuperAdmin = catchAsync(async (req, res) => {
+  const result = await register_ofsc_superadmin(req.body);
+  res.status(201).json(result);
+});
+
+// Register OFSC Sub Admin
+exports.register_OFSC_SubAdmin = catchAsync(async (req, res) => {
+  const result = await register_ofsc_subadmin(req.body);
+  res.status(201).json(result);
+});
+
+// Logout
+exports.logout = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader?.split(' ')[1];
+
+  if (!token) return next(new AppError('Token required', 401));
+
+  blacklistToken(token);
+  res.json({ message: 'Logout successful' });
 };
 
-exports.login = async (req, res, next) => {
-    try {
-        const result = await loginUser(req.body);
-        res.json(result);
-    } catch (error) {
-        next(error);
-    }
-};
-
-exports.register_OFSC_SuperAdmin = async (req, res, next) => {
-    try{
-        const result = await register_ofsc_superadmin(req.body);
-        res.status(201).json(result);
-    } catch (error) {
-        next(error);
-    }
-};
-
-exports.register_OFSC_SubAdmin = async (req, res, next) => {
-    try{
-        const result = await register_ofsc_subadmin(req.body);
-        res.status(201).json(result);
-    } catch (error) {
-        next(error);
-    }
-};
-
-exports.logout = (req, res) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader?.split(' ')[1];
-    if (!token) return res.status(401).json({ message: 'Token required' });
-
-    blacklistToken(token);
-    res.json({ message: 'Logout successful' });
-};
-
+// Protected Route
 exports.protectedRoute = (req, res) => {
-    res.json({ message: 'Access granted', user: req.user });
+  res.status(200).json({ message: 'Access granted', user: req.user });
 };
