@@ -33,25 +33,49 @@ export const updateGovernmentOrder = async (req, res) => {
 
 export const filterGovernmentOrders = async (req, res) => {
   try {
+    const { departmentName, pointOfContact, letterNumber } = req.body;
+    const page = parseInt(req.body.page) || 1;
+    const limit = parseInt(req.body.limit) || 10;
+    const skip = (page - 1) * limit;
+
     const filters = {};
-
-    if (req.body.departmentName) {
-      filters.departmentName = new RegExp(req.body.departmentName, 'i'); // case-insensitive match
+    if (departmentName) {
+      filters.departmentName = new RegExp(departmentName, 'i'); // case-insensitive match
     }
-    if (req.body.pointOfContact) {
-      filters.pointOfContact = new RegExp(req.body.pointOfContact, 'i');
+    if (pointOfContact) {
+      filters.pointOfContact = new RegExp(pointOfContact, 'i');
     }
-    if (req.body.letterNumber) {
-      filters.letterNumber = req.body.letterNumber;
+    if (letterNumber) {
+      filters.letterNumber = letterNumber;
     }
 
-    const orders = await GovernmentOrder.find(filters).sort({ createdAt: -1 });
+    const [orders, totalCount] = await Promise.all([
+      GovernmentOrder.find(filters).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      GovernmentOrder.countDocuments(filters)
+    ]);
 
-    res.json(orders);
+    const totalPages = Math.ceil(totalCount / limit);
+
+    if (!orders.length) {
+      return res.status(404).json({ message: 'No government orders found matching the filters' });
+    }
+
+    return res.status(200).json({
+      paginatedData: orders,
+      page,
+      limit,
+      totalItems: totalCount,
+      totalPages,
+      previousPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null,
+      currentPageCount: orders.length
+    });
   } catch (err) {
-    res.status(500).json({ error: 'Error filtering government orders' });
+    console.error('Error filtering government orders:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
 
 export const createFloatTender = async (req, res) => {
   try {
@@ -83,19 +107,43 @@ export const updateFloatTender = async (req, res) => {
 
 export const filterFloatTenders = async (req, res) => {
   try {
+    const { project_title, tender_number } = req.body;
+    const page = parseInt(req.body.page) || 1;
+    const limit = parseInt(req.body.limit) || 10;
+    const skip = (page - 1) * limit;
+
     const filters = {};
-
-    if (req.body.project_title) {
-      filters.project_title = new RegExp(req.body.project_title, 'i');
+    if (project_title) {
+      filters.project_title = new RegExp(project_title, 'i'); // case-insensitive
     }
-    if (req.body.tender_number) {
-      filters.tender_number = req.body.tender_number;
+    if (tender_number) {
+      filters.tender_number = tender_number;
     }
 
-    const tenders = await FloatTender.find(filters).sort({ createdAt: -1 });
-    res.json(tenders);
+    const [tenders, totalCount] = await Promise.all([
+      FloatTender.find(filters).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      FloatTender.countDocuments(filters)
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    if (!tenders.length) {
+      return res.status(404).json({ message: 'No float tenders found matching the filters' });
+    }
+
+    return res.status(200).json({
+      paginatedData: tenders,
+      page,
+      limit,
+      totalItems: totalCount,
+      totalPages,
+      previousPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null,
+      currentPageCount: tenders.length
+    });
   } catch (err) {
-    res.status(500).json({ error: 'Error filtering tenders' });
+    console.error('Error filtering float tenders:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
 
@@ -129,21 +177,46 @@ export const updateTenderResult = async (req, res) => {
 
 export const filterTenderResults = async (req, res) => {
   try {
+    const { tender_number, name } = req.body;
+    const page = parseInt(req.body.page) || 1;
+    const limit = parseInt(req.body.limit) || 10;
+    const skip = (page - 1) * limit;
+
     const filters = {};
-
-    if (req.body.tender_number) {
-      filters.tender_number = req.body.tender_number;
+    if (tender_number) {
+      filters.tender_number = tender_number;
     }
-    if (req.body.name) {
-      filters.name = new RegExp(req.body.name, 'i');
+    if (name) {
+      filters.name = new RegExp(name, 'i'); // case-insensitive
     }
 
-    const results = await TenderResult.find(filters).sort({ createdAt: -1 });
-    res.json(results);
+    const [results, totalCount] = await Promise.all([
+      TenderResult.find(filters).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      TenderResult.countDocuments(filters)
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    if (!results.length) {
+      return res.status(404).json({ message: 'No tender results found matching the filters' });
+    }
+
+    return res.status(200).json({
+      paginatedData: results,
+      page,
+      limit,
+      totalItems: totalCount,
+      totalPages,
+      previousPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null,
+      currentPageCount: results.length
+    });
   } catch (err) {
-    res.status(500).json({ error: 'Error filtering results' });
+    console.error('Error filtering tender results:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
 
 export const createSupplyOrder = async (req, res) => {
   try {
@@ -216,18 +289,43 @@ export const updateSupplyOrder = async (req, res) => {
 
 export const filterSupplyOrders = async (req, res) => {
   try {
-    const filters = {};
+    const { supply_details } = req.body;
+    const page = parseInt(req.body.page) || 1;
+    const limit = parseInt(req.body.limit) || 10;
+    const skip = (page - 1) * limit;
 
-    if (req.body.supply_details) {
-      filters.supply_details = new RegExp(req.body.supply_details, 'i');
+    const filters = {};
+    if (supply_details) {
+      filters.supply_details = new RegExp(supply_details, 'i'); // case-insensitive match
     }
 
-    const orders = await SupplyOrder.find(filters).sort({ createdAt: -1 });
-    res.json(orders);
+    const [orders, totalCount] = await Promise.all([
+      SupplyOrder.find(filters).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      SupplyOrder.countDocuments(filters)
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    if (!orders.length) {
+      return res.status(404).json({ message: 'No supply orders found matching the filters' });
+    }
+
+    return res.status(200).json({
+      paginatedData: orders,
+      page,
+      limit,
+      totalItems: totalCount,
+      totalPages,
+      previousPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null,
+      currentPageCount: orders.length
+    });
   } catch (err) {
-    res.status(500).json({ error: 'Error filtering supply orders' });
+    console.error('Error filtering supply orders:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
 
 export const getDashboardCounts = async (req, res) => {
   try {
