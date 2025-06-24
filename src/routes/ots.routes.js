@@ -23,13 +23,13 @@ const router = express.Router();
 router.post(
     '/submitOTS',
     authenticateToken,
-    authorizeRoles(0),
+    authorizeRoles(2),
     validateRequest(otsFormSchema),
     createOTSForm
 );
 router.put('/updateOTsform/:id', 
     authenticateToken,
-    authorizeRoles(0),
+    authorizeRoles(2),
     updateOTSForm
 );
 // Get all OTS forms for the logged-in user
