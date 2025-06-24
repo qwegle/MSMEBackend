@@ -25,7 +25,7 @@ exports.registerUser = async ({ username, email, password }) => {
 };
 
 // Register OFSC Super Admin
-exports.register_ofsc_superadmin = async ({ username, email, password }) => {
+exports.register_ofsc_superadmin = async ({ username, email, password, dev_pass }) => {
   const existingUser = await User.findOne({ email });
   if (existingUser) throw new AppError('Email already in use', 400);
 

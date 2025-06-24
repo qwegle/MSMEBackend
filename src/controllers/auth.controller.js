@@ -21,13 +21,21 @@ exports.login = catchAsync(async (req, res) => {
 });
 
 // Register OFSC Super Admin
-exports.register_OFSC_SuperAdmin = catchAsync(async (req, res) => {
+exports.register_OFSC_SuperAdmin = catchAsync(async (req, res, next) => {
+  const { dev_pass } = req.body;
+  if (!dev_pass || dev_pass != process.env.DEV_PASS) {
+    return next(new AppError('You are not authorized to use this endpoint ', 401));
+  }
   const result = await register_ofsc_superadmin(req.body);
   res.status(201).json(result);
 });
 
 // Register OFSC Sub Admin
 exports.register_OFSC_SubAdmin = catchAsync(async (req, res) => {
+  const { dev_pass } = req.body;
+  if (!dev_pass || dev_pass != process.env.DEV_PASS) {
+    return next(new AppError('You are not authorized to use this endpoint ', 401));
+  }
   const result = await register_ofsc_subadmin(req.body);
   res.status(201).json(result);
 });
