@@ -1,10 +1,12 @@
 const Memorandum = require('../models/memorandum');
 const OTSForm = require('../models/otsform');
 const AckForm = require('../models/acknowledgement');
+const validator = require('validator');
 const User = require('../models/user');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
-
+const sanitizeInput = input =>
+  typeof input === 'string' ? validator.escape(input.trim()) : input;
 exports.uploadPdf = catchAsync(async (req, res, next) => {
   const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
   if (!filePath) return next(new AppError('PDF file is required', 400));

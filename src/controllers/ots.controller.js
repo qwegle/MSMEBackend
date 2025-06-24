@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const OTSForm = require('../models/otsform');
+const validator = require('validator');
 const AckForm = require('../models/acknowledgement');
 const Memorandum = require('../models/memorandum');
 const CertificateOrder = require('../models/certificate');
@@ -7,6 +8,8 @@ const { sendApplicationSubmittedEmail } = require('../utils/sendStatusChangeEmai
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 
+const sanitizeInput = input =>
+  typeof input === 'string' ? validator.escape(input.trim()) : input;
 // Create OTS Form
 exports.createOTSForm = catchAsync(async (req, res, next) => {
   const formData = { ...req.body, userId: req.user.id };

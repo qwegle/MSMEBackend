@@ -11,7 +11,7 @@ const sanitizeInput = input =>
 
 exports.createAckForm = catchAsync(async (req, res, next) => {
   const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
-  if (!filePath) return next(new AppError('Image is required', 400));
+  if (!filePath) return next(new AppError('file is required', 400));
 
   const {
     loan_number, deposit_amount, deposit_date, deposit_type,

@@ -4,7 +4,7 @@ const AckForm = require('../models/acknowledgement');
 const Memorandum = require('../models/memorandum');
 const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
-
+const validator = require('validator');
 exports.uploadSettlementOrder = catchAsync(async (req, res, next) => {
   const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
   if (!filePath) return next(new AppError('PDF file is required.', 400));
