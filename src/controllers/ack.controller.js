@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const ACKForm = require('../models/acknowledgement');
 const OTSForm = require('../models/otsform');
-const CertificateOrder = require('../models/certificateOrder'); // assumed import
+const CertificateOrder = require('../models/certificate'); // assumed import
 const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
 

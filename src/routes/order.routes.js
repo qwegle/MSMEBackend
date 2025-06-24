@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const router = express.Router();
 const orderController = require('../controllers/order.controller');
+const { authenticateToken, authorizeRoles } = require('../middlewares/auth.middleware');
 const {singlePdfUpload,validatePdfMagicNumber,multerErrorHandler,} = require("../middlewares/fileUploadHandler");
 
 router.post('/uploadOrder', singlePdfUpload,validatePdfMagicNumber,multerErrorHandler,authenticateToken, authorizeRoles(0),orderController.uploadSettlementOrder);

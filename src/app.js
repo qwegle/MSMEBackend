@@ -63,9 +63,9 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api', routes);
 
 // 404 handler
-app.all('*', (req, res, next) => {
-  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
-});
+// app.all('*', (req, res, next) => {
+//   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+// });
 
 // Centralized error handler
 app.use(errorHandler);

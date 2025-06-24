@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const govController = require('../controllers/osic.controller');
+const { authenticateToken} = require('../middlewares/auth.middleware');
 const { supplyOrderUpload, validatePdfMagicNumber, multerErrorHandler} = require('../middlewares/fileUploadHandler');
 // Government Order Routes
 router.post('/createGovernmentOrder', authenticateToken, govController.createGovernmentOrder);
