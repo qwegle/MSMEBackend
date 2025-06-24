@@ -212,10 +212,24 @@ exports.getCertificateCountsLast7Days = catchAsync(async (req, res) => {
 
 exports.filterCertificateOrders = catchAsync(async (req, res, next) => {
   const { loan_number, branch, userId } = req.body;
+  const { user_role } = req.user;
   const page = parseInt(req.body.page) || 1;
   const limit = parseInt(req.body.limit) || 10;
   const skip = (page - 1) * limit;
-
+  if (user_role === 2) { // User
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return next(new AppError('User ID is required and must be valid for regular users.', 400));
+    }
+    if (branch) {
+      return next(new AppError('Branch filter is not allowed for regular users.', 403));
+    }
+  } else if (user_role === 1) { // Sub-admin
+    if (!branch) {
+      return next(new AppError('Branch is required for sub-admins.', 400));
+    }
+  } else if (user_role !== 0) { // Invalid or unauthorized role
+    return next(new AppError('Access denied: your role is not authorized to perform this operation.', 403));
+  }
   const matchStage = {
     ...(loan_number && { 'otsDetails.loan_number': loan_number }),
     ...(branch && { 'otsDetails.branch': branch }),
@@ -227,7 +241,6 @@ exports.filterCertificateOrders = catchAsync(async (req, res, next) => {
     }
     matchStage.userId = new mongoose.Types.ObjectId(userId);
   }
-
   const pipeline = [
     {
       $lookup: {
@@ -304,4 +317,5 @@ exports.filterCertificateOrders = catchAsync(async (req, res, next) => {
     currentPageCount: paginatedData.length,
   });
 });
+
 

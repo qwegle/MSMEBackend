@@ -87,20 +87,52 @@ exports.getAckFormsByUserId = catchAsync(async (req, res, next) => {
 });
 
 exports.filterAckForms = catchAsync(async (req, res, next) => {
+  const { user_role, id: requesterId } = req.user;
   const { userId, loan_number, branch } = req.body;
   const page = parseInt(req.body.page) || 1;
   const limit = parseInt(req.body.limit) || 10;
   const skip = (page - 1) * limit;
 
-  const matchConditions = {};
-  if (userId) {
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    return next(new AppError('Invalid userId format', 400));
+  // 🌐 Role validation logic
+  if (user_role === 2) { // Regular User
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return next(new AppError('User ID is required and must be valid for regular users.', 400));
+    }
+    if (branch) {
+      return next(
+        new AppError(
+          'As a regular user, you are not allowed to filter by branch.',
+          403
+        )
+      );
+    }
+  } else if (user_role === 1) { // Sub-admin
+    if (!branch) {
+      return next(
+        new AppError('Branch field is required for sub-admins to filter acknowledgement forms.', 400)
+      );
+    }
+  } else if (user_role !== 0) { // Invalid role
+    return next(new AppError('Access denied: your role is not authorized to perform this operation.', 403));
   }
-  matchConditions['otsDetails.userId'] = new mongoose.Types.ObjectId(userId);
-}
-  if (loan_number) matchConditions['otsDetails.loan_number'] = sanitizeInput(loan_number);
-  if (branch) matchConditions['otsDetails.branch'] = sanitizeInput(branch);
+
+  // 🔍 Build match conditions
+  const matchConditions = {};
+
+  if (userId) {
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return next(new AppError('Invalid userId format.', 400));
+    }
+    matchConditions['otsDetails.userId'] = new mongoose.Types.ObjectId(userId);
+  }
+
+  if (loan_number) {
+    matchConditions['otsDetails.loan_number'] = sanitizeInput(loan_number);
+  }
+
+  if (branch) {
+    matchConditions['otsDetails.branch'] = sanitizeInput(branch);
+  }
 
   const pipeline = [
     {
@@ -147,3 +179,4 @@ exports.filterAckForms = catchAsync(async (req, res, next) => {
     currentPageCount: paginatedData.length,
   });
 });
+

@@ -134,19 +134,42 @@ exports.getMemosByUserId = catchAsync(async (req, res, next) => {
 
 exports.getAllMemos = catchAsync(async (req, res, next) => {
   const { loan_number, userId, branch, status } = req.body;
+  const { user_role } = req.user;
   const page = parseInt(req.body.page) || 1;
   const limit = parseInt(req.body.limit) || 10;
 
   let memoFilter = {};
   let otsFilter = {};
 
+  // 🛡️ Role-based filtering logic
+  if (user_role === 2) { // User
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return next(new AppError('User ID is required and must be valid for regular users.', 400));
+    }
+    if (branch) {
+      return next(new AppError('Regular users are not allowed to filter by branch.', 403));
+    }
+  } else if (user_role === 1) { // Sub-admin
+    if (!branch) {
+      return next(new AppError('Branch is required for sub-admins.', 400));
+    }
+  } else if (user_role !== 0) { // Invalid role
+    return next(new AppError('Access denied: your role is not authorized to perform this operation.', 403));
+  }
+
+  // 🔍 Filtering logic
   if (loan_number) {
     const otsForm = await OTSForm.findOne({ loan_number });
     if (!otsForm) return next(new AppError('No OTS Form found for the given loan number', 404));
     memoFilter.otsFormId = otsForm._id;
   } else {
-    if (userId) otsFilter.userId = userId;
-    if (branch) otsFilter.branch = branch;
+    if (userId) {
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return next(new AppError('Invalid userId format.', 400));
+      }
+      otsFilter.userId = userId;
+    }
+    if (branch) otsFilter.branch = sanitizeInput(branch);
     if (status) memoFilter.status = status;
 
     const matchedOtsForms = await OTSForm.find(otsFilter).select('_id');

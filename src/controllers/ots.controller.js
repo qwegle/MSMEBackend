@@ -112,13 +112,40 @@ exports.approveOtsApplication = catchAsync(async (req, res, next) => {
 });
 
 // Filter OTS Forms
-exports.filterOTS = catchAsync(async (req, res) => {
+exports.filterOTS = catchAsync(async (req, res, next) => {
+  const { user_role, id: requesterId } = req.user; // from JWT
   const { otsId, userId, branch, status, page = 1, limit = 10 } = req.body;
 
+  // 🔒 Role-based validation
+  if (user_role === 2) { // Regular User
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return next(new AppError('User ID is required and must be valid for regular users.', 400));
+    }
+    if (branch) {
+      return next(
+        new AppError('Branch filtering is not allowed for regular users.', 403)
+      );
+    }
+  } else if (user_role === 1) { // Sub-admin
+    if (!branch) {
+      return next(
+        new AppError('Branch field is required for sub-admins to filter OTS forms.', 400)
+      );
+    }
+  } else if (user_role !== 0) { // Invalid or unauthorized role
+    return next(new AppError('Access denied: your role is not authorized to perform this operation.', 403));
+  }
+
+  // ✅ Build filter conditions
   const filter = {};
-  if (otsId) filter.loan_number = otsId;
-  if (userId) filter.userId = userId;
-  if (branch) filter.branch = branch;
+  if (otsId) filter.loan_number = sanitizeInput(otsId);
+  if (userId) {
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return next(new AppError('Invalid userId format.', 400));
+    }
+    filter.userId = userId;
+  }
+  if (branch) filter.branch = sanitizeInput(branch);
   if (status !== undefined) filter.status = status;
 
   const totalItems = await OTSForm.countDocuments(filter);
@@ -150,6 +177,7 @@ exports.filterOTS = catchAsync(async (req, res) => {
     currentPageCount: enriched.length
   });
 });
+
 
 // Count status for OTS applications
 exports.getOTSStatusCounts = catchAsync(async (req, res) => {
