@@ -9,28 +9,19 @@ const hpp = require('hpp');
 const compression = require('compression');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
-
 const connectDB = require('./config/db');
 const routes = require('./routes');
 const errorHandler = require('./middlewares/errorHandler');
 const AppError = require('./utils/AppError');
-
 const app = express();
-
+// Tell Express to trust the proxy headers
+app.set('trust proxy', 1);
 app.disable('x-powered-by'); 
-
-// Enable request logging in development
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
-
-// Set secure headers
 app.use(helmet());
-
-// Enable CORS
 app.use(cors());
-
-// Limit repeated requests to public APIs (e.g., 100 requests per 15 minutes per IP)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
