@@ -4,7 +4,7 @@ const {
   getHolidays,
   deleteHoliday,
   updateHoliday
-} = require('../controllers/holiday.controller'); // corrected the controller name
+} = require('../controllers/okvi.controller'); // corrected the controller name
 const {
   authenticateToken,
   authorizeRoles,

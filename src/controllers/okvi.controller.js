@@ -1,4 +1,4 @@
-const Holiday = require('../models/holidayFestival');
+const Holiday = require('../models/hoildayFestival');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 
