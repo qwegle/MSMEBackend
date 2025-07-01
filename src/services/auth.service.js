@@ -111,7 +111,27 @@ exports.forgotPasswordService = async (email, baseUrl) => {
   await user.save({ validateBeforeSave: false });
 
   const resetURL = `${baseUrl}/api/auth/reset-password/${resetToken}`;
-  const html = `<p>You requested a password reset. Click <a href="${resetURL}">here</a> to reset your password. This link will expire in 10 minutes.</p>`;
+  const html= `
+  <div style="max-width: 600px; margin: auto; padding: 30px; font-family: Arial, sans-serif; background-color: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 10px;">
+    <h2 style="color: #2c3e50; text-align: center;">Password Reset Request</h2>
+    <p style="font-size: 16px; color: #555;">Hi <strong>${user.username}</strong>,</p>
+    <p style="font-size: 16px; color: #555;">
+      We received a request to reset your password. Click the button below to set a new password:
+    </p>
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${resetURL}" style="background-color: #007bff; color: #fff; padding: 12px 24px; border-radius: 5px; text-decoration: none; font-size: 16px;">
+        Reset Password
+      </a>
+    </div>
+    <p style="font-size: 14px; color: #777;">
+      This link will expire in <strong>10 minutes</strong>. If you didn’t request a password reset, you can safely ignore this email.
+    </p>
+    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+    <p style="font-size: 13px; color: #aaa; text-align: center;">
+      &copy; ${new Date().getFullYear()} MSME. All rights reserved.
+    </p>
+  </div>
+`;
 
   await sendEmail({
     to: user.email,
