@@ -15,6 +15,6 @@ const router = express.Router();
 router.get('/getAllHolidays', authenticateToken, getHolidays);
 router.post('/createHoliday', authenticateToken, authorizeRoles(0), authorizeType(2), createHoliday);
 router.put('/updateHoliday', authenticateToken, authorizeRoles(0), authorizeType(2), updateHoliday);
-router.delete('/deleteHoiday', authenticateToken, authorizeRoles(0), authorizeType(2), deleteHoliday);
+router.delete('/deleteHoliday', authenticateToken, authorizeRoles(0), authorizeType(2), deleteHoliday);
 
 module.exports = router;
