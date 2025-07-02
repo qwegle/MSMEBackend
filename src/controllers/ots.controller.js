@@ -148,37 +148,41 @@ exports.filterOTS = catchAsync(async (req, res, next) => {
   const { user_role, id: requesterId } = req.user; // from JWT
   const { otsId, userId, branch, status, page = 1, limit = 10 } = req.body;
 
+  const clean = (val) => (typeof val === 'string' && val.trim() === '') ? undefined : val;
+  const cleanedOtsId = clean(otsId);
+  const cleanedUserId = clean(userId);
+  const cleanedBranch = clean(branch);
+  const cleanedStatus = clean(status);
+
   // 🔒 Role-based validation
   if (user_role === 2) { // Regular User
-    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+    if (!cleanedUserId || !mongoose.Types.ObjectId.isValid(cleanedUserId)) {
       return next(new AppError('User ID is required and must be valid for regular users.', 400));
     }
-    if (branch) {
-      return next(
-        new AppError('Branch filtering is not allowed for regular users.', 403)
-      );
+    if (cleanedBranch) {
+      return next(new AppError('Branch filtering is not allowed for regular users.', 403));
     }
   } else if (user_role === 1) { // Sub-admin
-    if (!branch) {
-      return next(
-        new AppError('Branch field is required for sub-admins to filter OTS forms.', 400)
-      );
+    if (!cleanedBranch) {
+      return next(new AppError('Branch field is required for sub-admins to filter OTS forms.', 400));
     }
   } else if (user_role !== 0) { // Invalid or unauthorized role
     return next(new AppError('Access denied: your role is not authorized to perform this operation.', 403));
   }
 
-  // ✅ Build filter conditions
   const filter = {};
-  if (otsId) filter.loan_number = sanitizeInput(otsId);
-  if (userId) {
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
+  if (cleanedOtsId) filter.loan_number = sanitizeInput(cleanedOtsId);
+  if (cleanedUserId) {
+    if (!mongoose.Types.ObjectId.isValid(cleanedUserId)) {
       return next(new AppError('Invalid userId format.', 400));
     }
-    filter.userId = userId;
+    filter.userId = cleanedUserId;
   }
-  if (branch) filter.branch = sanitizeInput(branch);
-  if (status !== undefined) filter.status = status;
+  if (cleanedBranch) filter.branch = sanitizeInput(cleanedBranch);
+  if (cleanedStatus !== undefined) filter.status = cleanedStatus;
+
+
+  console.log('OTS Filter:', filter);
 
   const totalItems = await OTSForm.countDocuments(filter);
   const forms = await OTSForm.find(filter)
@@ -190,6 +194,7 @@ exports.filterOTS = catchAsync(async (req, res, next) => {
     const ack = await AckForm.findOne({ ots_form_id: ots._id }, 'img_link_sign_stamp');
     const memo = await Memorandum.findOne({ otsFormId: ots._id }, 'pdfData');
     const certificate = await CertificateOrder.findOne({ otsId: ots._id }, 'certificate');
+
     return {
       ots,
       ackFile: ack?.img_link_sign_stamp || null,
@@ -197,6 +202,7 @@ exports.filterOTS = catchAsync(async (req, res, next) => {
       certificateFile: certificate?.certificate || null
     };
   }));
+
 
   res.status(200).json({
     paginatedData: enriched,
@@ -209,6 +215,7 @@ exports.filterOTS = catchAsync(async (req, res, next) => {
     currentPageCount: enriched.length
   });
 });
+
 
 
 // Count status for OTS applications
