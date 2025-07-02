@@ -9,7 +9,7 @@ const router = express.Router();
 router.post(
     '/submitAck',
     authenticateToken,
-    authorizeRoles(2),
+    authorizeRoles(1),
     authorizeType(1),
     singlePdfUpload,
     validatePdfMagicNumber,
