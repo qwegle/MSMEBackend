@@ -10,7 +10,7 @@ const AppError = require('../utils/AppError');
 
 const sanitizeInput = input =>
   typeof input === 'string' ? validator.escape(input.trim()) : input;
-// Create OTS Form
+
 exports.createOTSForm = catchAsync(async (req, res, next) => {
   const formData = { ...req.body, userId: req.user.id };
   const baseTimestamp = Date.now();
@@ -34,26 +34,26 @@ exports.createOTSForm = catchAsync(async (req, res, next) => {
   return next(new AppError('Server busy. Please try again.', 500));
 });
 
-// Get user's OTS forms
+
 exports.getUserOTSForms = catchAsync(async (req, res) => {
   const forms = await OTSForm.find({ userId: req.user.id }).sort({ createdAt: -1 });
   res.status(200).json(forms);
 });
 
-// Get OTS Form by ID (only if owned)
+
 exports.getOTSFormById = catchAsync(async (req, res, next) => {
   const form = await OTSForm.findOne({ _id: req.params.id, userId: req.user.id });
   if (!form) return next(new AppError('OTS form not found', 404));
   res.status(200).json(form);
 });
 
-// Admin: Get all OTS Forms
+
 exports.getAllOTSForms = catchAsync(async (req, res) => {
   const forms = await OTSForm.find().populate('userId', 'first_name last_name email');
   res.status(200).json(forms);
 });
 
-// Get forms by branch
+
 exports.getOTSFormsByBranch = catchAsync(async (req, res, next) => {
   const { branch } = req.query;
   if (!branch) return next(new AppError('Branch is required as query parameter', 400));
@@ -61,7 +61,7 @@ exports.getOTSFormsByBranch = catchAsync(async (req, res, next) => {
   res.status(200).json(forms);
 });
 
-// Update OTS Form (only by owner)
+
 exports.updateOTSForm = catchAsync(async (req, res, next) => {
   const updatedForm = await OTSForm.findOneAndUpdate(
     { _id: req.params.id, userId: req.user.id },
@@ -72,7 +72,7 @@ exports.updateOTSForm = catchAsync(async (req, res, next) => {
   res.status(200).json({ message: 'OTS form updated successfully', data: updatedForm });
 });
 
-// Track status by loan number
+
 exports.trackStatus = catchAsync(async (req, res, next) => {
   const { loan_number } = req.body;
 
@@ -112,7 +112,7 @@ exports.trackStatus = catchAsync(async (req, res, next) => {
 });
 
 
-// Admin: Approve or reject OTS form
+
 exports.ApproveRejectOtsApplication = catchAsync(async (req, res, next) => {
   const { otsFormId, flag } = req.body;
   if (![1, 2].includes(flag)) {
@@ -131,7 +131,7 @@ exports.ApproveRejectOtsApplication = catchAsync(async (req, res, next) => {
   res.status(200).json({ message: status_msg, form: updatedForm });
 });
 
-// Dedicated approve route (optional)
+
 exports.approveOtsApplication = catchAsync(async (req, res, next) => {
   const { otsFormId } = req.body;
   const updatedForm = await OTSForm.findByIdAndUpdate(
@@ -143,13 +143,14 @@ exports.approveOtsApplication = catchAsync(async (req, res, next) => {
   res.status(200).json({ message: 'OTS application approved successfully', form: updatedForm });
 });
 
-// Filter OTS Forms
+
 exports.filterOTS = catchAsync(async (req, res, next) => {
   const { user_role, id: requesterId } = req.user;
   const { otsId, userId, branch, status } = req.body;
   const page = parseInt(req.body.page) || 1;
   const limit = parseInt(req.body.limit) || 10;
   const skip = (page - 1) * limit;
+
   const clean = (val) => (typeof val === 'string' && val.trim() === '') ? undefined : val;
   const cleanedOtsId = clean(otsId);
   const cleanedUserId = clean(userId);
@@ -209,18 +210,17 @@ exports.filterOTS = catchAsync(async (req, res, next) => {
       },
     },
     {
-      $project: {
-        _id: 1,
-        first_name: 1,
-        last_name: 1,
-        loan_number: 1,
-        userId: 1,
-        branch: 1,
-        status: 1,
-        createdAt: 1,
+      $addFields: {
         ackFile: { $arrayElemAt: ['$ackForm.img_link_sign_stamp', 0] },
         memoFile: { $arrayElemAt: ['$memoForm.pdfData', 0] },
         certificateFile: { $arrayElemAt: ['$certificateForm.certificate', 0] },
+      },
+    },
+    {
+      $project: {
+        ackForm: 0,
+        memoForm: 0,
+        certificateForm: 0,
       },
     },
     {
@@ -232,9 +232,11 @@ exports.filterOTS = catchAsync(async (req, res, next) => {
   ];
 
   const result = await OTSForm.aggregate(pipeline);
-  const paginatedData = result[0].paginatedData;
+  const paginatedRaw = result[0].paginatedData || [];
   const totalItems = result[0].totalCount[0]?.count || 0;
   const totalPages = Math.ceil(totalItems / limit);
+
+  const paginatedData = paginatedRaw.map((otsDoc) => ({ ots: otsDoc }));
 
   res.status(200).json({
     paginatedData,
@@ -247,6 +249,7 @@ exports.filterOTS = catchAsync(async (req, res, next) => {
     currentPageCount: paginatedData.length,
   });
 });
+
 
 
 
