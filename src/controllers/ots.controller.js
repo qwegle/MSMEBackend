@@ -145,28 +145,29 @@ exports.approveOtsApplication = catchAsync(async (req, res, next) => {
 
 // Filter OTS Forms
 exports.filterOTS = catchAsync(async (req, res, next) => {
-  const { user_role, id: requesterId } = req.user; // from JWT
-  const { otsId, userId, branch, status, page = 1, limit = 10 } = req.body;
-
+  const { user_role, id: requesterId } = req.user;
+  const { otsId, userId, branch, status } = req.body;
+  const page = parseInt(req.body.page) || 1;
+  const limit = parseInt(req.body.limit) || 10;
+  const skip = (page - 1) * limit;
   const clean = (val) => (typeof val === 'string' && val.trim() === '') ? undefined : val;
   const cleanedOtsId = clean(otsId);
   const cleanedUserId = clean(userId);
   const cleanedBranch = clean(branch);
   const cleanedStatus = clean(status);
 
-  // 🔒 Role-based validation
-  if (user_role === 2) { // Regular User
+  if (user_role === 2) {
     if (!cleanedUserId || !mongoose.Types.ObjectId.isValid(cleanedUserId)) {
       return next(new AppError('User ID is required and must be valid for regular users.', 400));
     }
     if (cleanedBranch) {
       return next(new AppError('Branch filtering is not allowed for regular users.', 403));
     }
-  } else if (user_role === 1) { // Sub-admin
+  } else if (user_role === 1) {
     if (!cleanedBranch) {
       return next(new AppError('Branch field is required for sub-admins to filter OTS forms.', 400));
     }
-  } else if (user_role !== 0) { // Invalid or unauthorized role
+  } else if (user_role !== 0) {
     return next(new AppError('Access denied: your role is not authorized to perform this operation.', 403));
   }
 
@@ -176,45 +177,77 @@ exports.filterOTS = catchAsync(async (req, res, next) => {
     if (!mongoose.Types.ObjectId.isValid(cleanedUserId)) {
       return next(new AppError('Invalid userId format.', 400));
     }
-    filter.userId = cleanedUserId;
+    filter.userId = new mongoose.Types.ObjectId(cleanedUserId);
   }
   if (cleanedBranch) filter.branch = sanitizeInput(cleanedBranch);
   if (cleanedStatus !== undefined) filter.status = cleanedStatus;
 
+  const pipeline = [
+    { $match: filter },
+    {
+      $lookup: {
+        from: 'ackforms',
+        localField: '_id',
+        foreignField: 'ots_form_id',
+        as: 'ackForm',
+      },
+    },
+    {
+      $lookup: {
+        from: 'memorandums',
+        localField: '_id',
+        foreignField: 'otsFormId',
+        as: 'memoForm',
+      },
+    },
+    {
+      $lookup: {
+        from: 'certificateorders',
+        localField: '_id',
+        foreignField: 'otsId',
+        as: 'certificateForm',
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        first_name: 1,
+        last_name: 1,
+        loan_number: 1,
+        userId: 1,
+        branch: 1,
+        status: 1,
+        createdAt: 1,
+        ackFile: { $arrayElemAt: ['$ackForm.img_link_sign_stamp', 0] },
+        memoFile: { $arrayElemAt: ['$memoForm.pdfData', 0] },
+        certificateFile: { $arrayElemAt: ['$certificateForm.certificate', 0] },
+      },
+    },
+    {
+      $facet: {
+        paginatedData: [{ $sort: { createdAt: -1 } }, { $skip: skip }, { $limit: limit }],
+        totalCount: [{ $count: 'count' }],
+      },
+    },
+  ];
 
-  console.log('OTS Filter:', filter);
-
-  const totalItems = await OTSForm.countDocuments(filter);
-  const forms = await OTSForm.find(filter)
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .sort({ createdAt: -1 });
-
-  const enriched = await Promise.all(forms.map(async (ots) => {
-    const ack = await AckForm.findOne({ ots_form_id: ots._id }, 'img_link_sign_stamp');
-    const memo = await Memorandum.findOne({ otsFormId: ots._id }, 'pdfData');
-    const certificate = await CertificateOrder.findOne({ otsId: ots._id }, 'certificate');
-
-    return {
-      ots,
-      ackFile: ack?.img_link_sign_stamp || null,
-      memoFile: memo?.pdfData || null,
-      certificateFile: certificate?.certificate || null
-    };
-  }));
-
+  const result = await OTSForm.aggregate(pipeline);
+  const paginatedData = result[0].paginatedData;
+  const totalItems = result[0].totalCount[0]?.count || 0;
+  const totalPages = Math.ceil(totalItems / limit);
 
   res.status(200).json({
-    paginatedData: enriched,
+    paginatedData,
     page,
     limit,
     totalItems,
-    totalPages: Math.ceil(totalItems / limit),
+    totalPages,
     previousPage: page > 1 ? page - 1 : null,
-    nextPage: page * limit < totalItems ? page + 1 : null,
-    currentPageCount: enriched.length
+    nextPage: page < totalPages ? page + 1 : null,
+    currentPageCount: paginatedData.length,
   });
 });
+
 
 
 
