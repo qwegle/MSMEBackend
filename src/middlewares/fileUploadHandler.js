@@ -1,46 +1,37 @@
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+// src/middlewares/fileUploadHandler.js
+import multer, { diskStorage, MulterError } from 'multer';
+import { fileURLToPath } from 'url';
+import { dirname, join, basename, extname } from 'path';
+import { existsSync, mkdirSync, readFileSync, unlinkSync } from 'fs';
+
+// ✅ Create __dirname equivalent for ES module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Upload directory
-const uploadDir = path.join(__dirname, '..', 'uploads');
+const uploadDir = join(__dirname, '..', 'uploads');
+if (!existsSync(uploadDir)) mkdirSync(uploadDir, { recursive: true });
 
-// Ensure upload directory exists
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Filename sanitization and uniqueness
 const sanitizeFilename = (originalName) => {
-  const safeName = path.basename(originalName).replace(/[^a-zA-Z0-9_.-]/g, '');
+  const safeName = basename(originalName).replace(/[^a-zA-Z0-9_.-]/g, '');
   const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
   return uniqueSuffix + '-' + safeName;
 };
 
-// Multer storage config
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, sanitizeFilename(file.originalname));
-  }
+const storage = diskStorage({
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => cb(null, sanitizeFilename(file.originalname))
 });
 
-// File filter for strict PDF validation
 const fileFilter = (req, file, cb) => {
   const allowedMimeTypes = ['application/pdf'];
   const isMimeValid = allowedMimeTypes.includes(file.mimetype);
-  const isExtValid = path.extname(file.originalname).toLowerCase() === '.pdf';
-  
-  if (isMimeValid && isExtValid) {
-    cb(null, true);
-  } else {
-    cb(new Error('Only PDF files are allowed!'));
-  }
+  const isExtValid = extname(file.originalname).toLowerCase() === '.pdf';
+
+  if (isMimeValid && isExtValid) cb(null, true);
+  else cb(new Error('Only PDF files are allowed!'));
 };
 
-// Base upload middleware
 const upload = multer({
   storage,
   fileFilter,
@@ -49,23 +40,21 @@ const upload = multer({
   }
 });
 
-// Exported upload middlewares
-const singlePdfUpload = upload.single('pdf');
+export const singlePdfUpload = upload.single('pdf');
 
-const supplyOrderUpload = upload.fields([
+export const supplyOrderUpload = upload.fields([
   { name: 'proof_of_supply', maxCount: 1 },
   { name: 'invoice_submission', maxCount: 1 }
 ]);
 
-// Optional PDF magic number check
-const validatePdfMagicNumber = (req, res, next) => {
+export const validatePdfMagicNumber = (req, res, next) => {
   const file = req.file || (req.files?.pdf?.[0]);
   if (!file) return next();
 
   try {
-    const buffer = fs.readFileSync(file.path);
+    const buffer = readFileSync(file.path);
     if (!buffer.toString().startsWith('%PDF')) {
-      fs.unlinkSync(file.path); // Remove fake PDF
+      unlinkSync(file.path);
       return res.status(400).json({ status: 'fail', message: 'Invalid PDF file content' });
     }
     next();
@@ -74,17 +63,9 @@ const validatePdfMagicNumber = (req, res, next) => {
   }
 };
 
-// Multer error handler
-const multerErrorHandler = (err, req, res, next) => {
-  if (err instanceof multer.MulterError || err.message.includes('Only PDF')) {
+export const multerErrorHandler = (err, req, res, next) => {
+  if (err instanceof MulterError || err.message.includes('Only PDF')) {
     return res.status(400).json({ status: 'fail', message: err.message });
   }
   next(err);
-};
-
-module.exports = {
-  singlePdfUpload,
-  supplyOrderUpload,
-  validatePdfMagicNumber,
-  multerErrorHandler
 };

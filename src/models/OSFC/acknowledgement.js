@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const acknowledgementSchema = new mongoose.Schema({
+const acknowledgementSchema = new Schema({
   ots_form_id: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: 'OTSForm', // Replace with actual name of referenced model
     required: true
   },
@@ -61,6 +61,6 @@ const acknowledgementSchema = new mongoose.Schema({
   timestamps: true
 });
 
-const acknowledgementForm = mongoose.model('AckForm', acknowledgementSchema);
+const acknowledgementForm = model('AckForm', acknowledgementSchema);
 
-module.exports = acknowledgementForm;
+export default acknowledgementForm;

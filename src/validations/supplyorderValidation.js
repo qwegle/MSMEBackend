@@ -1,4 +1,5 @@
-const Joi = require('joi');
+// src/validations/supplyOrderValidation.js
+import Joi from 'joi';
 
 const supplyOrderValidation = Joi.object({
   supply_details: Joi.string()
@@ -35,4 +36,4 @@ const supplyOrderValidation = Joi.object({
     }),
 });
 
-module.exports = supplyOrderValidation;
+export default supplyOrderValidation;

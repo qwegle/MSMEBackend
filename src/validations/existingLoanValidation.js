@@ -1,4 +1,5 @@
-const Joi = require('joi');
+// src/validations/loanValidation.js
+import Joi from 'joi';
 
 const loanValidation = Joi.object({
   loanId: Joi.string().required().messages({
@@ -86,4 +87,4 @@ const loanValidation = Joi.object({
     }),
 });
 
-module.exports = loanValidation;
+export default loanValidation;

@@ -1,8 +1,9 @@
-const Joi = require('joi');
-const mongoose = require('mongoose');
+// src/validations/certificateOrderValidation.js
+import Joi from 'joi';
+import { Types } from 'mongoose';
 
 const isValidObjectId = (value, helpers) => {
-  if (!mongoose.Types.ObjectId.isValid(value)) {
+  if (!Types.ObjectId.isValid(value)) {
     return helpers.error('any.invalid');
   }
   return value;
@@ -56,4 +57,4 @@ const certificateOrderValidation = Joi.object({
     })
 });
 
-module.exports = certificateOrderValidation;
+export default certificateOrderValidation;

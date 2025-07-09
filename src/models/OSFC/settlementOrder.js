@@ -1,24 +1,24 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const settlementOrderSchema = new mongoose.Schema(
+const settlementOrderSchema = new Schema(
   {
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
     },
     otsId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: 'OTSForm',
       required: true,
     },
     AckId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: 'AckForm',
       required: true,
     },
     memoId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: 'Memos', // Assuming your memorandum model is named 'Pdf'
       required: true,
     },
@@ -35,6 +35,6 @@ const settlementOrderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const SettlementOrder = mongoose.model('SettlementOrder', settlementOrderSchema);
+const SettlementOrder = model('SettlementOrder', settlementOrderSchema);
 
-module.exports = SettlementOrder;
+export default SettlementOrder;

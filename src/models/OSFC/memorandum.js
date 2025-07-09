@@ -1,21 +1,20 @@
-const { required } = require('joi');
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const memorandum = new mongoose.Schema(
+const memorandum = new Schema(
   {
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
     },
     otsFormId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: 'OTSForm',
       required: true,
     },
 
     ackId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: 'AckForm',
       required: true,
     },
@@ -45,6 +44,6 @@ const memorandum = new mongoose.Schema(
   { timestamps: true } 
 );
 
-const Memorandum = mongoose.model('Memos', memorandum);
+const Memorandum = model('Memos', memorandum);
 
-module.exports = Memorandum;
+export default Memorandum;

@@ -1,9 +1,9 @@
 const blacklistedTokens = new Set();
 
-exports.blacklistToken = (token) => {
+export function blacklistToken(token) {
     blacklistedTokens.add(token);
-};
+}
 
-exports.isBlacklisted = (token) => {
+export function isBlacklisted(token) {
     return blacklistedTokens.has(token);
-};
+}

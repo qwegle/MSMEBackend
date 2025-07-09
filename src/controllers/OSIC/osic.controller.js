@@ -1,7 +1,7 @@
-import GovernmentOrder from '../models/governmentModel.js';
-import FloatTender from '../models/floatTender.js';
-import TenderResult from '../models/tenderResult.js';
-import SupplyOrder from '../models/supplyOrderModel.js';
+import GovernmentOrder from '../../models/OSIC/governmentModel.js';
+import FloatTender from '../../models/OSIC/floatTender.js';
+import TenderResult from '../../models/OSIC/tenderResult.js';
+import SupplyOrder from '../../models/OSIC/supplyOrderModel.js';
 
 export const createGovernmentOrder = async (req, res) => {
   try {

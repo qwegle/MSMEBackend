@@ -1,10 +1,10 @@
-const express = require('express');
-const { createAckForm, getAckFormsByUserId, getAllAckForms, filterAckForms, reuploadAckSignature } = require('../controllers/ack.controller');
-const { authenticateToken, authorizeRoles, authorizeType } = require('../middlewares/auth.middleware');
-const validateRequest = require('../middlewares/validateRequest');
-const ackFormValidation = require('../validations/ackFormValidation');
-const {singlePdfUpload,validatePdfMagicNumber, multerErrorHandler} = require("../middlewares/fileUploadHandler");
-const router = express.Router();
+import { Router } from 'express';
+import { createAckForm, getAckFormsByUserId, getAllAckForms, filterAckForms, reuploadAckSignature } from '../controllers/OSFC/ack.controller.js';
+import { authenticateToken, authorizeRoles, authorizeType } from '../middlewares/auth.middleware.js';
+import validateRequest from '../middlewares/validateRequest.js';
+import ackFormValidation from '../validations/ackFormValidation.js';
+import { singlePdfUpload, validatePdfMagicNumber, multerErrorHandler } from "../middlewares/fileUploadHandler.js";
+const router = Router();
 
 router.post(
     '/submitAck',
@@ -23,4 +23,4 @@ router.get('/getAllAck', authenticateToken, authorizeRoles(0), authorizeType(1),
 router.post('/filterAckForms', authenticateToken, authorizeType(0,1), filterAckForms);
 router.post('/reuploadAck', singlePdfUpload,validatePdfMagicNumber,multerErrorHandler, authorizeRoles(1), authorizeType(1), authenticateToken, reuploadAckSignature);
 
-module.exports = router;
+export default router;

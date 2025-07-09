@@ -1,9 +1,9 @@
-const jwt = require('jsonwebtoken');
-const { isBlacklisted } = require('../utils/tokenBlacklist');
-const AppError = require('../utils/AppError');
-
+import jwt from 'jsonwebtoken';
+import { isBlacklisted } from '../utils/tokenBlacklist.js';
+import AppError from '../utils/AppError.js';
+const {verify} = jwt
 const JWT_SECRET = process.env.JWT_SECRET;
-exports.authenticateToken = (req, res, next) => {
+export function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader?.split(' ')[1];
   if (!token) {
@@ -12,16 +12,16 @@ exports.authenticateToken = (req, res, next) => {
   if (isBlacklisted(token)) {
     return next(new AppError('Token is invalid (logged out)', 403));
   }
-  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+  verify(token, JWT_SECRET, (err, decoded) => {
     if (err) {
       return next(new AppError('Invalid or expired token', 403));
     }
     req.user = decoded;
     next();
   });
-};
+}
 
-exports.authorizeRoles = (...allowedRoles) => {
+export function authorizeRoles(...allowedRoles) {
   return (req, res, next) => {
     if (!req.user || typeof req.user.user_role === 'undefined') {
       return next(new AppError('Unauthorized access', 401));
@@ -33,9 +33,9 @@ exports.authorizeRoles = (...allowedRoles) => {
 
     next();
   };
-};
+}
 
-exports.authorizeType = (...allowedTypes) => {
+export function authorizeType(...allowedTypes) {
   return (req, res, next) => {
     if (!req.user || typeof req.user.user_type === 'undefined') {
       return next(new AppError('Unauthorized access', 401));

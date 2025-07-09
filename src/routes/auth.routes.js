@@ -1,7 +1,7 @@
-const express = require('express');
-const { register, login, logout, protectedRoute, register_OFSC_SuperAdmin, register_OFSC_SubAdmin, forgotPassword, resetPassword } = require('../controllers/auth.controller');
-const { authenticateToken } = require('../middlewares/auth.middleware');
-const router = express.Router();
+import { Router } from 'express';
+import { register, login, logout, protectedRoute, register_OFSC_SuperAdmin, register_OFSC_SubAdmin, forgotPassword, resetPassword } from '../controllers/auth.controller.js';
+import { authenticateToken } from '../middlewares/auth.middleware.js';
+const router = Router();
 
 router.post('/register', register);
 router.post('/login', login);
@@ -12,4 +12,4 @@ router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 router.get('/protected', authenticateToken, protectedRoute);
 
-module.exports = router;
+export default router;

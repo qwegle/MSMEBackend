@@ -1,7 +1,7 @@
-const crypto = require('crypto');
+import { randomBytes, createHash } from 'crypto';
 
-exports.generateResetToken = function () {
-  const resetToken = crypto.randomBytes(32).toString('hex');
-  const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+export function generateResetToken () {
+  const resetToken = randomBytes(32).toString('hex');
+  const hashedToken = createHash('sha256').update(resetToken).digest('hex');
   return { resetToken, hashedToken };
-};
+}

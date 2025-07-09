@@ -1,14 +1,15 @@
-const mongoose = require('mongoose');
-const AppError = require('../utils/AppError');
-const catchAsync = require('../utils/catchAsync');
-const CertificateOrder = require('../models/certificate');
-const OTSForm = require('../models/otsform');
-const AckForm = require('../models/acknowledgement');
-const Memorandum = require('../models/memorandum');
-const SettlementOrder = require('../models/settlementOrder');
+import { Types } from 'mongoose';
+import AppError from '../../utils/AppError.js';
+import catchAsync from '../../utils/catchAsync.js';
 
+import CertificateOrder from '../../models/OSFC/certificate.js';
+import OTSForm from '../../models/OSFC/otsform.js';
+import Acknowledgement from '../../models/OSFC/acknowledgement.js';
+import Memorandum from '../../models/OSFC/memorandum.js';
+import SettlementOrder from '../../models/OSFC/settlementOrder.js';
 
-exports.uploadCertificateOrder = catchAsync(async (req, res, next) => {
+// Upload certificate
+export const uploadCertificateOrder = catchAsync(async (req, res, next) => {
   const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
   if (!filePath) return next(new AppError('PDF file is required', 400));
 
@@ -21,7 +22,7 @@ exports.uploadCertificateOrder = catchAsync(async (req, res, next) => {
   const userId = otsForm.userId;
   const otsId = otsForm._id;
 
-  const ackForm = await AckForm.findOne({ ots_form_id: otsId });
+  const ackForm = await Acknowledgement.findOne({ ots_form_id: otsId });
   if (!ackForm) return next(new AppError('AckForm not found for this OTSForm', 404));
 
   const memo = await Memorandum.findOne({ ackId: ackForm._id });
@@ -62,7 +63,8 @@ exports.uploadCertificateOrder = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.reuploadCertificateOrder = catchAsync(async (req, res, next) => {
+// Re-upload certificate
+export const reuploadCertificateOrder = catchAsync(async (req, res, next) => {
   const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
   if (!filePath) return next(new AppError('PDF file is required.', 400));
 
@@ -86,7 +88,8 @@ exports.reuploadCertificateOrder = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getAllCertificateOrders = catchAsync(async (req, res) => {
+// Get all certificates
+export const getAllCertificateOrders = catchAsync(async (req, res) => {
   const orders = await CertificateOrder.find()
     .populate({ path: 'userId', select: 'username email' })
     .populate({ path: 'otsId', select: 'loan_number number' })
@@ -96,10 +99,11 @@ exports.getAllCertificateOrders = catchAsync(async (req, res) => {
   res.status(200).json(orders);
 });
 
-exports.getCertificatesByUserId = catchAsync(async (req, res, next) => {
+// Get certificates by user ID
+export const getCertificatesByUserId = catchAsync(async (req, res, next) => {
   const { userId } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
+  if (!Types.ObjectId.isValid(userId)) {
     return next(new AppError('Invalid user ID format', 400));
   }
 
@@ -114,7 +118,8 @@ exports.getCertificatesByUserId = catchAsync(async (req, res, next) => {
   res.status(200).json(orders);
 });
 
-exports.getCertificateOrderCounts = catchAsync(async (req, res) => {
+// Count certificates (with filters)
+export const getCertificateOrderCounts = catchAsync(async (req, res) => {
   const { branch, startDate, endDate } = req.body;
 
   const pipeline = [
@@ -168,7 +173,8 @@ exports.getCertificateOrderCounts = catchAsync(async (req, res) => {
   });
 });
 
-exports.getCertificateCountsLast7Days = catchAsync(async (req, res) => {
+// Last 7 days chart
+export const getCertificateCountsLast7Days = catchAsync(async (req, res) => {
   const timezone = 'Asia/Kolkata';
   const end = new Date();
   end.setHours(23, 59, 59, 999);
@@ -210,37 +216,41 @@ exports.getCertificateCountsLast7Days = catchAsync(async (req, res) => {
   res.status(200).json(response);
 });
 
-exports.filterCertificateOrders = catchAsync(async (req, res, next) => {
+// Filter with pagination
+export const filterCertificateOrders = catchAsync(async (req, res, next) => {
   const { loan_number, branch, userId } = req.body;
   const { user_role } = req.user;
   const page = parseInt(req.body.page) || 1;
   const limit = parseInt(req.body.limit) || 10;
   const skip = (page - 1) * limit;
-  if (user_role === 2) { // User
-    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+
+  if (user_role === 2) {
+    if (!userId || !Types.ObjectId.isValid(userId)) {
       return next(new AppError('User ID is required and must be valid for regular users.', 400));
     }
     if (branch) {
       return next(new AppError('Branch filter is not allowed for regular users.', 403));
     }
-  } else if (user_role === 1) { // Sub-admin
+  } else if (user_role === 1) {
     if (!branch) {
       return next(new AppError('Branch is required for sub-admins.', 400));
     }
-  } else if (user_role !== 0) { // Invalid or unauthorized role
-    return next(new AppError('Access denied: your role is not authorized to perform this operation.', 403));
+  } else if (user_role !== 0) {
+    return next(new AppError('Access denied: your role is not authorized.', 403));
   }
+
   const matchStage = {
     ...(loan_number && { 'otsDetails.loan_number': loan_number }),
     ...(branch && { 'otsDetails.branch': branch }),
   };
 
   if (userId) {
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
+    if (!Types.ObjectId.isValid(userId)) {
       return next(new AppError('Invalid userId format', 400));
     }
-    matchStage.userId = new mongoose.Types.ObjectId(userId);
+    matchStage.userId = new Types.ObjectId(userId);
   }
+
   const pipeline = [
     {
       $lookup: {
@@ -317,5 +327,3 @@ exports.filterCertificateOrders = catchAsync(async (req, res, next) => {
     currentPageCount: paginatedData.length,
   });
 });
-
-

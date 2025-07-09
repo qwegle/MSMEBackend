@@ -1,0 +1,178 @@
+import { hash, compare } from 'bcryptjs';
+import { findOne, create } from '../../models/OKVI/okviuserdetails.js';
+import OkviAuth from '../../models/OKVI/okviauth.js'; 
+import { sign } from 'jsonwebtoken';
+import catchAsync from '../../utils/catchAsync.js';
+import AppError from '../../utils/AppError.js';
+import sendEmail from '../../utils/sendEmail.js';
+import { createHash } from 'crypto';
+import { blacklistToken } from '../../utils/tokenBlacklist.js';
+
+export const registerOkviUser = catchAsync(async (req, res, next) => {
+  const { name, email, password, role, dev_pass } = req.body;
+  if (!name || !email || !password) {
+    return next(new AppError('Name, email, and password are required', 400));
+  }
+  if (role === 0 || role === 1) {
+    if (!dev_pass || dev_pass !== process.env.DEV_PASS) {
+      return next(new AppError('Unauthorized to register as admin', 403));
+    }
+  }
+  const hashedPassword = await hash(password, 12);
+  const newUser = await OkviAuth.create({
+    name,
+    email,
+    password: hashedPassword,
+    role: role || 2 
+  });
+  res.status(201).json({
+    status: 'success',
+    data: {
+      id: newUser._id,
+      name: newUser.name,
+      email: newUser.email,
+      role: newUser.role
+    }
+  });
+});
+
+export const sendOtp = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  if (!email) return next(new AppError('Email is required', 400));
+
+  const user = await OkviAuth.findOne({ email });
+  if (!user) return next(new AppError('User not found', 404));
+
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const otpExpires = Date.now() + 10 * 60 * 1000;
+
+  user.otp = createHash('sha256').update(otp).digest('hex');
+  user.otpExpires = otpExpires;
+  await user.save({ validateBeforeSave: false });
+
+  await sendEmail({
+    to: user.email,
+    subject: 'Your OTP for OKVI Email Verification',
+    text: `Your OTP is ${otp}. It is valid for 10 minutes.`
+  });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'OTP sent to email'
+  });
+});
+
+export const verifyOtp = catchAsync(async (req, res, next) => {
+  const { email, otp } = req.body;
+  if (!email || !otp) return next(new AppError('Email and OTP are required', 400));
+
+  const hashedOtp = createHash('sha256').update(otp).digest('hex');
+
+  const user = await OkviAuth.findOne({
+    email,
+    otp: hashedOtp,
+    otpExpires: { $gt: Date.now() }
+  });
+
+  if (!user) return next(new AppError('Invalid or expired OTP', 400));
+
+  user.isEmailVerified = true;
+  user.otp = undefined;
+  user.otpExpires = undefined;
+  await user.save({ validateBeforeSave: false });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Email verified successfully'
+  });
+});
+
+export const registerOkviUserdetails = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  const {
+    institutionInfo,
+    registrationInfo,
+    bankDetails,
+    secretaryInfo,
+    presidentInfo,
+    committeeMembers
+  } = req.body;
+
+  const okviUser = await OkviAuth.findById(userId);
+  if (!okviUser || !okviUser.isEmailVerified) {
+    return next(new AppError('User not found or email not verified', 401));
+  }
+
+  const existing = await findOne({ user: userId });
+  if (existing) {
+    return next(new AppError('User details already registered', 400));
+  }
+
+  if (institutionInfo.email !== okviUser.email) {
+    return next(new AppError('Email mismatch with verified user email', 400));
+  }
+
+  const userDetails = await create({
+    user: userId,
+    institutionInfo,
+    registrationInfo,
+    bankDetails,
+    secretaryInfo,
+    presidentInfo,
+    committeeMembers,
+    isEmailVerified: true
+  });
+
+  res.status(201).json({
+    status: 'success',
+    data: userDetails
+  });
+});
+
+export const loginOkviUser = catchAsync(async (req, res, next) => {
+  const { email, password } = req.body;
+  if (!email || !password)
+    return next(new AppError('Email and password are required', 400));
+
+  const user = await findOne({ 'institutionInfo.email': email }).select('+password');
+  if (!user || !(await compare(password, user.password)))
+    return next(new AppError('Invalid email or password', 401));
+
+  const token = sign(
+    {
+      id: user._id,
+      user_role: user.role
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRES_IN }
+  );
+
+  res.status(200).json({
+    status: 'success',
+    token
+  });
+});
+
+export const logout = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader?.split(' ')[1];
+  if (!token) return next(new AppError('Token required', 401));
+  blacklistToken(token);
+  res.json({ message: 'Logout successful' });
+};
+
+export const logoutOkvi = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return next(new AppError('Authorization token is required', 401));
+  }
+  const token = authHeader.split(' ')[1];
+  if (!token) {
+    return next(new AppError('Invalid token format', 400));
+  }
+  blacklistToken(token);
+  res.status(200).json({
+    status: 'success',
+    message: 'Logout successful',
+  });
+};

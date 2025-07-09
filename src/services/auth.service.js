@@ -1,19 +1,19 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const User = require('../models/user');
-const AppError = require('../utils/AppError');
-const { generateResetToken } = require('../utils/generateResetToken');
-const sendEmail = require('../utils/sendEmail');
-
+import { hash, compare } from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import User from '../models/user.js';
+import AppError from '../utils/AppError.js';
+import { generateResetToken } from '../utils/generateResetToken.js';
+import sendEmail from '../utils/sendEmail.js';
+const { sign } = jwt;
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
 
 // Register Normal User
-exports.registerUser = async ({ username, email, password }) => {
+export async function registerUser({ username, email, password }) {
   const existingUser = await User.findOne({ email });
   if (existingUser) throw new AppError('Email already in use', 400);
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await hash(password, 10);
   const newUser = new User({
     username,
     email,
@@ -24,14 +24,14 @@ exports.registerUser = async ({ username, email, password }) => {
   await newUser.save();
 
   return { message: 'User registered successfully' };
-};
+}
 
 // Register OFSC Super Admin
-exports.register_ofsc_superadmin = async ({ username, email, password, dev_pass }) => {
+export async function register_ofsc_superadmin({ username, email, password, dev_pass }) {
   const existingUser = await User.findOne({ email });
   if (existingUser) throw new AppError('Email already in use', 400);
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await hash(password, 10);
   const newUser = new User({
     username,
     email,
@@ -42,14 +42,14 @@ exports.register_ofsc_superadmin = async ({ username, email, password, dev_pass 
   await newUser.save();
 
   return { message: 'Super admin registered successfully' };
-};
+}
 
 // Register OFSC Sub Admin
-exports.register_ofsc_subadmin = async ({ username, email, password }) => {
+export async function register_ofsc_subadmin({ username, email, password }) {
   const existingUser = await User.findOne({ email });
   if (existingUser) throw new AppError('Email already in use', 400);
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await hash(password, 10);
   const newUser = new User({
     username,
     email,
@@ -60,19 +60,19 @@ exports.register_ofsc_subadmin = async ({ username, email, password }) => {
   await newUser.save();
 
   return { message: 'Sub admin registered successfully' };
-};
+}
 
 // Login
-exports.loginUser = async ({ email, password }) => {
+export async function loginUser({ email, password }) {
   if (!email || !password) throw new AppError('Email and password are required', 400);
 
   const user = await User.findOne({ email });
   if (!user) throw new AppError('Invalid credentials', 401);
 
-  const isPasswordCorrect = await bcrypt.compare(password, user.password);
+  const isPasswordCorrect = await compare(password, user.password);
   if (!isPasswordCorrect) throw new AppError('Invalid credentials', 401);
 
-    const token = jwt.sign(
+    const token = sign(
     {
         id: user._id,
         user_role: user.user_role,
@@ -98,10 +98,10 @@ exports.loginUser = async ({ email, password }) => {
       updatedAt: user.updatedAt
     }
   };
-};
+}
 
 // Forgot Password
-exports.forgotPasswordService = async (email, baseUrl) => {
+export async function forgotPasswordService(email, baseUrl) {
   const user = await User.findOne({ email });
   if (!user) throw new AppError('No user found with this email', 404);
 
@@ -140,10 +140,10 @@ exports.forgotPasswordService = async (email, baseUrl) => {
   });
 
   return { message: 'Reset link sent to email.' };
-};
+}
 
 // Reset Password
-exports.resetPasswordService = async (token, newPassword) => {
+export async function resetPasswordService(token, newPassword) {
   const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
   const user = await User.findOne({
@@ -153,11 +153,11 @@ exports.resetPasswordService = async (token, newPassword) => {
 
   if (!user) throw new AppError('Token is invalid or has expired', 400);
 
-  user.password = await bcrypt.hash(newPassword, 10);
+  user.password = await hash(newPassword, 10);
   user.resetPasswordToken = undefined;
   user.resetPasswordExpires = undefined;
   await user.save();
 
   return { message: 'Password has been reset successfully.' };
-};
+}
 

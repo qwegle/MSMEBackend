@@ -1,8 +1,7 @@
-const mongoose = require('mongoose');
-const {sendStatusChangeEmail} = require('../utils/sendStatusChangeEmail'); // adjust path as needed
-
-const otsFormSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+import { Schema, model } from 'mongoose';
+import { sendStatusChangeEmail } from '../../utils/sendStatusChangeEmail.js';
+const otsFormSchema = new Schema({
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     first_name: { type: String, required: true },
     last_name: { type: String, required: true },
     number: { type: String, required: true },
@@ -62,5 +61,5 @@ otsFormSchema.post('findOneAndUpdate', async function (doc) {
 });
 
 
-const OTSForm = mongoose.model('OTSForm', otsFormSchema);
-module.exports = OTSForm;
+const OTSForm = model('OTSForm', otsFormSchema);
+export default OTSForm;

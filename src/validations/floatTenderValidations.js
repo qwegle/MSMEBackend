@@ -1,4 +1,5 @@
-const Joi = require('joi');
+// src/validations/floatTenderValidation.js
+import Joi from 'joi';
 
 const floatTenderValidation = Joi.object({
   tender_number: Joi.string()
@@ -48,4 +49,4 @@ const floatTenderValidation = Joi.object({
     }),
 });
 
-module.exports = floatTenderValidation;
+export default floatTenderValidation;

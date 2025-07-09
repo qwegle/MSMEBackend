@@ -1,4 +1,4 @@
-module.exports = (schema, source = 'body') => {
+export default (schema, source = 'body') => {
   return (req, res, next) => {
     const data = req[source]; // 'body', 'query', or 'params'
     const { error, value } = schema.validate(data, { abortEarly: false });

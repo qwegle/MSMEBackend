@@ -1,4 +1,5 @@
-const Joi = require('joi');
+// src/validations/tenderResultValidation.js
+import Joi from 'joi';
 
 const tenderResultValidation = Joi.object({
   tender_number: Joi.string()
@@ -34,4 +35,4 @@ const tenderResultValidation = Joi.object({
     }),
 });
 
-module.exports = tenderResultValidation;
+export default tenderResultValidation;

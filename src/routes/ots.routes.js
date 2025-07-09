@@ -1,19 +1,11 @@
-const express = require('express');
-const {
-    createOTSForm,
-    updateOTSForm,
-    trackStatus,
-    filterOTS,
-    getOTSStatusCounts,
-    ApproveRejectOtsApplication,
-    getUserStats
-} = require('../controllers/ots.controller');
+import { Router } from 'express';
+import { createOTSForm, updateOTSForm, trackStatus, filterOTS, getOTSStatusCounts, ApproveRejectOtsApplication, getUserStats } from '../controllers/OSFC/ots.controller.js';
 
-const { authenticateToken, authorizeRoles, authorizeType } = require('../middlewares/auth.middleware');
-const validateRequest = require('../middlewares/validateRequest');
-const otsFormSchema = require('../validations/otsFormValidation');
+import { authenticateToken, authorizeRoles, authorizeType } from '../middlewares/auth.middleware.js';
+import validateRequest from '../middlewares/validateRequest.js';
+import otsFormSchema from '../validations/otsFormValidation.js';
 
-const router = express.Router();
+const router = Router();
 
 router.post(
     '/submitOTS',
@@ -62,4 +54,4 @@ router.post(
     getUserStats 
 )
 
-module.exports = router;
+export default router;

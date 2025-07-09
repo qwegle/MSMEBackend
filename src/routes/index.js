@@ -1,16 +1,15 @@
-const express = require('express');
-const authRoutes = require('./auth.routes');
-const userRoutes = require('./user.routes');
-const otsRoutes = require('./ots.routes');
-const ackRoutes = require('./ack.routes');
-const memoRoutes = require('./memo.route');
-const orderRoutes = require('./order.routes');
-const certificateRoutes = require('./certificate.routes');
-const existingLoan = require('./loan.routes');
-const OSIC = require('./osic.routes');
-const OKVI = require('./okvi.routes')
-const test = require('./test.route');
-const router = express.Router();
+import { Router } from 'express';
+import authRoutes from './auth.routes.js';
+import userRoutes from './user.routes.js';
+import otsRoutes from './ots.routes.js';
+import ackRoutes from './ack.routes.js';
+import memoRoutes from './memo.route.js';
+import orderRoutes from './order.routes.js';
+import certificateRoutes from './certificate.routes.js';
+import existingLoan from './loan.routes.js';
+import OSIC from './osic.routes.js';
+import OKVI from './OKVI/holiday.routes.js';
+const router = Router();
 
 router.use('/auth', authRoutes);
 router.use('/ots', otsRoutes);
@@ -22,6 +21,5 @@ router.use('/certificate', certificateRoutes);
 router.use('/loan', existingLoan);
 router.use('/osic', OSIC);
 router.use('/okvi', OKVI);
-router.use('/test', test);
 
-module.exports = router;
+export default router;

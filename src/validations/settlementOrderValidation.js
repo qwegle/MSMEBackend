@@ -1,8 +1,9 @@
-const Joi = require('joi');
-const mongoose = require('mongoose');
+// src/validations/settlementOrderValidation.js
+import Joi from 'joi';
+import { Types } from 'mongoose';
 
 const isValidObjectId = (value, helpers) => {
-  if (!mongoose.Types.ObjectId.isValid(value)) {
+  if (!Types.ObjectId.isValid(value)) {
     return helpers.error('any.invalid');
   }
   return value;
@@ -57,4 +58,4 @@ const settlementOrderValidation = Joi.object({
     }),
 });
 
-module.exports = settlementOrderValidation;
+export default settlementOrderValidation;

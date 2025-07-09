@@ -1,9 +1,9 @@
-const Loan = require('../models/existing_loans');
-const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/AppError');
-const mongoose = require('mongoose');
+import Loan from '../../models/OSFC/existing_loans.js';
+import catchAsync from '../../utils/catchAsync.js';
+import AppError from '../../utils/AppError.js';
+import { Types } from 'mongoose';
 
-exports.createLoan = catchAsync(async (req, res, next) => {
+export const createLoan = catchAsync(async (req, res, next) => {
   const loan = new Loan(req.body);
   await loan.save();
   res.status(201).json({
@@ -12,12 +12,12 @@ exports.createLoan = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getAllLoans = catchAsync(async (req, res) => {
+export const getAllLoans = catchAsync(async (req, res) => {
   const loans = await Loan.find().sort({ createdAt: -1 });
   res.status(200).json({ data: loans });
 });
 
-exports.getLoansByCustomerId = catchAsync(async (req, res, next) => {
+export const getLoansByCustomerId = catchAsync(async (req, res, next) => {
   const { customerId } = req.params;
 
   if (!customerId) {
@@ -33,7 +33,7 @@ exports.getLoansByCustomerId = catchAsync(async (req, res, next) => {
   res.status(200).json({ data: loans });
 });
 
-exports.filterLoans = catchAsync(async (req, res) => {
+export const filterLoans = catchAsync(async (req, res) => {
   const {
     loan_id,
     loanType,
@@ -65,11 +65,10 @@ exports.filterLoans = catchAsync(async (req, res) => {
   res.status(200).json({ data: loans });
 });
 
-// Update loan
-exports.updateLoan = catchAsync(async (req, res, next) => {
+export const updateLoan = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(id)) {
+  if (!Types.ObjectId.isValid(id)) {
     return next(new AppError('Invalid loan ID', 400));
   }
 
@@ -88,11 +87,10 @@ exports.updateLoan = catchAsync(async (req, res, next) => {
   });
 });
 
-// Delete loan
-exports.deleteLoan = catchAsync(async (req, res, next) => {
+export const deleteLoan = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(id)) {
+  if (!Types.ObjectId.isValid(id)) {
     return next(new AppError('Invalid loan ID', 400));
   }
 

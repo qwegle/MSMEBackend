@@ -1,11 +1,11 @@
-const SettlementOrder = require('../models/settlementOrder');
-const OTSForm = require('../models/otsform');
-const AckForm = require('../models/acknowledgement');
-const Memorandum = require('../models/memorandum');
-const AppError = require('../utils/AppError');
-const catchAsync = require('../utils/catchAsync');
-const validator = require('validator');
-exports.uploadSettlementOrder = catchAsync(async (req, res, next) => {
+import SettlementOrder from '../../models/OSFC/settlementOrder.js';
+import OTSForm from '../../models/OSFC/otsform.js';
+import AckForm from '../../models/OSFC/acknowledgement.js';
+import Memorandum from '../../models/OSFC/memorandum.js';
+import AppError from '../../utils/AppError.js';
+import catchAsync from '../../utils/catchAsync.js';
+
+export const uploadSettlementOrder = catchAsync(async (req, res, next) => {
   const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
   if (!filePath) return next(new AppError('PDF file is required.', 400));
 
@@ -50,7 +50,7 @@ exports.uploadSettlementOrder = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.reuploadSettlementOrder = catchAsync(async (req, res, next) => {
+export const reuploadSettlementOrder = catchAsync(async (req, res, next) => {
   const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
   if (!filePath) return next(new AppError('PDF file is required.', 400));
 
@@ -72,7 +72,7 @@ exports.reuploadSettlementOrder = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getSettlementOrdersByUserId = catchAsync(async (req, res, next) => {
+export const getSettlementOrdersByUserId = catchAsync(async (req, res, next) => {
   const { userId } = req.params;
   if (!userId) return next(new AppError('User ID is required', 400));
 
@@ -87,7 +87,7 @@ exports.getSettlementOrdersByUserId = catchAsync(async (req, res, next) => {
   res.status(200).json(orders);
 });
 
-exports.listSettlementOrders = catchAsync(async (req, res) => {
+export const listSettlementOrders = catchAsync(async (req, res) => {
   const orders = await SettlementOrder.find()
     .populate('userId')
     .populate('otsId')
@@ -98,7 +98,7 @@ exports.listSettlementOrders = catchAsync(async (req, res) => {
   res.status(200).json(orders);
 });
 
-exports.filterSettlementOrders = catchAsync(async (req, res, next) => {
+export const filterSettlementOrders = catchAsync(async (req, res, next) => {
   const { userId, loan_number } = req.body;
   const page = parseInt(req.body.page) || 1;
   const limit = parseInt(req.body.limit) || 10;

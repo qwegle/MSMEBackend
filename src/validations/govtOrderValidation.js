@@ -1,4 +1,5 @@
-const Joi = require('joi');
+// src/validations/governmentOrderValidation.js
+import Joi from 'joi';
 
 const governmentOrderValidation = Joi.object({
   letterNumber: Joi.string()
@@ -39,4 +40,4 @@ const governmentOrderValidation = Joi.object({
     }),
 });
 
-module.exports = governmentOrderValidation;
+export default governmentOrderValidation;

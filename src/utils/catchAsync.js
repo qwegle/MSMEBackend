@@ -1,4 +1,4 @@
 // utils/catchAsync.js
-module.exports = fn => (req, res, next) => {
+export default fn => (req, res, next) => {
   fn(req, res, next).catch(next);
 };

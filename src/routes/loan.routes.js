@@ -1,14 +1,14 @@
-const express = require('express');
-const router = express.Router();
-const loanController = require('../controllers/loan.controller');
-const { authenticateToken } = require('../middlewares/auth.middleware');
+import { Router } from 'express';
+const router = Router();
+import { getAllLoans, filterLoans } from '../controllers/OSFC/loan.controller.js';
+import { authenticateToken } from '../middlewares/auth.middleware.js';
 
 // router.post('/', loanController.createLoan);
-router.get('/getAllLoans', authenticateToken, loanController.getAllLoans);
+router.get('/getAllLoans', authenticateToken, getAllLoans);
 // router.get('/:customerId', loanController.getLoansByCustomerId);
-router.post('/filterLoans', authenticateToken, loanController.filterLoans);
+router.post('/filterLoans', authenticateToken, filterLoans);
 // router.put('/:id', loanController.updateLoan);
 // router.delete('/:id', loanController.deleteLoan);
 
-module.exports = router;
+export default router;
 

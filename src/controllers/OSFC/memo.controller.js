@@ -1,13 +1,15 @@
-const Memorandum = require('../models/memorandum');
-const OTSForm = require('../models/otsform');
-const AckForm = require('../models/acknowledgement');
-const validator = require('validator');
-const User = require('../models/user');
-const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/AppError');
+import Memorandum from '../../models/OSFC/memorandum.js';
+import OTSForm from '../../models/OSFC/otsform.js';
+import AckForm from '../../models/OSFC/acknowledgement.js';
+import validator from 'validator';
+import mongoose from 'mongoose';
+import catchAsync from '../../utils/catchAsync.js';
+import AppError from '../../utils/AppError.js';
+const { escape } = validator;
 const sanitizeInput = input =>
-  typeof input === 'string' ? validator.escape(input.trim()) : input;
-exports.uploadPdf = catchAsync(async (req, res, next) => {
+  typeof input === 'string' ? escape(input.trim()) : input;
+
+export const uploadPdf = catchAsync(async (req, res, next) => {
   const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
   if (!filePath) return next(new AppError('PDF file is required', 400));
 
@@ -40,7 +42,7 @@ exports.uploadPdf = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.updateMemoStatus = catchAsync(async (req, res, next) => {
+export const updateMemoStatus = catchAsync(async (req, res, next) => {
   const { memoId, status, remarks } = req.body;
 
   if (!memoId || status === undefined) {
@@ -73,7 +75,7 @@ exports.updateMemoStatus = catchAsync(async (req, res, next) => {
   res.json({ message: 'Memo status updated successfully', memo: updatedMemo });
 });
 
-exports.reuploadMemo = catchAsync(async (req, res, next) => {
+export const reuploadMemo = catchAsync(async (req, res, next) => {
   const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
   if (!filePath) return next(new AppError('PDF file is required', 400));
 
@@ -121,7 +123,7 @@ exports.reuploadMemo = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getMemosByUserId = catchAsync(async (req, res, next) => {
+export const getMemosByUserId = catchAsync(async (req, res, next) => {
   const { userId } = req.params;
   if (!userId) return next(new AppError('User ID is required', 400));
 
@@ -134,7 +136,7 @@ exports.getMemosByUserId = catchAsync(async (req, res, next) => {
   res.json(memos);
 });
 
-exports.getAllMemos = catchAsync(async (req, res, next) => {
+export const getAllMemos = catchAsync(async (req, res, next) => {
   const { loan_number, userId, branch, status } = req.body;
   const { user_role } = req.user;
   const page = parseInt(req.body.page) || 1;
@@ -159,7 +161,6 @@ exports.getAllMemos = catchAsync(async (req, res, next) => {
     return next(new AppError('Access denied: your role is not authorized to perform this operation.', 403));
   }
 
-  // 🔍 Filtering logic
   if (loan_number) {
     const otsForm = await OTSForm.findOne({ loan_number });
     if (!otsForm) return next(new AppError('No OTS Form found for the given loan number', 404));

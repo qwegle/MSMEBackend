@@ -1,8 +1,9 @@
-const Joi = require('joi');
-const mongoose = require('mongoose');
+// src/validations/memorandumValidation.js
+import Joi from 'joi';
+import { Types } from 'mongoose';
 
 const isValidObjectId = (value, helpers) => {
-  if (!mongoose.Types.ObjectId.isValid(value)) {
+  if (!Types.ObjectId.isValid(value)) {
     return helpers.error('any.invalid');
   }
   return value;
@@ -63,4 +64,4 @@ const memorandumValidation = Joi.object({
     }),
 });
 
-module.exports = memorandumValidation;
+export default memorandumValidation;

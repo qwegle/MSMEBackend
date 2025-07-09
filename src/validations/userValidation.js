@@ -1,4 +1,5 @@
-const Joi = require('joi');
+// src/validations/userValidation.js
+import Joi from 'joi';
 
 const strongPassword = Joi.string()
   .min(12)
@@ -61,4 +62,4 @@ const userValidation = Joi.object({
     }),
 });
 
-module.exports = userValidation;
+export default userValidation;

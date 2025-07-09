@@ -1,17 +1,18 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
-const ACKForm = require('../models/acknowledgement');
-const OTSForm = require('../models/otsform');
-const CertificateOrder = require('../models/certificate'); // assumed import
-const AppError = require('../utils/AppError');
-const catchAsync = require('../utils/catchAsync');
-
+import { Types } from 'mongoose';
+import validator from 'validator';
+import ACKForm from '../../models/OSFC/acknowledgement.js';
+import OTSForm from '../../models/OSFC/otsform.js';
+import CertificateOrder from '../../models/OSFC/certificate.js'; // assumed import
+import AppError from '../../utils/AppError.js';
+import catchAsync from '../../utils/catchAsync.js';
+const { escape } = validator;
 const sanitizeInput = input =>
-  typeof input === 'string' ? validator.escape(input.trim()) : input;
+  typeof input === 'string' ? escape(input.trim()) : input;
 
-exports.createAckForm = catchAsync(async (req, res, next) => {
+// Create Acknowledgement Form
+export const createAckForm = catchAsync(async (req, res, next) => {
   const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
-  if (!filePath) return next(new AppError('file is required', 400));
+  if (!filePath) return next(new AppError('File is required', 400));
 
   const {
     loan_number, deposit_amount, deposit_date, deposit_type,
@@ -51,7 +52,8 @@ exports.createAckForm = catchAsync(async (req, res, next) => {
   res.status(201).json({ message: 'Acknowledgement form saved successfully', ackForm });
 });
 
-exports.reuploadAckSignature = catchAsync(async (req, res, next) => {
+// Reupload Signature or Stamp
+export const reuploadAckSignature = catchAsync(async (req, res, next) => {
   const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
   if (!filePath) return next(new AppError('Image is required for re-upload', 400));
 
@@ -70,12 +72,14 @@ exports.reuploadAckSignature = catchAsync(async (req, res, next) => {
   res.status(200).json({ message: 'Signature/stamp re-uploaded successfully', ackForm });
 });
 
-exports.getAllAckForms = catchAsync(async (req, res) => {
+// Get All Acknowledgements
+export const getAllAckForms = catchAsync(async (req, res) => {
   const forms = await ACKForm.find().populate('ots_form_id').sort({ createdAt: -1 });
   res.status(200).json(forms);
 });
 
-exports.getAckFormsByUserId = catchAsync(async (req, res, next) => {
+// Get Acknowledgements by User ID
+export const getAckFormsByUserId = catchAsync(async (req, res, next) => {
   const userId = sanitizeInput(req.params.userId);
   if (!userId) return next(new AppError('User ID is required', 400));
 
@@ -86,44 +90,37 @@ exports.getAckFormsByUserId = catchAsync(async (req, res, next) => {
   res.status(200).json(forms);
 });
 
-exports.filterAckForms = catchAsync(async (req, res, next) => {
+// Filter Acknowledgements with Role-Based Rules
+export const filterAckForms = catchAsync(async (req, res, next) => {
   const { user_role, id: requesterId } = req.user;
   const { userId, loan_number, branch } = req.body;
   const page = parseInt(req.body.page) || 1;
   const limit = parseInt(req.body.limit) || 10;
   const skip = (page - 1) * limit;
 
-  // 🌐 Role validation logic
-  if (user_role === 2) { // Regular User
-    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+  // Role-based filtering rules
+  if (user_role === 2) {
+    if (!userId || !Types.ObjectId.isValid(userId)) {
       return next(new AppError('User ID is required and must be valid for regular users.', 400));
     }
     if (branch) {
-      return next(
-        new AppError(
-          'As a regular user, you are not allowed to filter by branch.',
-          403
-        )
-      );
+      return next(new AppError('Regular users cannot filter by branch.', 403));
     }
-  } else if (user_role === 1) { // Sub-admin
+  } else if (user_role === 1) {
     if (!branch) {
-      return next(
-        new AppError('Branch field is required for sub-admins to filter acknowledgement forms.', 400)
-      );
+      return next(new AppError('Branch field is required for sub-admins.', 400));
     }
-  } else if (user_role !== 0) { // Invalid role
-    return next(new AppError('Access denied: your role is not authorized to perform this operation.', 403));
+  } else if (user_role !== 0) {
+    return next(new AppError('Access denied for this role.', 403));
   }
 
-  // 🔍 Build match conditions
   const matchConditions = {};
 
   if (userId) {
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
+    if (!Types.ObjectId.isValid(userId)) {
       return next(new AppError('Invalid userId format.', 400));
     }
-    matchConditions['otsDetails.userId'] = new mongoose.Types.ObjectId(userId);
+    matchConditions['otsDetails.userId'] = new Types.ObjectId(userId);
   }
 
   if (loan_number) {
@@ -179,4 +176,3 @@ exports.filterAckForms = catchAsync(async (req, res, next) => {
     currentPageCount: paginatedData.length,
   });
 });
-
