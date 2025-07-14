@@ -1,15 +1,15 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const openingStockSchema = new mongoose.Schema({
+const openingStockSchema = new Schema({
   user: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: 'OkviAuth',
     required: true
   },
-  festivalName: {
-    type: String,
+  festivalId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Holiday',
     required: true,
-    trim: true
   },
   head: {
     type: String,
@@ -50,4 +50,4 @@ const openingStockSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('OpeningStock', openingStockSchema);
+export default model('OpeningStock', openingStockSchema);
