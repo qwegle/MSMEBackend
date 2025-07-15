@@ -6,6 +6,11 @@ const clauseSchema = new mongoose.Schema({
 }, { _id: false });
 
 const declarationCertificateSchema = new mongoose.Schema({
+  openingStockId: {type: mongoose.Schema.Types.ObjectId, ref: 'OpeningStock', required: true },
+  closingStockId: {type: mongoose.Schema.Types.ObjectId, ref: 'ClosingStock', required: true },
+  formIId: {type: mongoose.Schema.Types.ObjectId, ref: 'Form1', required: true },
+  formVId: {type: mongoose.Schema.Types.ObjectId, ref: 'FormV', required: true },
+  formVIId: {type: mongoose.Schema.Types.ObjectId, ref: 'FormVI', required: true },
   khadiInstitutionName: { type: String, required: true },
   address: { type: String, required: true },
   month: { type: String, required: true },

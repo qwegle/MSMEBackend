@@ -7,6 +7,9 @@ const salesRebateSchema = new mongoose.Schema({
 }, { _id: false });
 
 const formVSchema = new mongoose.Schema({
+  openingStockId: {type: mongoose.Schema.Types.ObjectId, ref: 'OpeningStock', required: true },
+  closingStockId: {type: mongoose.Schema.Types.ObjectId, ref: 'ClosingStock', required: true },
+  FormIId: {type: mongoose.Schema.Types.ObjectId, ref: 'Form1', required: true },
   institutionName: { type: String, required: true },
   address: { type: String, required: true },
   festival: { type: String, required: true },
