@@ -1,8 +1,6 @@
 // controllers/OKVI/claimdocuments.controller.js
-
 import catchAsync from '../../utils/catchAsync.js';
 import AppError from '../../utils/AppError.js';
-
 import Form1 from '../../models/OKVI/Form1.js';
 import FormV from '../../models/OKVI/FormV.js';
 import FormVI from '../../models/OKVI/FormVI.js';
@@ -28,9 +26,7 @@ export const createForm1 = catchAsync(async (req, res, next) => {
   if (!festivalId || !subCenterName || !subCenterAddress || !head || !Array.isArray(retailSales)) {
     return next(new AppError('Missing required fields for Form1', 400));
   }
-
   const { openingStock, closingStock } = await getStocks(userId, festivalId);
-
   const form1 = await Form1.create({
     openingStockId: openingStock._id,
     closingStockId: closingStock._id,
@@ -48,15 +44,12 @@ export const createForm1 = catchAsync(async (req, res, next) => {
 
   res.status(201).json({ status: 'success', data: form1 });
 });
-
 export const createFormV = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
   const { festivalId, totalSaleAmt, totalRebateAmt, salesRebateDetails } = req.body;
-
   if (!festivalId || !totalSaleAmt || !totalRebateAmt || !Array.isArray(salesRebateDetails)) {
     return next(new AppError('Missing required fields for FormV', 400));
   }
-
   const { openingStock, closingStock } = await getStocks(userId, festivalId);
   const form1 = await Form1.findOne({ openingStockId: openingStock._id });
   if (!form1) return next(new AppError('Form1 not found', 404));
