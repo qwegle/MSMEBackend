@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
 const districts = [
   "Angul", "Balangir", "Balasore", "Bargarh", "Bhadrak", "Boudh", "Cuttack", "Deogarh",
@@ -11,14 +11,14 @@ const mobileRegex = /^[6-9]\d{9}$/;
 const nameRegex = /^[a-zA-Z\s]{3,50}$/;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const committeeMemberSchema = new mongoose.Schema({
+const committeeMemberSchema = new Schema({
   name: { type: String, required: true, match: nameRegex },
   mobile: { type: String, required: true, match: mobileRegex },
   address: { type: String, required: true }
 }, { _id: false });
 
-const userOkviSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'OkviAuth', required: true },
+const userOkviSchema = new Schema({
+  user: { type: Schema.Types.ObjectId, ref: 'OkviAuth', required: true },
 
   institutionInfo: {
     name: { type: String, required: true, match: nameRegex },
@@ -77,4 +77,4 @@ const userOkviSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-module.exports = mongoose.model('UserOKVI', userOkviSchema);
+export default model('UserOKVI', userOkviSchema);
