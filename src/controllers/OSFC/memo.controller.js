@@ -114,7 +114,7 @@ export const reuploadMemo = catchAsync(async (req, res, next) => {
 
   await OTSForm.findByIdAndUpdate(
     otsForm._id,
-    { status_msg: 'Memorandum uploaded (first-time) by branch office' }
+    { status_msg: 'Memorandum uploaded by branch office' }
   );
 
   res.status(201).json({

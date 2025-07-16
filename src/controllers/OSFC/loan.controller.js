@@ -33,58 +33,58 @@ export const getLoansByCustomerId = catchAsync(async (req, res, next) => {
   res.status(200).json({ data: loans });
 });
 
-export const filterLoans = catchAsync(async (req, res, next) => {
-  const {
-    loan_id,
-    loanType,
-    loanStatus,
-    customerName,
-    minOverdue,
-    maxOverdue,
-    branch,
-    aadharNumber,
-    page: rawPage,
-    limit: rawLimit,
-  } = req.body;
+  export const filterLoans = catchAsync(async (req, res, next) => {
+    const {
+      loan_id,
+      loanType,
+      loanStatus,
+      customerName,
+      minOverdue,
+      maxOverdue,
+      branch,
+      aadharNumber,
+      page: rawPage,
+      limit: rawLimit,
+    } = req.body;
 
-  const page = parseInt(rawPage) || 1;
-  const limit = parseInt(rawLimit) || 10;
-  const skip = (page - 1) * limit;
+    const page = parseInt(rawPage) || 1;
+    const limit = parseInt(rawLimit) || 10;
+    const skip = (page - 1) * limit;
 
-  const query = {};
+    const query = {};
 
-  if (loan_id) query.loanId = loan_id;
-  if (loanType) query.loanType = loanType;
-  if (loanStatus) query.loanStatus = loanStatus;
-  if (aadharNumber) query.aadharNumber = aadharNumber;
-  if (branch) query.branch = branch;
-  if (customerName) query.customerName = { $regex: new RegExp(customerName, 'i') };
+    if (loan_id) query.loanId = loan_id;
+    if (loanType) query.loanType = loanType;
+    if (loanStatus) query.loanStatus = loanStatus;
+    if (aadharNumber) query.aadharNumber = aadharNumber;
+    if (branch) query.branch = branch;
+    if (customerName) query.customerName = { $regex: new RegExp(customerName, 'i') };
 
-  if (minOverdue !== '' || maxOverdue !== '') {
-    query.overdueAmount = {};
-    if (minOverdue !== '') query.overdueAmount.$gte = Number(minOverdue);
-    if (maxOverdue !== '') query.overdueAmount.$lte = Number(maxOverdue);
-  }
+    if (minOverdue !== '' || maxOverdue !== '') {
+      query.overdueAmount = {};
+      if (minOverdue !== '') query.overdueAmount.$gte = Number(minOverdue);
+      if (maxOverdue !== '') query.overdueAmount.$lte = Number(maxOverdue);
+    }
 
-  const totalItems = await Loan.countDocuments(query);
-  const totalPages = Math.ceil(totalItems / limit);
+    const totalItems = await Loan.countDocuments(query);
+    const totalPages = Math.ceil(totalItems / limit);
 
-  const loans = await Loan.find(query)
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit);
+    const loans = await Loan.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-  res.status(200).json({
-    paginatedData: loans,
-    page,
-    limit,
-    totalItems,
-    totalPages,
-    previousPage: page > 1 ? page - 1 : null,
-    nextPage: page < totalPages ? page + 1 : null,
-    currentPageCount: loans.length,
+    res.status(200).json({
+      paginatedData: loans,
+      page,
+      limit,
+      totalItems,
+      totalPages,
+      previousPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null,
+      currentPageCount: loans.length,
+    });
   });
-});
 
 
 export const updateLoan = catchAsync(async (req, res, next) => {
