@@ -1,4 +1,4 @@
-import { hash, compare } from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import { findOne, create } from '../../models/OKVI/okviuserdetails.js';
 import OkviAuth from '../../models/OKVI/okviauth.js'; 
 import { sign } from 'jsonwebtoken';
@@ -7,8 +7,9 @@ import AppError from '../../utils/AppError.js';
 import sendEmail from '../../utils/sendEmail.js';
 import { createHash } from 'crypto';
 import { blacklistToken } from '../../utils/tokenBlacklist.js';
-import OkviOtpVerification from '../../models/OkviOtpVerification.js';
+import OkviOtpVerification from '../../models/OKVI/otpverificationschema.js'
 
+const { hash, compare } = bcrypt;
 export const registerOkviUser = catchAsync(async (req, res, next) => {
   const { name, email, password, role, dev_pass } = req.body;
   if (!name || !email || !password) {

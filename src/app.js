@@ -50,10 +50,14 @@ const sanitizeInput = (input) => {
 
 app.use((req, res, next) => {
   req.body = mongoSanitize(sanitizeInput(req.body));
-  req.query = sanitizeInput({ ...req.query });
+  const sanitizedQuery = sanitizeInput({ ...req.query });
+  for (const key in sanitizedQuery) {
+    req.query[key] = sanitizedQuery[key];
+  }
   req.params = mongoSanitize(sanitizeInput(req.params));
   next();
 });
+
 
 // Rate limiting
 const limiter = rateLimit({

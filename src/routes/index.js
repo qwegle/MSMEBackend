@@ -8,7 +8,7 @@ import orderRoutes from './order.routes.js';
 import certificateRoutes from './certificate.routes.js';
 import existingLoan from './loan.routes.js';
 import OSIC from './osic.routes.js';
-import OKVI from './OKVI/holiday.routes.js';
+import OKVI from './OKVI/okvi.routes.js';
 const router = Router();
 
 router.use('/auth', authRoutes);
