@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import {registerOkviUser, sendOtp, verifyOtp, registerOkviUserdetails, loginOkviUser, logoutOkvi} from '../../controllers/OKVI/okviuser.controller.js'; 
+import { registerOkviUser, sendOtp, verifyOtp, registerOkviUserdetails, loginOkviUser, logoutOkvi} from '../../controllers/OKVI/okviuser.controller.js'; 
 import { authenticateToken } from '../../middlewares/auth.middleware.js';
 
 const router = Router();

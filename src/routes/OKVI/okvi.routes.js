@@ -6,6 +6,6 @@ const router = Router();
 
 router.use('/holidays', holidays);
 router.use('/user', user);
-router.use(['/opening-stock', openingStock])
+router.use('/opening-stock', openingStock)
 
 export default router;

@@ -87,8 +87,49 @@ export const verifyOtp = catchAsync(async (req, res, next) => {
   });
 });
 
+// export const registerOkviUserdetails = catchAsync(async (req, res, next) => {
+//   const userId = req.user.id;
+//   const {
+//     institutionInfo,
+//     registrationInfo,
+//     bankDetails,
+//     secretaryInfo,
+//     presidentInfo,
+//     committeeMembers
+//   } = req.body;
+
+//   const okviUser = await OkviAuth.findById(userId);
+//   if (!okviUser || !okviUser.isEmailVerified) {
+//     return next(new AppError('User not found or email not verified', 401));
+//   }
+
+//   const existing = await findOne({ user: userId });
+//   if (existing) {
+//     return next(new AppError('User details already registered', 400));
+//   }
+
+//   if (institutionInfo.email !== okviUser.email) {
+//     return next(new AppError('Email mismatch with verified user email', 400));
+//   }
+
+//   const userDetails = await create({
+//     user: userId,
+//     institutionInfo,
+//     registrationInfo,
+//     bankDetails,
+//     secretaryInfo,
+//     presidentInfo,
+//     committeeMembers,
+//     isEmailVerified: true
+//   });
+
+//   res.status(201).json({
+//     status: 'success',
+//     data: userDetails
+//   });
+// });
+
 export const registerOkviUserdetails = catchAsync(async (req, res, next) => {
-  const userId = req.user.id;
   const {
     institutionInfo,
     registrationInfo,
@@ -98,22 +139,39 @@ export const registerOkviUserdetails = catchAsync(async (req, res, next) => {
     committeeMembers
   } = req.body;
 
-  const okviUser = await OkviAuth.findById(userId);
-  if (!okviUser || !okviUser.isEmailVerified) {
-    return next(new AppError('User not found or email not verified', 401));
+  if (!institutionInfo || !institutionInfo.name || !institutionInfo.email || !req.body.password) {
+    return next(new AppError('Institution name, email, and password are required', 400));
   }
 
-  const existing = await findOne({ user: userId });
-  if (existing) {
+  const { name, email } = institutionInfo;
+
+  // Check if email is already used
+  const existingUser = await OkviAuth.findOne({ email });
+  if (existingUser) {
+    return next(new AppError('Email is already registered', 400));
+  }
+
+  // Hash password
+  const hashedPassword = await hash(req.body.password, 12);
+
+  // Create auth user
+  const newUser = await OkviAuth.create({
+    name,
+    email,
+    password: hashedPassword,
+    role: 2,
+    isEmailVerified: true
+  });
+
+  // Check if user details already exist (shouldn't normally happen)
+  const existingDetails = await UserOKVI.findOne({ user: newUser._id });
+  if (existingDetails) {
     return next(new AppError('User details already registered', 400));
   }
 
-  if (institutionInfo.email !== okviUser.email) {
-    return next(new AppError('Email mismatch with verified user email', 400));
-  }
-
-  const userDetails = await create({
-    user: userId,
+  // Create user details
+  const userDetails = await UserOKVI.create({
+    user: newUser._id,
     institutionInfo,
     registrationInfo,
     bankDetails,
@@ -125,9 +183,17 @@ export const registerOkviUserdetails = catchAsync(async (req, res, next) => {
 
   res.status(201).json({
     status: 'success',
-    data: userDetails
+    data: {
+      auth: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email
+      },
+      details: userDetails
+    }
   });
 });
+
 
 export const loginOkviUser = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
