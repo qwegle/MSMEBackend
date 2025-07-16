@@ -7,6 +7,7 @@ import AppError from '../../utils/AppError.js';
 import sendEmail from '../../utils/sendEmail.js';
 import { createHash } from 'crypto';
 import { blacklistToken } from '../../utils/tokenBlacklist.js';
+import OkviOtpVerification from '../../models/OkviOtpVerification.js';
 
 export const registerOkviUser = catchAsync(async (req, res, next) => {
   const { name, email, password, role, dev_pass } = req.body;
@@ -39,19 +40,24 @@ export const registerOkviUser = catchAsync(async (req, res, next) => {
 export const sendOtp = catchAsync(async (req, res, next) => {
   const { email } = req.body;
   if (!email) return next(new AppError('Email is required', 400));
-
-  const user = await OkviAuth.findOne({ email });
-  if (!user) return next(new AppError('User not found', 404));
-
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   const otpExpires = Date.now() + 10 * 60 * 1000;
-
-  user.otp = createHash('sha256').update(otp).digest('hex');
-  user.otpExpires = otpExpires;
-  await user.save({ validateBeforeSave: false });
-
+  const hashedOtp = createHash('sha256').update(otp).digest('hex');
+  const existing = await OkviOtpVerification.findOne({ email });
+  if (existing) {
+    existing.otp = hashedOtp;
+    existing.otpExpires = otpExpires;
+    existing.isVerified = false;
+    await existing.save();
+  } else {
+    await OkviOtpVerification.create({
+      email,
+      otp: hashedOtp,
+      otpExpires
+    });
+  }
   await sendEmail({
-    to: user.email,
+    to: email,
     subject: 'Your OTP for OKVI Email Verification',
     text: `Your OTP is ${otp}. It is valid for 10 minutes.`
   });
@@ -61,31 +67,28 @@ export const sendOtp = catchAsync(async (req, res, next) => {
     message: 'OTP sent to email'
   });
 });
-
 export const verifyOtp = catchAsync(async (req, res, next) => {
   const { email, otp } = req.body;
   if (!email || !otp) return next(new AppError('Email and OTP are required', 400));
 
   const hashedOtp = createHash('sha256').update(otp).digest('hex');
 
-  const user = await OkviAuth.findOne({
+  const entry = await OkviOtpVerification.findOne({
     email,
     otp: hashedOtp,
     otpExpires: { $gt: Date.now() }
   });
-
-  if (!user) return next(new AppError('Invalid or expired OTP', 400));
-
-  user.isEmailVerified = true;
-  user.otp = undefined;
-  user.otpExpires = undefined;
-  await user.save({ validateBeforeSave: false });
-
+  if (!entry) return next(new AppError('Invalid or expired OTP', 400));
+  entry.isVerified = true;
+  entry.otp = undefined;
+  entry.otpExpires = undefined;
+  await entry.save();
   res.status(200).json({
     status: 'success',
     message: 'Email verified successfully'
   });
 });
+
 
 // export const registerOkviUserdetails = catchAsync(async (req, res, next) => {
 //   const userId = req.user.id;
@@ -129,8 +132,9 @@ export const verifyOtp = catchAsync(async (req, res, next) => {
 //   });
 // });
 
-export const registerOkviUserdetails = catchAsync(async (req, res, next) => {
+export const registerOkviUserWithDetails = catchAsync(async (req, res, next) => {
   const {
+    password,
     institutionInfo,
     registrationInfo,
     bankDetails,
@@ -138,23 +142,19 @@ export const registerOkviUserdetails = catchAsync(async (req, res, next) => {
     presidentInfo,
     committeeMembers
   } = req.body;
-
-  if (!institutionInfo || !institutionInfo.name || !institutionInfo.email || !req.body.password) {
-    return next(new AppError('Institution name, email, and password are required', 400));
+  const { email, name } = institutionInfo || {};
+  if (!email || !name || !password) {
+    return next(new AppError('Institution email, name, and password are required', 400));
   }
-
-  const { name, email } = institutionInfo;
-
-  // Check if email is already used
-  const existingUser = await OkviAuth.findOne({ email });
-  if (existingUser) {
-    return next(new AppError('Email is already registered', 400));
+  const otpStatus = await OkviOtpVerification.findOne({ email });
+  if (!otpStatus || !otpStatus.isVerified) {
+    return next(new AppError('Email not verified via OTP', 401));
   }
-
-  // Hash password
-  const hashedPassword = await hash(req.body.password, 12);
-
-  // Create auth user
+  const existing = await OkviAuth.findOne({ email });
+  if (existing) {
+    return next(new AppError('Email already registered', 400));
+  }
+  const hashedPassword = await hash(password, 12);
   const newUser = await OkviAuth.create({
     name,
     email,
@@ -162,14 +162,6 @@ export const registerOkviUserdetails = catchAsync(async (req, res, next) => {
     role: 2,
     isEmailVerified: true
   });
-
-  // Check if user details already exist (shouldn't normally happen)
-  const existingDetails = await UserOKVI.findOne({ user: newUser._id });
-  if (existingDetails) {
-    return next(new AppError('User details already registered', 400));
-  }
-
-  // Create user details
   const userDetails = await UserOKVI.create({
     user: newUser._id,
     institutionInfo,
@@ -180,9 +172,10 @@ export const registerOkviUserdetails = catchAsync(async (req, res, next) => {
     committeeMembers,
     isEmailVerified: true
   });
-
+  await OkviOtpVerification.deleteOne({ email });
   res.status(201).json({
     status: 'success',
+    message: 'User registered successfully',
     data: {
       auth: {
         id: newUser._id,
@@ -193,6 +186,7 @@ export const registerOkviUserdetails = catchAsync(async (req, res, next) => {
     }
   });
 });
+
 
 
 export const loginOkviUser = catchAsync(async (req, res, next) => {
