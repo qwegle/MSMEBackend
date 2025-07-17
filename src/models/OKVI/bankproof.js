@@ -14,12 +14,8 @@ const bankDepositProofSchema = new mongoose.Schema({
   month: { type: String, required: true },
   fromDate: { type: Date, required: true },
   toDate: { type: Date, required: true },
-
   depositProofFile: { type: String, required: true }, 
-
   createdAt: { type: Date, default: Date.now }
 });
-
 const BankDepositProof = mongoose.model('BankDepositProof', bankDepositProofSchema);
-
 export default BankDepositProof;

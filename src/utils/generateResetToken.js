@@ -1,7 +1,7 @@
-import { randomBytes, createHash } from 'crypto';
+import crypto from 'crypto';
 
-export function generateResetToken () {
-  const resetToken = randomBytes(32).toString('hex');
-  const hashedToken = createHash('sha256').update(resetToken).digest('hex');
-  return { resetToken, hashedToken };
+export function generateOTP () {
+ const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit
+  const hashedOTP = crypto.createHash('sha256').update(otp).digest('hex');
+  return { otp, hashedOTP };
 }

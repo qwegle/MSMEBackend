@@ -44,15 +44,13 @@ export function logout(req, res, next) {
 }
 
 export const forgotPassword = catchAsync(async (req, res) => {
-  const baseUrl = `${req.protocol}://${req.get('host')}`;
-  const result = await forgotPasswordService(req.body.email, baseUrl);
+  const result = await forgotPasswordService(req.body.email);
   res.status(200).json(result);
 });
 
 export const resetPassword = catchAsync(async (req, res) => {
-  const { token } = req.body;
-  const { password } = req.body;
-  const result = await resetPasswordService(token, password);
+  const { otp, password } = req.body;
+  const result = await resetPasswordService(otp, password);
   res.status(200).json(result);
 });
 

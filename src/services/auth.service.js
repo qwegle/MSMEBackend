@@ -2,7 +2,7 @@ import { hash, compare } from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
 import AppError from '../utils/AppError.js';
-import { generateResetToken } from '../utils/generateResetToken.js';
+import { generateOTP } from '../utils/generateResetToken.js';
 import sendEmail from '../utils/sendEmail.js';
 const { sign } = jwt;
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -65,13 +65,10 @@ export async function register_ofsc_subadmin({ username, email, password }) {
 // Login
 export async function loginUser({ email, password }) {
   if (!email || !password) throw new AppError('Email and password are required', 400);
-
   const user = await User.findOne({ email });
   if (!user) throw new AppError('Invalid credentials', 401);
-
   const isPasswordCorrect = await compare(password, user.password);
   if (!isPasswordCorrect) throw new AppError('Invalid credentials', 401);
-
     const token = sign(
     {
         id: user._id,
@@ -101,63 +98,43 @@ export async function loginUser({ email, password }) {
 }
 
 // Forgot Password
-export async function forgotPasswordService(email, baseUrl) {
+export async function forgotPasswordService(email) {
   const user = await User.findOne({ email });
   if (!user) throw new AppError('No user found with this email', 404);
-
-  const { resetToken, hashedToken } = generateResetToken();
-  user.resetPasswordToken = hashedToken;
-  user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+  const { otp, hashedOTP } = generateOTP();
+  user.resetPasswordToken = hashedOTP;
+  user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 min
   await user.save({ validateBeforeSave: false });
-
-  const resetURL = `${baseUrl}/api/auth/reset-password/${resetToken}`;
-  const html= `
-  <div style="max-width: 600px; margin: auto; padding: 30px; font-family: Arial, sans-serif; background-color: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 10px;">
-    <h2 style="color: #2c3e50; text-align: center;">Password Reset Request</h2>
-    <p style="font-size: 16px; color: #555;">Hi <strong>${user.username}</strong>,</p>
-    <p style="font-size: 16px; color: #555;">
-      We received a request to reset your password. Click the button below to set a new password:
-    </p>
-    <div style="text-align: center; margin: 30px 0;">
-      <a href="${resetURL}" style="background-color: #007bff; color: #fff; padding: 12px 24px; border-radius: 5px; text-decoration: none; font-size: 16px;">
-        Reset Password
-      </a>
+  const html = `
+    <div style="padding: 20px; font-family: Arial;">
+      <h2 style="color: #333;">Password Reset OTP</h2>
+      <p>Hi <strong>${user.username}</strong>,</p>
+      <p>Your OTP for resetting your password is:</p>
+      <div style="font-size: 24px; font-weight: bold; color: #007bff;">${otp}</div>
+      <p>This OTP is valid for 10 minutes.</p>
+      <p>If you did not request a reset, please ignore this email.</p>
     </div>
-    <p style="font-size: 14px; color: #777;">
-      This link will expire in <strong>10 minutes</strong>. If you didn’t request a password reset, you can safely ignore this email.
-    </p>
-    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
-    <p style="font-size: 13px; color: #aaa; text-align: center;">
-      &copy; ${new Date().getFullYear()} MSME. All rights reserved.
-    </p>
-  </div>
-`;
-
+  `;
   await sendEmail({
     to: user.email,
-    subject: 'Reset Password Link',
+    subject: 'Your OTP for Password Reset',
     html
   });
-
-  return { message: 'Reset link sent to email.' };
+  return { message: 'OTP sent to email.' };
 }
 
-// Reset Password
-export async function resetPasswordService(token, newPassword) {
-  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
-
+export async function resetPasswordService(otp, newPassword) {
+  const hashedOTP = crypto.createHash('sha256').update(otp).digest('hex');
   const user = await User.findOne({
-    resetPasswordToken: hashedToken,
+    resetPasswordOTP: hashedOTP,
     resetPasswordExpires: { $gt: Date.now() }
   });
-
-  if (!user) throw new AppError('Token is invalid or has expired', 400);
-
+  if (!user) throw new AppError('OTP is invalid or has expired', 400);
   user.password = await hash(newPassword, 10);
   user.resetPasswordToken = undefined;
   user.resetPasswordExpires = undefined;
   await user.save();
-
   return { message: 'Password has been reset successfully.' };
 }
+
 
