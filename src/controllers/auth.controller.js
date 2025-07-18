@@ -2,20 +2,16 @@ import { registerUser, loginUser, register_ofsc_superadmin, register_ofsc_subadm
 import { blacklistToken } from '../utils/tokenBlacklist.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/AppError.js';
-
+import User from '../models/user.js';
 
 export const register = catchAsync(async (req, res) => {
   const result = await registerUser(req.body);
   res.status(201).json(result);
 });
-
-
 export const login = catchAsync(async (req, res) => {
   const result = await loginUser(req.body);
   res.status(200).json(result);
 });
-
-
 export const register_OFSC_SuperAdmin = catchAsync(async (req, res, next) => {
   const { dev_pass } = req.body;
   if (!dev_pass || dev_pass != process.env.DEV_PASS) {
@@ -58,3 +54,26 @@ export const resetPassword = catchAsync(async (req, res) => {
 export function protectedRoute(req, res) {
   res.status(200).json({ message: 'Access granted', user: req.user });
 }
+
+export const updateProfile = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  const { username, phone, aadharNumber, currentPassword, newPassword } = req.body;
+  const user = await User.findById(userId);
+  if (!user) return next(new AppError('User not found', 404));
+  if (username) user.username = username;
+  if (phone) user.phone = phone;
+  if (aadharNumber) user.aadharNumber = aadharNumber;
+  if (newPassword) {
+    if (!currentPassword) {
+      return next(new AppError('Current password is required to change password', 400));
+    }
+    const isMatch = await compare(currentPassword, user.password);
+    if (!isMatch) {
+      return next(new AppError('Current password is incorrect', 401));
+    }
+    user.password = await hash(newPassword, 10);
+  }
+  await user.save();
+  res.status(200).json({ message: 'Profile updated successfully' });
+});
+
