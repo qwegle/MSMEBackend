@@ -16,7 +16,7 @@ const declarationCertificateSchema = new mongoose.Schema({
   month: { type: String, required: true },
   spellStartDate: { type: Date, required: true },
   spellEndDate: { type: Date, required: true },
-
+  status: {type: Number, required: true,default: 0,enum: [0, 1, 2]}, // 0 - Pending, 1 - Approved, 2 - Rejected
   declarations: {
     type: [clauseSchema],
     required: true,

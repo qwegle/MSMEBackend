@@ -242,34 +242,38 @@ export const approveOtsApplication = catchAsync(async (req, res, next) => {
 
 export const filterOTS = catchAsync(async (req, res, next) => {
   const { user_role, id: requesterId } = req.user;
-  const { otsId, userId, branch, status } = req.body;
-  const page = parseInt(req.body.page) || 1;
-  const limit = parseInt(req.body.limit) || 10;
-  const skip = (page - 1) * limit;
-
-  const clean = (val) => (typeof val === 'string' && val.trim() === '') ? undefined : val;
+  const { otsId, userId, branch, status, page = 1, limit = 10 } = req.body;
+  const clean = (val) => (typeof val === 'string' && val.trim() === '' ? undefined : val);
   const cleanedOtsId = clean(otsId);
   const cleanedUserId = clean(userId);
   const cleanedBranch = clean(branch);
   const cleanedStatus = clean(status);
-
+  const pageNum = parseInt(page);
+  const limitNum = parseInt(limit);
+  const skip = (pageNum - 1) * limitNum;
+  const parsedStatus =
+    cleanedStatus !== undefined && !isNaN(Number(cleanedStatus))
+      ? Number(cleanedStatus)
+      : undefined;
   if (user_role === 2) {
     if (!cleanedUserId || !Types.ObjectId.isValid(cleanedUserId)) {
-      return next(new AppError('User ID is required and must be valid for regular users.', 400));
+      return next(new AppError('Valid userId is required for regular users.', 400));
     }
     if (cleanedBranch) {
       return next(new AppError('Branch filtering is not allowed for regular users.', 403));
     }
-  } else if (user_role === 1) {
-    if (!cleanedBranch) {
-      return next(new AppError('Branch field is required for sub-admins to filter OTS forms.', 400));
-    }
-  } else if (user_role !== 0) {
-    return next(new AppError('Access denied: your role is not authorized to perform this operation.', 403));
   }
 
+  if (user_role === 1 && !cleanedBranch) {
+    return next(new AppError('Branch is required for sub-admins to filter OTS forms.', 400));
+  }
+
+  if (![0, 1, 2].includes(user_role)) {
+    return next(new AppError('Access denied: invalid user role.', 403));
+  }
   const filter = {};
   if (cleanedOtsId) filter.loan_number = sanitizeInput(cleanedOtsId);
+
   if (cleanedUserId) {
     if (!Types.ObjectId.isValid(cleanedUserId)) {
       return next(new AppError('Invalid userId format.', 400));
@@ -277,9 +281,8 @@ export const filterOTS = catchAsync(async (req, res, next) => {
     filter.userId = new Types.ObjectId(cleanedUserId);
   }
   if (cleanedBranch) filter.branch = sanitizeInput(cleanedBranch);
-  if (cleanedStatus !== undefined) filter.status = cleanedStatus;
-
-  const pipeline = [
+  if (parsedStatus !== undefined) filter.status = parsedStatus;
+  const aggregationPipeline = [
     { $match: filter },
     {
       $lookup: {
@@ -321,30 +324,32 @@ export const filterOTS = catchAsync(async (req, res, next) => {
     },
     {
       $facet: {
-        paginatedData: [{ $sort: { createdAt: -1 } }, { $skip: skip }, { $limit: limit }],
+        paginatedData: [{ $sort: { createdAt: -1 } }, { $skip: skip }, { $limit: limitNum }],
         totalCount: [{ $count: 'count' }],
       },
     },
   ];
 
-  const result = await OTSForm.aggregate(pipeline);
-  const paginatedRaw = result[0].paginatedData || [];
-  const totalItems = result[0].totalCount[0]?.count || 0;
-  const totalPages = Math.ceil(totalItems / limit);
+  const result = await OTSForm.aggregate(aggregationPipeline);
 
-  const paginatedData = paginatedRaw.map((otsDoc) => ({ ots: otsDoc }));
+  const paginatedRaw = result[0]?.paginatedData || [];
+  const totalItems = result[0]?.totalCount[0]?.count || 0;
+  const totalPages = Math.ceil(totalItems / limitNum);
+
+  const paginatedData = paginatedRaw.map((ots) => ({ ots }));
 
   res.status(200).json({
     paginatedData,
-    page,
-    limit,
+    page: pageNum,
+    limit: limitNum,
     totalItems,
     totalPages,
-    previousPage: page > 1 ? page - 1 : null,
-    nextPage: page < totalPages ? page + 1 : null,
+    previousPage: pageNum > 1 ? pageNum - 1 : null,
+    nextPage: pageNum < totalPages ? pageNum + 1 : null,
     currentPageCount: paginatedData.length,
   });
 });
+
 
 export const getOTSStatusCounts = catchAsync(async (req, res) => {
   const { branch } = req.body;

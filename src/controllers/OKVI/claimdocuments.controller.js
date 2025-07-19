@@ -1,7 +1,7 @@
 // controllers/OKVI/claimdocuments.controller.js
 import catchAsync from '../../utils/catchAsync.js';
 import AppError from '../../utils/AppError.js';
-import Form1 from '../../models/OKVI/Form1.js';
+import Form1 from '../../models/OKVI/formI.js';
 import FormV from '../../models/OKVI/FormV.js';
 import FormVI from '../../models/OKVI/FormVI.js';
 import DeclarationCertificate from '../../models/OKVI/DeclarationCertificate.js';
@@ -9,6 +9,7 @@ import AuditCertificate from '../../models/OKVI/AuditCertificate.js';
 import BankDepositProof from '../../models/OKVI/BankDepositProof.js';
 import OpeningStock from '../../models/OKVI/openingstock.js';
 import ClosingStock from '../../models/OKVI/closingstock.js';
+import Holiday from '../../models/OKVI/hoildayFestival.js'
 
 const getStocks = async (userId, festivalId) => {
   const openingStock = await OpeningStock.findOne({ user: userId, festivalId });
@@ -19,102 +20,145 @@ const getStocks = async (userId, festivalId) => {
 
   return { openingStock, closingStock };
 };
+const getFestival = async(festivalName) => {
+  const currentYear = new Date().getFullYear();
+  const festival = await Holiday.findOne({ name: festivalName, year: currentYear });
+  if (!festival) {
+    throw new AppError(
+      `No festival found with name "${festivalName}" in year ${currentYear}`,
+      404
+    );
+  }
+  return festival;
+};
+
 export const createForm1 = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
-  const { festivalId, subCenterName, subCenterAddress, head, retailSales } = req.body;
-
-  if (!festivalId || !subCenterName || !subCenterAddress || !head || !Array.isArray(retailSales)) {
-    return next(new AppError('Missing required fields for Form1', 400));
+  const { festivalName, retailSales } = req.body;
+  if (
+    !festivalName ||
+    !Array.isArray(retailSales) ||
+    retailSales.length === 0
+  ) {
+    return next(
+      new AppError(
+        'festivalName (string) and at least one retailSale entry are required',
+        400
+      )
+    );
   }
-  const { openingStock, closingStock } = await getStocks(userId, festivalId);
-  const form1 = await Form1.create({
-    openingStockId: openingStock._id,
-    closingStockId: closingStock._id,
-    institutionName: req.user.name,
-    address: req.user.address || '',
-    festival: openingStock.festivalId?.name || '',
-    month: new Date().toLocaleString('default', { month: 'long' }),
-    fromDate: openingStock.createdAt,
-    toDate: closingStock.createdAt,
-    subCenterName,
-    subCenterAddress,
-    head,
-    retailSales,
-  });
+  const requiredKeys = [
+    'headType',
+    'subCenterName',
+    'subCenterAddress',
+    'billNo',
+    'billDate',
+    'item',
+    'quantity',
+    'rate',
+    'totalAmount',
+  ];
+  for (const sale of retailSales) {
+    if (!requiredKeys.every((k) => sale[k] != null)) {
+      return next(
+        new AppError(
+          `Each retailSale must include: ${requiredKeys.join(', ')}`,
+          400
+        )
+      );
+    }
 
+    if (isNaN(new Date(sale.billDate).getTime())) {
+      return next(new AppError('Each sale must have a valid billDate', 400));
+    }
+  }
+  const festival = await getFestival(festivalName);
+  const { openingStock, closingStock } = await getStocks(
+    userId,
+    festival._id
+  );
+  const form1 = await Form1.create({
+    openingStockId:     openingStock._id,
+    closingStockId:     closingStock._id,
+    institutionName:    req.user.name,
+    institutionAddress: req.user.address || '',
+    festival:           festivalName,  
+    month:              new Date().toLocaleString('default', { month: 'long' }),
+    fromDate:           openingStock.createdAt,
+    toDate:             closingStock.createdAt,
+    retailSales,                                
+  });
   res.status(201).json({ status: 'success', data: form1 });
 });
+
 export const createFormV = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
-  const { festivalId, totalSaleAmt, totalRebateAmt, salesRebateDetails } = req.body;
-  if (!festivalId || !totalSaleAmt || !totalRebateAmt || !Array.isArray(salesRebateDetails)) {
-    return next(new AppError('Missing required fields for FormV', 400));
+  const { festivalName, rebateRate } = req.body;
+  if (!festivalName || typeof rebateRate !== 'number') {
+    return next(new AppError('festivalId and rebateRate (%) are required', 400));
   }
-  const { openingStock, closingStock } = await getStocks(userId, festivalId);
+  const festival = await getFestival(festivalName);
+  const { openingStock } = await getStocks(userId, festival._id);
   const form1 = await Form1.findOne({ openingStockId: openingStock._id });
   if (!form1) return next(new AppError('Form1 not found', 404));
-
+  const totalSaleAmt = form1.retailSales.reduce((sum, r) => sum + r.totalAmount, 0);
+  const totalRebateAmt = Math.round(totalSaleAmt * (rebateRate/100));
   const formV = await FormV.create({
-    openingStockId: openingStock._id,
-    closingStockId: closingStock._id,
-    FormIId: form1._id,
-    institutionName: req.user.name,
-    address: req.user.address || '',
-    festival: openingStock.festivalId?.name || '',
-    month: new Date().toLocaleString('default', { month: 'long' }),
-    fromDate: openingStock.createdAt,
-    toDate: closingStock.createdAt,
-    salesRebateDetails,
+    formIId:form1._id,
     totalSaleAmt,
     totalRebateAmt,
+    status: 0
   });
-
   res.status(201).json({ status: 'success', data: formV });
 });
-
 export const createFormVI = catchAsync(async (req, res, next) => {
-  const userId = req.user.id;
-  const { festivalId, centerWiseSales, totalSaleAmt, totalRebateAmt } = req.body;
-
-  if (!festivalId || !Array.isArray(centerWiseSales)) {
-    return next(new AppError('Missing required fields for FormVI', 400));
+  const userId       = req.user.id;
+  const { festivalName, rebateRate } = req.body;
+  if (!festivalName || typeof rebateRate !== 'number') {
+    return next(new AppError(
+      'festivalName (string) and rebateRate (%) are required',
+      400
+    ));
   }
-
-  const { openingStock, closingStock } = await getStocks(userId, festivalId);
+  const festival = await getFestival(festivalName);
+  const { openingStock } = await getStocks(userId, festival._id);
   const form1 = await Form1.findOne({ openingStockId: openingStock._id });
-  const formV = await FormV.findOne({ openingStockId: openingStock._id });
-  if (!form1 || !formV) return next(new AppError('Required previous forms not found', 404));
-
+  if (!form1) {
+    return next(new AppError('Form I (retail sales) not found', 404));
+  }
+  const byCenter = form1.retailSales.reduce((acc, sale) => {
+    const key = sale.subCenterName;
+    acc[key] = acc[key] || [];
+    acc[key].push(sale);
+    return acc;
+  }, {});
+  const centerBreakup = Object.entries(byCenter).map(
+    ([subCenterName, entries]) => {
+      const totalSaleAmt   = entries.reduce((sum, e) => sum + e.totalAmount, 0);
+      const totalRebateAmt = Math.round(totalSaleAmt * (rebateRate / 100));
+      return { subCenterName, totalSaleAmt, totalRebateAmt };
+    }
+  );
+  if (centerBreakup.length === 0) {
+    return next(new AppError('No retail sales found to build Form VI', 400));
+  }
   const formVI = await FormVI.create({
-    openingStockId: openingStock._id,
-    closingStockId: closingStock._id,
-    formIId: form1._id,
-    FormVId: formV._id,
-    institutionName: req.user.name,
-    address: req.user.address || '',
-    month: new Date().toLocaleString('default', { month: 'long' }),
-    centerWiseSales,
-    totalSaleAmt,
-    totalRebateAmt,
+    formIId:form1._id,
+    centerBreakup,
   });
-
   res.status(201).json({ status: 'success', data: formVI });
 });
-
 export const createDeclarationCertificate = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
   const { festivalId, spellStartDate, spellEndDate } = req.body;
-
   if (!festivalId || !spellStartDate || !spellEndDate) {
     return next(new AppError('Required fields missing for Declaration Certificate', 400));
   }
-
   const { openingStock, closingStock } = await getStocks(userId, festivalId);
   const form1 = await Form1.findOne({ openingStockId: openingStock._id });
   const formV = await FormV.findOne({ openingStockId: openingStock._id });
   const formVI = await FormVI.findOne({ openingStockId: openingStock._id });
   if (!form1 || !formV || !formVI) return next(new AppError('All previous forms are required', 404));
-
   const certificate = await DeclarationCertificate.create({
     openingStockId: openingStock._id,
     closingStockId: closingStock._id,
@@ -127,7 +171,6 @@ export const createDeclarationCertificate = catchAsync(async (req, res, next) =>
     spellStartDate,
     spellEndDate,
   });
-
   res.status(201).json({ status: 'success', data: certificate });
 });
 

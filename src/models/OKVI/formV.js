@@ -1,33 +1,34 @@
 import mongoose from 'mongoose';
 
-const salesRebateSchema = new mongoose.Schema({
-  head: { type: String, required: true },
-  totalSaleAmt: { type: Number, required: true },
-  totalRebateAmt: { type: Number, required: true }
-}, { _id: false });
-
 const formVSchema = new mongoose.Schema({
-  openingStockId: {type: mongoose.Schema.Types.ObjectId, ref: 'OpeningStock', required: true },
-  closingStockId: {type: mongoose.Schema.Types.ObjectId, ref: 'ClosingStock', required: true },
-  FormIId: {type: mongoose.Schema.Types.ObjectId, ref: 'Form1', required: true },
-  institutionName: { type: String, required: true },
-  address: { type: String, required: true },
-  festival: { type: String, required: true },
-  month: { type: String, required: true },
-  fromDate: { type: Date, required: true },
-  toDate: { type: Date, required: true },
-
-  salesRebateDetails: {
-    type: [salesRebateSchema],
-    required: true
+  formIId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Form1', 
+    required: true 
   },
 
-  totalSaleAmt: { type: Number, required: true },
-  totalRebateAmt: { type: Number, required: true },
+  // These two fields are _only_ written by your server logic:
+  totalSaleAmt:   { type: Number, required: true },  
+  totalRebateAmt: { type: Number, required: true },  
 
-  createdAt: { type: Date, default: Date.now }
+  sub_admin_status: { 
+    type: Number,
+    enum: [0, 1, 2],    // 0 = Pending, 1 = Approved, 2 = Rejected
+    default: 0,
+  },
+  super_admin_status: { 
+    type: Number,
+    enum: [0, 1, 2],    // 0 = Pending, 1 = Approved, 2 = Rejected
+    default: 0,
+  },
+  addl_admin_status: {
+    type: Number,
+    enum: [0, 1, 2],    // 0 = Pending, 1 = Approved, 2 = Rejected
+    default: 0,
+  },
+
+  createdAt: { type: Date, default: Date.now },
 });
 
 const FormV = mongoose.model('FormV', formVSchema);
-
 export default FormV;
