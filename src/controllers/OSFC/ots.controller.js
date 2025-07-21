@@ -242,14 +242,14 @@ export const approveOtsApplication = catchAsync(async (req, res, next) => {
 
 export const filterOTS = catchAsync(async (req, res, next) => {
   const { user_role, id: requesterId } = req.user;
-  const { otsId, userId, branch, status, page = 1, limit = 10 } = req.body;
+  const { otsId, userId, branch, status, page, limit} = req.body;
   const clean = (val) => (typeof val === 'string' && val.trim() === '' ? undefined : val);
   const cleanedOtsId = clean(otsId);
   const cleanedUserId = clean(userId);
   const cleanedBranch = clean(branch);
   const cleanedStatus = clean(status);
-  const pageNum = parseInt(page);
-  const limitNum = parseInt(limit);
+  const pageNum = (!page || page == "")? 1 : parseInt(page,10);
+  const limitNum = (!limit || limit == "")? 1 : parseInt(limit,10);
   const skip = (pageNum - 1) * limitNum;
   const parsedStatus =
     cleanedStatus !== undefined && !isNaN(Number(cleanedStatus))
