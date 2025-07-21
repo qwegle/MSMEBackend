@@ -126,10 +126,10 @@ export async function forgotPasswordService(email) {
 
 export async function resetPasswordService(otp, newPassword) {
   const hashedOTP = crypto.createHash('sha256').update(otp).digest('hex');
-  const user = await User.findOne({
-    resetPasswordOTP: hashedOTP,
-    resetPasswordExpires: { $gt: Date.now() }
-  });
+const user = await User.findOne({
+  resetPasswordToken: hashedOTP, // FIXED FIELD NAME
+  resetPasswordExpires: { $gt: Date.now() }
+});
   if (!user) throw new AppError('OTP is invalid or has expired', 400);
   user.password = await hash(newPassword, 10);
   user.resetPasswordToken = undefined;
