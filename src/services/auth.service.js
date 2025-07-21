@@ -137,4 +137,44 @@ export async function resetPasswordService(otp, newPassword) {
   return { message: 'Password has been reset successfully.' };
 }
 
+export async function resendResetOTPService(email) {
+  const user = await User.findOne({ email });
+  if (!user) throw new AppError('No user found with this email', 404);
+
+  const now = Date.now();
+  const lastSent = user.resetPasswordLastSentAt?.getTime() || 0;
+  const cooldown = 60 * 1000; // 60 seconds
+
+  if (now - lastSent < cooldown) {
+    const waitTime = Math.ceil((cooldown - (now - lastSent)) / 1000);
+    throw new AppError(`Please wait ${waitTime} more seconds before resending OTP.`, 429);
+  }
+
+  const { otp, hashedOTP } = generateOTP();
+  user.resetPasswordToken = hashedOTP;
+  user.resetPasswordExpires = now + 10 * 60 * 1000; // 10 minutes
+  user.resetPasswordLastSentAt = now;
+  await user.save({ validateBeforeSave: false });
+
+  const html = `
+    <div style="padding: 20px; font-family: Arial;">
+      <h2 style="color: #333;">Password Reset OTP</h2>
+      <p>Hi <strong>${user.username}</strong>,</p>
+      <p>Your OTP for resetting your password is:</p>
+      <div style="font-size: 24px; font-weight: bold; color: #007bff;">${otp}</div>
+      <p>This OTP is valid for 10 minutes.</p>
+      <p>If you did not request a reset, please ignore this email.</p>
+    </div>
+  `;
+
+  await sendEmail({
+    to: user.email,
+    subject: 'Your OTP for Password Reset',
+    html,
+  });
+
+  return { message: 'OTP resent to email.' };
+}
+
+
 

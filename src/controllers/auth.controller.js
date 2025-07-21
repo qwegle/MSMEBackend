@@ -1,4 +1,4 @@
-import { registerUser, loginUser, register_ofsc_superadmin, register_ofsc_subadmin, forgotPasswordService, resetPasswordService } from '../services/auth.service.js';
+import { registerUser, loginUser, register_ofsc_superadmin, register_ofsc_subadmin, forgotPasswordService, resetPasswordService, resendResetOTPService } from '../services/auth.service.js';
 import { blacklistToken } from '../utils/tokenBlacklist.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/AppError.js';
@@ -47,6 +47,11 @@ export const forgotPassword = catchAsync(async (req, res) => {
 export const resetPassword = catchAsync(async (req, res) => {
   const { otp, password } = req.body;
   const result = await resetPasswordService(otp, password);
+  res.status(200).json(result);
+});
+
+export const resendResetOTP = catchAsync(async (req, res) => {
+  const result = await resendResetOTPService(req.body.email);
   res.status(200).json(result);
 });
 

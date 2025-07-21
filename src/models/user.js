@@ -10,6 +10,7 @@ const userSchema = new Schema({
   branch: { type: String },
   resetPasswordToken: { type: String },
   resetPasswordExpires: { type: Date },
+  resetPasswordLastSentAt:{type: Date }
 }, { timestamps: true });
 
 const User = model('User', userSchema);
