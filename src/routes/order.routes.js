@@ -8,7 +8,7 @@ import { singlePdfUpload, validatePdfMagicNumber, multerErrorHandler } from "../
 router.post('/uploadOrder', singlePdfUpload,validatePdfMagicNumber,multerErrorHandler,authenticateToken, authorizeRoles(0), authorizeType(1),uploadSettlementOrder);
 router.get('/getOrdersById/:userId', authorizeType(1), getSettlementOrdersByUserId);
 router.get('/getAllOrders', authorizeRoles(0), authorizeType(1), listSettlementOrders);
-router.post('/filterOrders', authorizeType(0, 1), filterSettlementOrders);
+router.post('/filterOrders', filterSettlementOrders);
 router.post('/reuploadOrder',singlePdfUpload,validatePdfMagicNumber,multerErrorHandler,authorizeRoles(0), authorizeType(1), reuploadSettlementOrder);
 // router.get('/:id', memorandumController.getPdfById);
 // router.get('/', memorandumController.listAllPdfs);
