@@ -135,14 +135,18 @@ export const filterSettlementOrders = catchAsync(async (req, res, next) => {
     .limit(limit);
 
   if (!orders.length) return next(new AppError('No settlement orders found for the filters.', 404));
-
   const paginatedData = orders.map(order => {
     const createdAt = dayjs(order.createdAt)
       .tz('Asia/Kolkata')
       .format('DD/MM/YYYY');
-
+    const orderObj = order.toObject();
+    if (orderObj.otsId && orderObj.otsId.createdAt) {
+      orderObj.otsId.createdAtFormatted = dayjs(orderObj.otsId.createdAt)
+        .tz('Asia/Kolkata')
+        .format('DD/MM/YYYY');
+    }
     return {
-      ...order.toObject(),
+      ...orderObj,
       createdAt,
     };
   });
