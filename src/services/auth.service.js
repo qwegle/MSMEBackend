@@ -4,6 +4,7 @@ import User from '../models/user.js';
 import AppError from '../utils/AppError.js';
 import { generateOTP } from '../utils/generateResetToken.js';
 import sendEmail from '../utils/sendEmail.js';
+import crypto from 'crypto';
 const { sign } = jwt;
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
