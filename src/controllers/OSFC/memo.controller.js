@@ -5,6 +5,11 @@ import validator from 'validator';
 import mongoose from 'mongoose';
 import catchAsync from '../../utils/catchAsync.js';
 import AppError from '../../utils/AppError.js';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc.js';
+import timezone from 'dayjs/plugin/timezone.js';
+dayjs.extend(utc);
+dayjs.extend(timezone);
 const { escape } = validator;
 const sanitizeInput = input =>
   typeof input === 'string' ? escape(input.trim()) : input;
@@ -145,22 +150,23 @@ export const getAllMemos = catchAsync(async (req, res, next) => {
   let memoFilter = {};
   let otsFilter = {};
 
-  // 🛡️ Role-based filtering logic
-  if (user_role === 2) { // User
+  // Role-based filtering
+  if (user_role === 2) {
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return next(new AppError('User ID is required and must be valid for regular users.', 400));
     }
     if (branch) {
       return next(new AppError('Regular users are not allowed to filter by branch.', 403));
     }
-  } else if (user_role === 1) { // Sub-admin
+  } else if (user_role === 1) {
     if (!branch) {
       return next(new AppError('Branch is required for sub-admins.', 400));
     }
-  } else if (user_role !== 0) { // Invalid role
+  } else if (user_role !== 0) {
     return next(new AppError('Access denied: your role is not authorized to perform this operation.', 403));
   }
 
+  // Loan number-based filter
   if (loan_number) {
     const otsForm = await OTSForm.findOne({ loan_number });
     if (!otsForm) return next(new AppError('No OTS Form found for the given loan number', 404));
@@ -204,14 +210,25 @@ export const getAllMemos = catchAsync(async (req, res, next) => {
     .populate('otsFormId')
     .populate('ackId');
 
+  const paginatedData = memos.map(memo => {
+    const createdAtFormatted = dayjs(memo.createdAt)
+      .tz('Asia/Kolkata')
+      .format('DD/MM/YYYY');
+
+    return {
+      ...memo.toObject(),
+      createdAtFormatted,
+    };
+  });
+
   res.json({
-    paginatedData: memos,
+    paginatedData,
     page,
     limit,
     totalItems,
     totalPages,
     previousPage: page > 1 ? page - 1 : null,
     nextPage: page < totalPages ? page + 1 : null,
-    currentPageCount: memos.length,
+    currentPageCount: paginatedData.length,
   });
 });

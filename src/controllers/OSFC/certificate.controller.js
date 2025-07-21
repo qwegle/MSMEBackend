@@ -7,6 +7,12 @@ import OTSForm from '../../models/OSFC/otsform.js';
 import Acknowledgement from '../../models/OSFC/acknowledgement.js';
 import Memorandum from '../../models/OSFC/memorandum.js';
 import SettlementOrder from '../../models/OSFC/settlementOrder.js';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc.js';
+import timezone from 'dayjs/plugin/timezone.js';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 // Upload certificate
 export const uploadCertificateOrder = catchAsync(async (req, res, next) => {
@@ -308,13 +314,24 @@ export const filterCertificateOrders = catchAsync(async (req, res, next) => {
   ];
 
   const result = await CertificateOrder.aggregate(pipeline);
-  const paginatedData = result[0].paginatedData;
-  const totalCount = result[0].totalCount[0]?.count || 0;
+  const rawData = result[0]?.paginatedData || [];
+  const totalCount = result[0]?.totalCount[0]?.count || 0;
   const totalPages = Math.ceil(totalCount / limit);
 
-  if (!paginatedData.length) {
+  if (!rawData.length) {
     return next(new AppError('No certificates found matching the filters', 404));
   }
+
+  // Format createdAt in Asia/Kolkata timezone
+  const paginatedData = rawData.map((item) => {
+    const formattedCreatedAt = dayjs(item.createdAt)
+      .tz('Asia/Kolkata')
+      .format('DD/MM/YYYY');
+    return {
+      ...item,
+      createdAt: formattedCreatedAt,
+    };
+  });
 
   res.status(200).json({
     paginatedData,
@@ -327,3 +344,4 @@ export const filterCertificateOrders = catchAsync(async (req, res, next) => {
     currentPageCount: paginatedData.length,
   });
 });
+

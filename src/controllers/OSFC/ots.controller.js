@@ -1,5 +1,7 @@
 import { Types } from 'mongoose';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc.js';
+import timezone from 'dayjs/plugin/timezone.js';
 import relativeTime from 'dayjs/plugin/relativeTime.js';
 import OTSForm from '../../models/OSFC/otsform.js';
 import AckForm from '../../models/OSFC/acknowledgement.js';
@@ -14,7 +16,8 @@ import validator from 'validator';
 const sanitizeInput = input =>
   typeof input === 'string' ? escape(input.trim()) : input;
 
-
+dayjs.extend(utc);
+dayjs.extend(timezone);
 dayjs.extend(relativeTime);
 const { escape } = validator;
 
@@ -242,19 +245,24 @@ export const approveOtsApplication = catchAsync(async (req, res, next) => {
 
 export const filterOTS = catchAsync(async (req, res, next) => {
   const { user_role, id: requesterId } = req.user;
-  const { otsId, userId, branch, status, page, limit} = req.body;
+  const { otsId, userId, branch, status, page, limit } = req.body;
+
   const clean = (val) => (typeof val === 'string' && val.trim() === '' ? undefined : val);
+
   const cleanedOtsId = clean(otsId);
   const cleanedUserId = clean(userId);
   const cleanedBranch = clean(branch);
   const cleanedStatus = clean(status);
-  const pageNum = (!page || page == "")? 1 : parseInt(page,10);
-  const limitNum = (!limit || limit == "")? 10 : parseInt(limit,10);
+
+  const pageNum = !page || page === '' ? 1 : parseInt(page, 10);
+  const limitNum = !limit || limit === '' ? 10 : parseInt(limit, 10);
   const skip = (pageNum - 1) * limitNum;
+
   const parsedStatus =
     cleanedStatus !== undefined && !isNaN(Number(cleanedStatus))
       ? Number(cleanedStatus)
       : undefined;
+
   if (user_role === 2) {
     if (!cleanedUserId || !Types.ObjectId.isValid(cleanedUserId)) {
       return next(new AppError('Valid userId is required for regular users.', 400));
@@ -271,7 +279,9 @@ export const filterOTS = catchAsync(async (req, res, next) => {
   if (![0, 1, 2].includes(user_role)) {
     return next(new AppError('Access denied: invalid user role.', 403));
   }
+
   const filter = {};
+
   if (cleanedOtsId) filter.loan_number = sanitizeInput(cleanedOtsId);
 
   if (cleanedUserId) {
@@ -280,8 +290,10 @@ export const filterOTS = catchAsync(async (req, res, next) => {
     }
     filter.userId = new Types.ObjectId(cleanedUserId);
   }
+
   if (cleanedBranch) filter.branch = sanitizeInput(cleanedBranch);
   if (parsedStatus !== undefined) filter.status = parsedStatus;
+
   const aggregationPipeline = [
     { $match: filter },
     {
@@ -336,10 +348,19 @@ export const filterOTS = catchAsync(async (req, res, next) => {
   const totalItems = result[0]?.totalCount[0]?.count || 0;
   const totalPages = Math.ceil(totalItems / limitNum);
 
-  const paginatedData = paginatedRaw.map((ots) => ({ ots }));
+  const paginatedData = paginatedRaw.map((ots) => {
+    const formattedCreatedAt = dayjs(ots.createdAt)
+      .tz('Asia/Kolkata')
+      .format('DD/MM/YYYY');
+
+    return {
+      ...ots,
+      createdAt: formattedCreatedAt,
+    };
+  });
 
   res.status(200).json({
-    paginatedData,
+    paginatedData: paginatedData.map((ots) => ({ ots })),
     page: pageNum,
     limit: limitNum,
     totalItems,

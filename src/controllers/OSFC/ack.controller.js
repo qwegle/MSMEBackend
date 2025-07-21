@@ -3,12 +3,16 @@ import validator from 'validator';
 import ACKForm from '../../models/OSFC/acknowledgement.js';
 import OTSForm from '../../models/OSFC/otsform.js';
 import CertificateOrder from '../../models/OSFC/certificate.js'; // assumed import
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc.js';
+import timezone from 'dayjs/plugin/timezone.js';
 import AppError from '../../utils/AppError.js';
 import catchAsync from '../../utils/catchAsync.js';
 const { escape } = validator;
 const sanitizeInput = input =>
   typeof input === 'string' ? escape(input.trim()) : input;
-
+dayjs.extend(utc);
+dayjs.extend(timezone);
 // Create Acknowledgement Form
 export const createAckForm = catchAsync(async (req, res, next) => {
   const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
@@ -161,9 +165,20 @@ export const filterAckForms = catchAsync(async (req, res, next) => {
   ];
 
   const result = await ACKForm.aggregate(pipeline);
-  const paginatedData = result[0].paginatedData;
+  const paginatedRaw = result[0].paginatedData;
   const totalCount = result[0].totalCount[0]?.count || 0;
   const totalPages = Math.ceil(totalCount / limit);
+
+  // Convert UTC createdAt to Asia/Kolkata and format as dd/mm/yyyy
+  const paginatedData = paginatedRaw.map((item) => {
+    const formattedCreatedAt = dayjs(item.createdAt)
+      .tz('Asia/Kolkata')
+      .format('DD/MM/YYYY');
+    return {
+      ...item,
+      createdAt: formattedCreatedAt,
+    };
+  });
 
   res.status(200).json({
     paginatedData,
@@ -176,3 +191,4 @@ export const filterAckForms = catchAsync(async (req, res, next) => {
     currentPageCount: paginatedData.length,
   });
 });
+
