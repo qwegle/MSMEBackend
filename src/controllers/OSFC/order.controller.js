@@ -141,7 +141,7 @@ export const filterSettlementOrders = catchAsync(async (req, res, next) => {
       .format('DD/MM/YYYY');
     const orderObj = order.toObject();
     if (orderObj.otsId && orderObj.otsId.createdAt) {
-      orderObj.otsId.createdAtFormatted = dayjs(orderObj.otsId.createdAt)
+      orderObj.otsId.createdAt = dayjs(orderObj.otsId.createdAt)
         .tz('Asia/Kolkata')
         .format('DD/MM/YYYY');
     }
