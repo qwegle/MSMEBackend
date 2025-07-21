@@ -7,7 +7,6 @@ import catchAsync from '../../utils/catchAsync.js';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import timezone from 'dayjs/plugin/timezone.js';
-
 dayjs.extend(utc);
 dayjs.extend(timezone);
 export const uploadSettlementOrder = catchAsync(async (req, res, next) => {
@@ -138,13 +137,13 @@ export const filterSettlementOrders = catchAsync(async (req, res, next) => {
   if (!orders.length) return next(new AppError('No settlement orders found for the filters.', 404));
 
   const paginatedData = orders.map(order => {
-    const createdAtFormatted = dayjs(order.createdAt)
+    const createdAt = dayjs(order.createdAt)
       .tz('Asia/Kolkata')
       .format('DD/MM/YYYY');
 
     return {
       ...order.toObject(),
-      createdAtFormatted,
+      createdAt,
     };
   });
 
