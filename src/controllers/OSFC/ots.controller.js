@@ -249,7 +249,7 @@ export const filterOTS = catchAsync(async (req, res, next) => {
   const cleanedBranch = clean(branch);
   const cleanedStatus = clean(status);
   const pageNum = (!page || page == "")? 1 : parseInt(page,10);
-  const limitNum = (!limit || limit == "")? 1 : parseInt(limit,10);
+  const limitNum = (!limit || limit == "")? 10 : parseInt(limit,10);
   const skip = (pageNum - 1) * limitNum;
   const parsedStatus =
     cleanedStatus !== undefined && !isNaN(Number(cleanedStatus))
