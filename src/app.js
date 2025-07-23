@@ -114,7 +114,6 @@
 
 import dotenv from 'dotenv';
 dotenv.config();
-
 import express, { json } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -143,48 +142,36 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// Security Headers with Helmet
-app.use(
-  helmet({
-    contentSecurityPolicy: false, // Set manually below
-    frameguard: { action: 'deny' },
-    noSniff: true,
-    hsts: { maxAge: 63072000, includeSubDomains: true, preload: true },
-    referrerPolicy: { policy: 'no-referrer' },
-    dnsPrefetchControl: { allow: false },
-    crossOriginEmbedderPolicy: false,
-    crossOriginResourcePolicy: { policy: 'same-origin' },
-  })
-);
+app.use(helmet());
 
-// CSP (Content Security Policy)
-app.use(
-  helmet.contentSecurityPolicy({
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", 'https://cdn.jsdelivr.net'],
-      styleSrc: ["'self'", 'https://cdn.jsdelivr.net', "'unsafe-inline'"],
-      fontSrc: ["'self'", 'https://fonts.googleapis.com', 'https://fonts.gstatic.com'],
-      imgSrc: ["'self'", 'data:'],
-      objectSrc: ["'none'"],
-      upgradeInsecureRequests: [],
-    },
-  })
-);
+app.use(helmet.hsts({
+  maxAge: 31536000, // 1 year
+  includeSubDomains: true,
+  preload: true,
+}));
 
-// Restrictive CORS
-const allowedOrigins = ['https://msme-odisha.flutterflow.app'];
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      callback(new Error('Not allowed by CORS'));
-    },
-    credentials: true,
-  })
-);
+app.use(helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ["'self'"],
+    scriptSrc: ["'self'", "'unsafe-inline'", 'https://your-cdn.com'],
+    styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+    fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+    imgSrc: ["'self'", 'data:'],
+    connectSrc: ["'self'", 'https://api.yourdomain.com'],
+    objectSrc: ["'none'"],
+    upgradeInsecureRequests: [],
+  }
+}));
+
+app.use(helmet.frameguard({ action: 'sameorigin' })); // sets X-Frame-Options
+app.use(helmet.noSniff());                             // sets X-Content-Type-Options
+app.use(helmet.referrerPolicy({ policy: 'no-referrer' })); // sets Referrer-Policy
+
+// Manually set Permissions-Policy (not built into Helmet v6+)
+app.use((req, res, next) => {
+  res.setHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+  next();
+});
 
 // Basic middlewares
 app.use(json());
