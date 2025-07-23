@@ -18,11 +18,16 @@ router.post('/createTenderResult',authenticateToken, authorizeRoles(0), authoriz
 router.put('/updateTenderResult',authenticateToken, authorizeRoles(0), authorizeType(3), updateTenderResult);
 router.post('/filterTenderResults',authenticateToken, authorizeRoles(0), authorizeType(3), filterTenderResults);
 
+// bidder routes
+router.post('/getAllBidders',authenticateToken, authorizeRoles(0), authorizeType(3), getAllBidders);
+router.put('/deleteBidderById',authenticateToken, authorizeRoles(0), authorizeType(3), deleteBidderById);
+router.post('/createBidder',authenticateToken, authorizeRoles(0), authorizeType(3), createBidder);
+router.post('/updateBidderById',authenticateToken, authorizeRoles(0), authorizeType(3), updateBidderById)
+
 // Supply Order Routes
 router.post('/createSupplyOrder', supplyOrderUpload,validatePdfMagicNumber,multerErrorHandler,authenticateToken, authorizeRoles(0), authorizeType(3), createSupplyOrder);
 router.put('/updateSupplyOrder',authenticateToken, authorizeRoles(0), authorizeType(3), updateSupplyOrder);
 router.post('/filterSupplyOrders', authenticateToken, authorizeRoles(0), authorizeType(3), filterSupplyOrders);
-
 router.get('/dashboardCounts', authenticateToken, authorizeRoles(0), authorizeType(3), getDashboardCounts);
 
 export default router;

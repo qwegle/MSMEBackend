@@ -4,7 +4,6 @@ import { fileURLToPath } from 'url';
 import { dirname, join, basename, extname } from 'path';
 import { existsSync, mkdirSync, readFileSync, unlinkSync } from 'fs';
 
-// ✅ Create __dirname equivalent for ES module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 

@@ -60,28 +60,21 @@ export const createAckForm = catchAsync(async (req, res, next) => {
 export const reuploadAckSignature = catchAsync(async (req, res, next) => {
   const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
   if (!filePath) return next(new AppError('Image is required for re-upload', 400));
-
   const loan_number = sanitizeInput(req.body.loan_number);
   if (!loan_number) return next(new AppError('Loan number is required', 400));
-
   const otsForm = await OTSForm.findOne({ loan_number });
   if (!otsForm) return next(new AppError('OTS Form not found for this loan number', 404));
-
   const ackForm = await ACKForm.findOne({ ots_form_id: otsForm._id });
   if (!ackForm) return next(new AppError('Acknowledgement not found for this loan number', 404));
-
   ackForm.img_link_sign_stamp = filePath;
   await ackForm.save();
-
   res.status(200).json({ message: 'Signature/stamp re-uploaded successfully', ackForm });
 });
-
 // Get All Acknowledgements
 export const getAllAckForms = catchAsync(async (req, res) => {
   const forms = await ACKForm.find().populate('ots_form_id').sort({ createdAt: -1 });
   res.status(200).json(forms);
 });
-
 // Get Acknowledgements by User ID
 export const getAckFormsByUserId = catchAsync(async (req, res, next) => {
   const userId = sanitizeInput(req.params.userId);
@@ -93,7 +86,6 @@ export const getAckFormsByUserId = catchAsync(async (req, res, next) => {
 
   res.status(200).json(forms);
 });
-
 // Filter Acknowledgements with Role-Based Rules
 export const filterAckForms = catchAsync(async (req, res, next) => {
   const { user_role, id: requesterId } = req.user;
@@ -101,7 +93,6 @@ export const filterAckForms = catchAsync(async (req, res, next) => {
   const page = parseInt(req.body.page) || 1;
   const limit = parseInt(req.body.limit) || 10;
   const skip = (page - 1) * limit;
-
   // Role-based filtering rules
   if (user_role === 2) {
     if (!userId || !Types.ObjectId.isValid(userId)) {
@@ -117,24 +108,19 @@ export const filterAckForms = catchAsync(async (req, res, next) => {
   } else if (user_role !== 0) {
     return next(new AppError('Access denied for this role.', 403));
   }
-
   const matchConditions = {};
-
   if (userId) {
     if (!Types.ObjectId.isValid(userId)) {
       return next(new AppError('Invalid userId format.', 400));
     }
     matchConditions['otsDetails.userId'] = new Types.ObjectId(userId);
   }
-
   if (loan_number) {
     matchConditions['otsDetails.loan_number'] = sanitizeInput(loan_number);
   }
-
   if (branch) {
     matchConditions['otsDetails.branch'] = sanitizeInput(branch);
   }
-
   const pipeline = [
     {
       $lookup: {
