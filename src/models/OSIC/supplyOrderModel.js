@@ -2,7 +2,27 @@
 import mongoose from 'mongoose';
 
 const supplyOrderSchema = new mongoose.Schema({
-  supply_details: {
+  tender_number: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  tender_value: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  supply_quantity: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  invoice_number: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  invoice_amount: {
     type: String,
     required: true,
     trim: true,
@@ -35,5 +55,4 @@ const supplyOrderSchema = new mongoose.Schema({
 });
 
 const SupplyOrder = mongoose.model('SupplyOrder', supplyOrderSchema);
-
 export default SupplyOrder;

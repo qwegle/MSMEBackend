@@ -3,6 +3,7 @@ import FloatTender from '../../models/OSIC/floatTender.js';
 import TenderResult from '../../models/OSIC/tenderResult.js';
 import SupplyOrder from '../../models/OSIC/supplyOrderModel.js';
 import Bidder from '../../models/OSIC/bidder.js';
+
 export const createGovernmentOrder = async (req, res) => {
   try {
     const newOrder = new GovernmentOrder(req.body);
@@ -111,7 +112,6 @@ export const filterFloatTenders = async (req, res) => {
     const page = parseInt(req.body.page) || 1;
     const limit = parseInt(req.body.limit) || 10;
     const skip = (page - 1) * limit;
-
     const filters = {};
     if (project_title) {
       filters.project_title = new RegExp(project_title, 'i'); // case-insensitive
@@ -119,18 +119,14 @@ export const filterFloatTenders = async (req, res) => {
     if (tender_number) {
       filters.tender_number = tender_number;
     }
-
     const [tenders, totalCount] = await Promise.all([
       FloatTender.find(filters).sort({ createdAt: -1 }).skip(skip).limit(limit),
       FloatTender.countDocuments(filters)
     ]);
-
     const totalPages = Math.ceil(totalCount / limit);
-
     if (!tenders.length) {
       return res.status(404).json({ message: 'No float tenders found matching the filters' });
     }
-
     return res.status(200).json({
       paginatedData: tenders,
       page,
@@ -149,39 +145,89 @@ export const filterFloatTenders = async (req, res) => {
 
 export const createTenderResult = async (req, res) => {
   try {
-    const result = new TenderResult(req.body);
+    const { tender_number, bidder_details } = req.body;
+    if (!tender_number || !Array.isArray(bidder_details) || bidder_details.length === 0) {
+      return res.status(400).json({
+        error: 'tender_number and at least one bidder in bidder_details are required',
+      });
+    }
+    for (const bidder of bidder_details) {
+      const { name, bid_value, bidder_score } = bidder;
+      if (
+        !name ||
+        bid_value === undefined ||
+        bidder_score === undefined ||
+        typeof bid_value !== 'number' ||
+        typeof bidder_score !== 'number'
+      ) {
+        return res.status(400).json({
+          error: 'Each bidder must include name (string), bid_value (number), and bidder_score (number)',
+        });
+      }
+    }
+    const result = new TenderResult({ tender_number, bidder_details });
     await result.save();
     res.status(201).json({ message: 'Tender result recorded', result });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    console.error('Error creating tender result:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
 export const updateTenderResult = async (req, res) => {
   try {
     const { id } = req.body;
-    const updatedResult = await TenderResult.findByIdAndUpdate(id, req.body, {
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Valid tender result ID is required' });
+    }
+    const { tender_number, bidder_details } = req.body;
+    if (bidder_details && (!Array.isArray(bidder_details) || bidder_details.length === 0)) {
+      return res.status(400).json({
+        error: 'bidder_details must be a non-empty array if provided',
+      });
+    }
+    if (Array.isArray(bidder_details)) {
+      for (const bidder of bidder_details) {
+        const { name, bid_value, bidder_score } = bidder;
+        if (
+          !name ||
+          bid_value === undefined ||
+          bidder_score === undefined ||
+          typeof bid_value !== 'number' ||
+          typeof bidder_score !== 'number'
+        ) {
+          return res.status(400).json({
+            error:
+              'Each bidder must include name (string), bid_value (number), and bidder_score (number)',
+          });
+        }
+      }
+    }
+    const updatedData = {};
+    if (tender_number !== undefined) updatedData.tender_number = tender_number;
+    if (bidder_details !== undefined) updatedData.bidder_details = bidder_details;
+    const updatedResult = await TenderResult.findByIdAndUpdate(id, updatedData, {
       new: true,
       runValidators: true,
     });
-
     if (!updatedResult) {
       return res.status(404).json({ error: 'Tender result not found' });
     }
-
-    res.json({ message: 'Result updated successfully', result: updatedResult });
+    res.status(200).json({
+      message: 'Result updated successfully',
+      result: updatedResult,
+    });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    console.error('Error updating tender result:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
 export const filterTenderResults = async (req, res) => {
   try {
     const { tender_number, name } = req.body;
     const page = parseInt(req.body.page) || 1;
     const limit = parseInt(req.body.limit) || 10;
     const skip = (page - 1) * limit;
-
     const filters = {};
     if (tender_number) {
       filters.tender_number = tender_number;
@@ -217,73 +263,92 @@ export const filterTenderResults = async (req, res) => {
   }
 };
 
-
 export const createSupplyOrder = async (req, res) => {
   try {
     const proofOfSupply = req.files?.proof_of_supply?.[0];
     const invoiceSubmission = req.files?.invoice_submission?.[0];
-
     if (!proofOfSupply || !invoiceSubmission) {
       return res.status(400).json({
         error: 'Both proof_of_supply and invoice_submission PDF files are required.',
       });
     }
-
     const fileBaseURL = process.env.NODE_APP_URL + '/uploads';
-
+    const {
+      tender_number,
+      tender_value,
+      supply_quantity,
+      invoice_number,
+      invoice_amount,
+      payment_as_per_invoice
+    } = req.body;
+    if (
+      !tender_number || !tender_value || !supply_quantity ||
+      !invoice_number || !invoice_amount || payment_as_per_invoice === undefined
+    ) {
+      return res.status(400).json({ error: 'All supply order fields are required.' });
+    }
     const newOrder = new SupplyOrder({
-      supply_details: req.body.supply_details,
+      tender_number: tender_number.trim(),
+      tender_value: tender_value.trim(),
+      supply_quantity: supply_quantity.trim(),
+      invoice_number: invoice_number.trim(),
+      invoice_amount: invoice_amount.trim(),
       proof_of_supply: `${fileBaseURL}/${proofOfSupply.filename}`,
       invoice_submission: `${fileBaseURL}/${invoiceSubmission.filename}`,
-      payment_as_per_invoice: req.body.payment_as_per_invoice,
+      payment_as_per_invoice: Number(payment_as_per_invoice),
     });
-
     await newOrder.save();
-
-    res.status(201).json({ message: 'Supply order recorded successfully', order: newOrder });
+    res.status(201).json({
+      message: 'Supply order recorded successfully',
+      order: newOrder,
+    });
   } catch (err) {
-    console.error(err);
+    console.error('Error in createSupplyOrder:', err);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
+
+
 export const updateSupplyOrder = async (req, res) => {
   try {
-    const { id, supply_details, payment_as_per_invoice } = req.body;
-
-    if (!id) {
-      return res.status(400).json({ error: 'Supply order ID is required' });
+    const { id } = req.params;
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Valid supply order ID is required' });
     }
-
     const existingOrder = await SupplyOrder.findById(id);
     if (!existingOrder) {
       return res.status(404).json({ error: 'Supply order not found' });
     }
-    const proof_of_supply = req.files?.proof_of_supply?.[0]
-      ? `${process.env.NODE_APP_URL}/uploads/${req.files.proof_of_supply[0].filename}`
-      : existingOrder.proof_of_supply;
-
-    const invoice_submission = req.files?.invoice_submission?.[0]
-      ? `${process.env.NODE_APP_URL}/uploads/${req.files.invoice_submission[0].filename}`
-      : existingOrder.invoice_submission;
-    const updatedOrder = await SupplyOrder.findByIdAndUpdate(
-      id,
-      {
-        supply_details: supply_details || existingOrder.supply_details,
-        payment_as_per_invoice: payment_as_per_invoice ?? existingOrder.payment_as_per_invoice,
-        proof_of_supply,
-        invoice_submission,
-      },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
-
-    res.json({ message: 'Supply order updated', order: updatedOrder });
+    const fileBaseURL = process.env.NODE_APP_URL + '/uploads';
+    const updatedFields = {
+      tender_number: req.body.tender_number ?? existingOrder.tender_number,
+      tender_value: req.body.tender_value ?? existingOrder.tender_value,
+      supply_quantity: req.body.supply_quantity ?? existingOrder.supply_quantity,
+      invoice_number: req.body.invoice_number ?? existingOrder.invoice_number,
+      invoice_amount: req.body.invoice_amount ?? existingOrder.invoice_amount,
+      payment_as_per_invoice:
+        req.body.payment_as_per_invoice !== undefined
+          ? Number(req.body.payment_as_per_invoice)
+          : existingOrder.payment_as_per_invoice,
+      proof_of_supply: req.files?.proof_of_supply?.[0]
+        ? `${fileBaseURL}/${req.files.proof_of_supply[0].filename}`
+        : existingOrder.proof_of_supply,
+      invoice_submission: req.files?.invoice_submission?.[0]
+        ? `${fileBaseURL}/${req.files.invoice_submission[0].filename}`
+        : existingOrder.invoice_submission,
+    };
+    const updatedOrder = await SupplyOrder.findByIdAndUpdate(id, updatedFields, {
+      new: true,
+      runValidators: true,
+    });
+    res.status(200).json({
+      message: 'Supply order updated successfully',
+      order: updatedOrder,
+    });
   } catch (err) {
-    console.error(err);
-    res.status(400).json({ error: err.message });
+    console.error('Error updating supply order:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
