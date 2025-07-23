@@ -13,10 +13,7 @@ import { createGovernmentOrder,
     updateSupplyOrder, 
     filterSupplyOrders, 
     getDashboardCounts,
-    getAllBidders,
-    deleteBidderById,
-    createBidder,
-    updateBidderById } from '../controllers/OSIC/osic.controller.js';
+    } from '../controllers/OSIC/osic.controller.js';
 import { authenticateToken, authorizeType, authorizeRoles } from '../middlewares/auth.middleware.js';
 import { supplyOrderUpload, validatePdfMagicNumber, multerErrorHandler } from '../middlewares/fileUploadHandler.js';
 // Government Order Routes
@@ -34,11 +31,11 @@ router.post('/createTenderResult',authenticateToken, authorizeRoles(0), authoriz
 router.put('/updateTenderResult',authenticateToken, authorizeRoles(0), authorizeType(3), updateTenderResult);
 router.post('/filterTenderResults',authenticateToken, authorizeRoles(0), authorizeType(3), filterTenderResults);
 
-// bidder routes
-router.post('/getAllBidders',authenticateToken, authorizeRoles(0), authorizeType(3), getAllBidders);
-router.put('/deleteBidderById',authenticateToken, authorizeRoles(0), authorizeType(3), deleteBidderById);
-router.post('/createBidder',authenticateToken, authorizeRoles(0), authorizeType(3), createBidder);
-router.post('/updateBidderById',authenticateToken, authorizeRoles(0), authorizeType(3), updateBidderById)
+// // bidder routes
+// router.post('/getAllBidders',authenticateToken, authorizeRoles(0), authorizeType(3), getAllBidders);
+// router.put('/deleteBidderById',authenticateToken, authorizeRoles(0), authorizeType(3), deleteBidderById);
+// router.post('/createBidder',authenticateToken, authorizeRoles(0), authorizeType(3), createBidder);
+// router.post('/updateBidderById',authenticateToken, authorizeRoles(0), authorizeType(3), updateBidderById)
 
 // Supply Order Routes
 router.post('/createSupplyOrder', supplyOrderUpload,validatePdfMagicNumber,multerErrorHandler,authenticateToken, authorizeRoles(0), authorizeType(3), createSupplyOrder);

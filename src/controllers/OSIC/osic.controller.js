@@ -3,6 +3,9 @@ import FloatTender from '../../models/OSIC/floatTender.js';
 import TenderResult from '../../models/OSIC/tenderResult.js';
 import SupplyOrder from '../../models/OSIC/supplyOrderModel.js';
 import Bidder from '../../models/OSIC/bidder.js';
+import SanctionOrder from '../../models/OSIC/SanctionOrder.js';
+import AppError from '../../utils/AppError.js';
+import catchAsync from '../../utils/catchAsync.js';
 
 export const createGovernmentOrder = async (req, res) => {
   try {
@@ -414,85 +417,138 @@ export const getDashboardCounts = async (req, res) => {
 };
 
 
-export const createBidder = async (req, res, next) => {
-  try {
-    const { name, bid_value, bid_score } = req.body;
-    if (!name || !bid_value || !bid_score) {
-      return res.status(400).json({ message: 'All fields are required: name, bid_value, bid_score' });
-    }
-    const bidder = await Bidder.create({ name, bid_value, bid_score });
-    res.status(201).json({
-      status: 'success',
-      data: bidder,
-    });
-  } catch (error) {
-    console.error('Error creating bidder:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
+// export const createBidder = async (req, res, next) => {
+//   try {
+//     const { name, bid_value, bid_score } = req.body;
+//     if (!name || !bid_value || !bid_score) {
+//       return res.status(400).json({ message: 'All fields are required: name, bid_value, bid_score' });
+//     }
+//     const bidder = await Bidder.create({ name, bid_value, bid_score });
+//     res.status(201).json({
+//       status: 'success',
+//       data: bidder,
+//     });
+//   } catch (error) {
+//     console.error('Error creating bidder:', error);
+//     res.status(500).json({ message: 'Server error', error: error.message });
+//   }
+// };
 
-export const getAllBidders = async (req, res) => {
-  try {
-    const bidders = await Bidder.find().sort({ createdAt: -1 });
-    res.status(200).json({
-      status: 'success',
-      count: bidders.length,
-      data: bidders,
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
+// export const getAllBidders = async (req, res) => {
+//   try {
+//     const bidders = await Bidder.find().sort({ createdAt: -1 });
+//     res.status(200).json({
+//       status: 'success',
+//       count: bidders.length,
+//       data: bidders,
+//     });
+//   } catch (error) {
+//     res.status(500).json({ message: 'Server error', error: error.message });
+//   }
+// };
 
-export const deleteBidderById = async (req, res) => {
-  try {
-    const { id } = req.body;
+// export const deleteBidderById = async (req, res) => {
+//   try {
+//     const { id } = req.body;
 
-    const bidder = await Bidder.findByIdAndDelete(id);
+//     const bidder = await Bidder.findByIdAndDelete(id);
 
-    if (!bidder) {
-      return res.status(404).json({ message: 'Bidder not found' });
-    }
+//     if (!bidder) {
+//       return res.status(404).json({ message: 'Bidder not found' });
+//     }
 
-    res.status(200).json({
-      status: 'success',
-      message: `Bidder with ID ${id} deleted successfully.`,
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
+//     res.status(200).json({
+//       status: 'success',
+//       message: `Bidder with ID ${id} deleted successfully.`,
+//     });
+//   } catch (error) {
+//     res.status(500).json({ message: 'Server error', error: error.message });
+//   }
+// };
 
 
-export const updateBidderById = async (req, res) => {
-  try {
-    const { id, name, bid_value, bid_score } = req.body;
-    if (!id) {
-      return res.status(400).json({ message: 'Bidder ID is required' });
-    }
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: 'Invalid Bidder ID format' });
-    }
-    const updateFields = {};
-    if (name !== undefined) updateFields.name = name;
-    if (bid_value !== undefined) updateFields.bid_value = bid_value;
-    if (bid_score !== undefined) updateFields.bid_score = bid_score;
-    const updatedBidder = await Bidder.findByIdAndUpdate(
-      id,
-      updateFields,
-      { new: true, runValidators: true }
-    );
-    if (!updatedBidder) {
-      return res.status(404).json({ message: 'Bidder not found' });
-    }
-    res.status(200).json({
-      status: 'success',
-      data: updatedBidder,
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
+// export const updateBidderById = async (req, res) => {
+//   try {
+//     const { id, name, bid_value, bid_score } = req.body;
+//     if (!id) {
+//       return res.status(400).json({ message: 'Bidder ID is required' });
+//     }
+//     if (!mongoose.Types.ObjectId.isValid(id)) {
+//       return res.status(400).json({ message: 'Invalid Bidder ID format' });
+//     }
+//     const updateFields = {};
+//     if (name !== undefined) updateFields.name = name;
+//     if (bid_value !== undefined) updateFields.bid_value = bid_value;
+//     if (bid_score !== undefined) updateFields.bid_score = bid_score;
+//     const updatedBidder = await Bidder.findByIdAndUpdate(
+//       id,
+//       updateFields,
+//       { new: true, runValidators: true }
+//     );
+//     if (!updatedBidder) {
+//       return res.status(404).json({ message: 'Bidder not found' });
+//     }
+//     res.status(200).json({
+//       status: 'success',
+//       data: updatedBidder,
+//     });
+//   } catch (error) {
+//     res.status(500).json({ message: 'Server error', error: error.message });
+//   }
+// };
+
+
+export const createSanctionOrder = catchAsync(async (req, res, next) => {
+  const newOrder = await SanctionOrder.create(req.body);
+  res.status(201).json({
+    status: 'success',
+    data: newOrder,
+  });
+});
+
+export const getAllSanctionOrders = catchAsync(async (req, res, next) => {
+  const orders = await SanctionOrder.find();
+  res.status(200).json({
+    status: 'success',
+    results: orders.length,
+    data: orders,
+  });
+});
+
+
+export const getSanctionOrderById = catchAsync(async (req, res, next) => {
+  const order = await SanctionOrder.findById(req.body.id);
+  if (!order) return next(new AppError('Sanction Order not found', 404));
+
+  res.status(200).json({
+    status: 'success',
+    data: order,
+  });
+});
+
+export const updateSanctionOrder = catchAsync(async (req, res, next) => {
+  const updatedOrder = await SanctionOrder.findByIdAndUpdate(req.body.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!updatedOrder) return next(new AppError('Sanction Order not found', 404));
+
+  res.status(200).json({
+    status: 'success',
+    data: updatedOrder,
+  });
+});
+
+export const deleteSanctionOrder = catchAsync(async (req, res, next) => {
+  const deleted = await SanctionOrder.findByIdAndDelete(req.params.id);
+  if (!deleted) return next(new AppError('Sanction Order not found', 404));
+
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});
 
 
 
