@@ -20,6 +20,7 @@ import errorHandler from './middlewares/errorHandler.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+
 const app = express();
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
@@ -27,8 +28,16 @@ app.set('trust proxy', 1);
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
+app.use(helmet({
+  frameguard: { action: 'deny' },
+  noSniff: true,
+  dnsPrefetchControl: { allow: false },
+  permittedCrossDomainPolicies: true,
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false, 
+}));
 
-app.use(helmet());
+
 app.use(cors());
 app.use(json());
 app.use(hpp());
