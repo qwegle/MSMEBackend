@@ -1,6 +1,22 @@
 import { Router } from 'express';
 const router = Router();
-import { createGovernmentOrder, updateGovernmentOrder, filterGovernmentOrders, createFloatTender, updateFloatTender, filterFloatTenders, createTenderResult, updateTenderResult, filterTenderResults, createSupplyOrder, updateSupplyOrder, filterSupplyOrders, getDashboardCounts } from '../controllers/OSIC/osic.controller.js';
+import { createGovernmentOrder, 
+    updateGovernmentOrder, 
+    filterGovernmentOrders, 
+    createFloatTender, 
+    updateFloatTender, 
+    filterFloatTenders, 
+    createTenderResult, 
+    updateTenderResult, 
+    filterTenderResults, 
+    createSupplyOrder, 
+    updateSupplyOrder, 
+    filterSupplyOrders, 
+    getDashboardCounts,
+    getAllBidders,
+    deleteBidderById,
+    createBidder,
+    updateBidderById } from '../controllers/OSIC/osic.controller.js';
 import { authenticateToken, authorizeType, authorizeRoles } from '../middlewares/auth.middleware.js';
 import { supplyOrderUpload, validatePdfMagicNumber, multerErrorHandler } from '../middlewares/fileUploadHandler.js';
 // Government Order Routes
