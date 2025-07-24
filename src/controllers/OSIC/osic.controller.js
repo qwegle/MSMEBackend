@@ -251,7 +251,7 @@ export const updateTenderResult = async (req, res) => {
 };
 export const filterTenderResults = async (req, res) => {
   try {
-    const { tender_number, name } = req.body;
+    const { tender_number, name,  } = req.body;
     const page = parseInt(req.body.page) || 1;
     const limit = parseInt(req.body.limit) || 10;
     const skip = (page - 1) * limit;
@@ -280,9 +280,9 @@ export const filterTenderResults = async (req, res) => {
 
     const totalPages = Math.ceil(totalCount / limit);
 
-    if (!results.length) {
-      return res.status(404).json({ message: 'No tender results found matching the filters' });
-    }
+    // if (!results.length) {
+    //   return res.status(404).json({ message: 'No tender results found matching the filters' });
+    // }
 
     return res.status(200).json({
       paginatedData: results,
@@ -310,10 +310,6 @@ export const getAllTenderResults = async (req, res) => {
       TenderResult.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
       TenderResult.countDocuments()
     ]);
-
-    if (!results.length) {
-      return res.status(404).json({ message: 'No tender results found' });
-    }
 
     const totalPages = Math.ceil(totalCount / limit);
 
