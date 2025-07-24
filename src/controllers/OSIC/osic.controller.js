@@ -2,7 +2,7 @@ import GovernmentOrder from '../../models/OSIC/governmentModel.js';
 import FloatTender from '../../models/OSIC/floatTender.js';
 import TenderResult from '../../models/OSIC/tenderResult.js';
 import SupplyOrder from '../../models/OSIC/supplyOrderModel.js';
-import Bidder from '../../models/OSIC/bidder.js';
+// import Bidder from '../../models/OSIC/bidder.js';
 import SanctionOrder from '../../models/OSIC/SanctionOrder.js';
 import AppError from '../../utils/AppError.js';
 import catchAsync from '../../utils/catchAsync.js';
@@ -426,6 +426,7 @@ export const filterSupplyOrders = async (req, res) => {
     const page = parseInt(req.body.page) || 1;
     const limit = parseInt(req.body.limit) || 10;
     const skip = (page - 1) * limit;
+    
 
     const filters = {};
     if (supply_details) {
