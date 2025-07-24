@@ -60,9 +60,9 @@ export const filterGovernmentOrders = async (req, res) => {
 
     const totalPages = Math.ceil(totalCount / limit);
 
-    if (!orders.length) {
-      return res.status(404).json({ message: 'No government orders found matching the filters' });
-    }
+    // if (!orders.length) {
+    //   return res.status(404).json({ message: 'No government orders found matching the filters' });
+    // }
 
     return res.status(200).json({
       paginatedData: orders,
@@ -439,9 +439,9 @@ export const filterSupplyOrders = async (req, res) => {
 
     const totalPages = Math.ceil(totalCount / limit);
 
-    if (!orders.length) {
-      return res.status(404).json({ message: 'No supply orders found matching the filters' });
-    }
+    // if (!orders.length) {
+    //   return res.status(404).json({ message: 'No supply orders found matching the filters' });
+    // }
 
     return res.status(200).json({
       paginatedData: orders,
