@@ -61,12 +61,12 @@ app.use((req, res, next) => {
 
 
 // Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: 'Too many requests from this IP, please try again later.',
-});
-app.use('/api', limiter);
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000,
+//   max: 100,
+//   message: 'Too many requests from this IP, please try again later.',
+// });
+// app.use('/api', limiter);
 
 // Static file serving
 app.use('/uploads', express.static(join(__dirname, 'uploads')));

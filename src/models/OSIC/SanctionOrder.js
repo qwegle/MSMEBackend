@@ -8,11 +8,13 @@ const billSchema = new mongoose.Schema({
 
 const sanctionOrderSchema = new mongoose.Schema({
   headOfAccount: { type: String, required: true },
-  payeeNameAndAddress: { type: String, required: true },
+  payeeName: { type: String, required: true },
+  address: {type: String, required: true},
   purpose: { type: String, required: true },
   paymentProposedBy: { type: String },
   fileReference: { type: String },
-  expenditureAuthOrderAndDate: { type: String },
+  expenditureAuthOrder: { type: String },
+  expenditureAuthDate:{ type: String },
   billReceiptDate: { type: Date },
   natureOfPayment: { type: String },
   paymentType: { 
