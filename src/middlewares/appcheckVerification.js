@@ -1,7 +1,7 @@
 import admin from '../utils/firebaseAdmin.js';
 import AppError from '../utils/AppError.js';
 const verifyAppCheck = async (req, res, next) => {
-  const appCheckToken = req.headers['x-firebase-appcheck'];
+  const appCheckToken = req.headers['X-Firebase-Appcheck'];
   if (!appCheckToken) {
     return next(new AppError('App Check token missing', 401));
   }

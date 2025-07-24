@@ -1,6 +1,5 @@
 import dotenv from 'dotenv';
 dotenv.config();
-
 import express, { json } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -15,12 +14,9 @@ import xss from 'xss';
 import connectDB from './config/db.js';
 import routes from './routes/index.js';
 import errorHandler from './middlewares/errorHandler.js';
-
 // __dirname replacement for ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-
 const app = express();
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
