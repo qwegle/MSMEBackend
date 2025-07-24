@@ -160,8 +160,8 @@ export const createTenderResult = async (req, res) => {
         !name ||
         bid_value === undefined ||
         bidder_score === undefined ||
-        typeof bid_value !== 'number' ||
-        typeof bidder_score !== 'number'
+        typeof bid_value !== 'string' ||
+        typeof bidder_score !== 'string'
       ) {
         return res.status(400).json({
           error: 'Each bidder must include name (string), bid_value (number), and bidder_score (number)',

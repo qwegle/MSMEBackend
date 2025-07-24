@@ -14,12 +14,12 @@ const tenderResultSchema = new mongoose.Schema({
         trim: true,
       },
       bid_value: {
-        type: Number,
+        type: String,
         required: true,
         min: 0,
       },
       bidder_score: {
-        type: Number,
+        type: String,
         required: true,
         min: 0,
         max: 100,
