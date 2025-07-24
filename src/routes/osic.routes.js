@@ -13,6 +13,7 @@ import { createGovernmentOrder,
     updateSupplyOrder, 
     filterSupplyOrders, 
     getDashboardCounts,
+    getAllTenderResults
     } from '../controllers/OSIC/osic.controller.js';
 import { authenticateToken, authorizeType, authorizeRoles } from '../middlewares/auth.middleware.js';
 import { supplyOrderUpload, validatePdfMagicNumber, multerErrorHandler } from '../middlewares/fileUploadHandler.js';
@@ -30,6 +31,7 @@ router.post('/filterFloatTenders', authenticateToken, authorizeRoles(0), authori
 router.post('/createTenderResult',authenticateToken, authorizeRoles(0), authorizeType(3), createTenderResult);
 router.put('/updateTenderResult',authenticateToken, authorizeRoles(0), authorizeType(3), updateTenderResult);
 router.post('/filterTenderResults',authenticateToken, authorizeRoles(0), authorizeType(3), filterTenderResults);
+router.post('/getAllTenderResults',authenticateToken, authorizeRoles(0), authorizeType(3), getAllTenderResults )
 
 // // bidder routes
 // router.post('/getAllBidders',authenticateToken, authorizeRoles(0), authorizeType(3), getAllBidders);

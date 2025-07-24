@@ -177,6 +177,30 @@ export const createTenderResult = async (req, res) => {
   }
 };
 
+export const getBidderDetailsByTenderNumber = async (req, res) => {
+  try {
+    const { tender_number } = req.body;
+
+    if (!tender_number) {
+      return res.status(400).json({ error: 'Tender number is required' });
+    }
+
+    const result = await TenderResult.findOne({ tender_number });
+
+    if (!result) {
+      return res.status(404).json({ error: 'Tender result not found' });
+    }
+
+    res.status(200).json({
+      tender_number: result.tender_number,
+      bidder_details: result.bidder_details,
+    });
+  } catch (err) {
+    console.error('Error fetching bidder details:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 export const updateTenderResult = async (req, res) => {
   try {
     const { id } = req.body;
@@ -231,16 +255,26 @@ export const filterTenderResults = async (req, res) => {
     const page = parseInt(req.body.page) || 1;
     const limit = parseInt(req.body.limit) || 10;
     const skip = (page - 1) * limit;
+
     const filters = {};
+
     if (tender_number) {
       filters.tender_number = tender_number;
     }
+
     if (name) {
-      filters.name = new RegExp(name, 'i'); // case-insensitive
+      filters.bidder_details = {
+        $elemMatch: {
+          name: { $regex: name, $options: 'i' } // case-insensitive regex search
+        }
+      };
     }
 
     const [results, totalCount] = await Promise.all([
-      TenderResult.find(filters).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      TenderResult.find(filters)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
       TenderResult.countDocuments(filters)
     ]);
 
@@ -265,6 +299,41 @@ export const filterTenderResults = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
+export const getAllTenderResults = async (req, res) => {
+  try {
+    const page = parseInt(req.body.page) || 1;
+    const limit = parseInt(req.body.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const [results, totalCount] = await Promise.all([
+      TenderResult.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
+      TenderResult.countDocuments()
+    ]);
+
+    if (!results.length) {
+      return res.status(404).json({ message: 'No tender results found' });
+    }
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    return res.status(200).json({
+      paginatedData: results,
+      page,
+      limit,
+      totalItems: totalCount,
+      totalPages,
+      previousPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null,
+      currentPageCount: results.length
+    });
+  } catch (err) {
+    console.error('Error fetching tender results:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+
 
 export const createSupplyOrder = async (req, res) => {
   try {
