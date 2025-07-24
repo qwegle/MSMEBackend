@@ -10,7 +10,8 @@ import { register,
     updateProfile, 
     resendResetOTP, 
      } from '../controllers/auth.controller.js';
-import { authenticateToken, verifyAppCheck } from '../middlewares/auth.middleware.js';
+import { authenticateToken} from '../middlewares/auth.middleware.js';
+import  verifyAppCheck  from '../middlewares/appcheckVerification.js'
 const router = Router();
 
 router.post('/register', verifyAppCheck, register);
