@@ -422,28 +422,14 @@ export const updateSupplyOrder = async (req, res) => {
 
 export const filterSupplyOrders = async (req, res) => {
   try {
-    const { supply_details } = req.body;
     const page = parseInt(req.body.page) || 1;
     const limit = parseInt(req.body.limit) || 10;
     const skip = (page - 1) * limit;
-    
-
-    const filters = {};
-    if (supply_details) {
-      filters.supply_details = new RegExp(supply_details, 'i'); // case-insensitive match
-    }
-
     const [orders, totalCount] = await Promise.all([
-      SupplyOrder.find(filters).sort({ createdAt: -1 }).skip(skip).limit(limit),
-      SupplyOrder.countDocuments(filters)
+      SupplyOrder.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
+      SupplyOrder.countDocuments(),
     ]);
-
     const totalPages = Math.ceil(totalCount / limit);
-
-    // if (!orders.length) {
-    //   return res.status(404).json({ message: 'No supply orders found matching the filters' });
-    // }
-
     return res.status(200).json({
       paginatedData: orders,
       page,
@@ -452,14 +438,13 @@ export const filterSupplyOrders = async (req, res) => {
       totalPages,
       previousPage: page > 1 ? page - 1 : null,
       nextPage: page < totalPages ? page + 1 : null,
-      currentPageCount: orders.length
+      currentPageCount: orders.length,
     });
   } catch (err) {
-    console.error('Error filtering supply orders:', err);
+    console.error('Error fetching supply orders:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
-
 
 export const getDashboardCounts = async (req, res) => {
   try {

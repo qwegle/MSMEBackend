@@ -54,4 +54,5 @@ const sanctionOrderSchema = new mongoose.Schema({
   timestamps: true
 });
 
-export default mongoose.model('SanctionOrder', sanctionOrderSchema);
+const SanctionOrder = mongoose.model('SanctionOrder', sanctionOrderSchema);
+export default SanctionOrder;
