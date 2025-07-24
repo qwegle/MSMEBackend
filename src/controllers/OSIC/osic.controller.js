@@ -564,7 +564,38 @@ export const getDashboardCounts = async (req, res) => {
 
 
 export const createSanctionOrder = catchAsync(async (req, res, next) => {
-  const newOrder = await SanctionOrder.create(req.body);
+  const {
+    proposingOfficer_name,
+    proposingOfficer_designation,
+    recommendingOfficer_name,
+    recommendingOfficer_designation,
+    sanctioningAuthority_name,
+    sanctioningAuthority_designation,
+    ...rest
+  } = req.body;
+
+  const sanctionOrderData = {
+    ...rest,
+    proposingOfficer: {
+      name: proposingOfficer_name,
+      designation: proposingOfficer_designation,
+    },
+    recommendingOfficer: {
+      name: recommendingOfficer_name,
+      designation: recommendingOfficer_designation,
+    },
+    sanctioningAuthority: {
+      name: sanctioningAuthority_name,
+      designation: sanctioningAuthority_designation,
+    },
+    // Optional: ensure dates are stored as Date objects
+    billReceiptDate: rest.billReceiptDate ? new Date(rest.billReceiptDate) : undefined,
+    advanceDate: rest.advanceDate ? new Date(rest.advanceDate) : undefined,
+    paidPartyDate: rest.paidPartyDate ? new Date(rest.paidPartyDate) : undefined,
+  };
+
+  const newOrder = await SanctionOrder.create(sanctionOrderData);
+
   res.status(201).json({
     status: 'success',
     data: newOrder,

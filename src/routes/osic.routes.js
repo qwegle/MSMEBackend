@@ -13,7 +13,12 @@ import { createGovernmentOrder,
     updateSupplyOrder, 
     filterSupplyOrders, 
     getDashboardCounts,
-    getAllTenderResults
+    getAllTenderResults,
+    createSanctionOrder,
+    getAllSanctionOrders,
+    getSanctionOrderById,
+    updateSanctionOrder,
+    deleteSanctionOrder
     } from '../controllers/OSIC/osic.controller.js';
 import { authenticateToken, authorizeType, authorizeRoles } from '../middlewares/auth.middleware.js';
 import { supplyOrderUpload, validatePdfMagicNumber, multerErrorHandler } from '../middlewares/fileUploadHandler.js';
@@ -44,5 +49,13 @@ router.post('/createSupplyOrder', supplyOrderUpload,validatePdfMagicNumber,multe
 router.put('/updateSupplyOrder',authenticateToken, authorizeRoles(0), authorizeType(3), updateSupplyOrder);
 router.post('/filterSupplyOrders', authenticateToken, authorizeRoles(0), authorizeType(3), filterSupplyOrders);
 router.get('/dashboardCounts', authenticateToken, authorizeRoles(0), authorizeType(3), getDashboardCounts);
+
+//Sanction order Routes
+
+router.post('/createSanctionOrder', authenticateToken, authorizeRoles(0), authorizeType(3), createSanctionOrder);
+router.get('/getAllSanctionOrders', authenticateToken, authorizeRoles(0), authorizeType(3), getAllSanctionOrders);
+router.post('/getSanctionOrderById', authenticateToken, authorizeRoles(0), authorizeType(3), getSanctionOrderById);
+router.put('/updateSanctionOrder', authenticateToken, authorizeRoles(0), authorizeType(3), updateSanctionOrder);
+router.delete('/deleteSanctionOrder/:id', authenticateToken, authorizeRoles(0), authorizeType(3), deleteSanctionOrder);
 
 export default router;
