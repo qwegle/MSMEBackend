@@ -129,6 +129,8 @@ import connectDB from './config/db.js';
 import routes from './routes/index.js';
 import errorHandler from './middlewares/errorHandler.js';
 
+// msme-odisha.flutterflow.app
+
 // __dirname replacement for ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -157,7 +159,7 @@ app.use(helmet.contentSecurityPolicy({
     styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
     fontSrc: ["'self'", 'https://fonts.gstatic.com'],
     imgSrc: ["'self'", 'data:'],
-    connectSrc: ["'self'", 'https://api.yourdomain.com'],
+    connectSrc: ["'self'", 'msme-odisha.flutterflow.app'],
     objectSrc: ["'none'"],
     upgradeInsecureRequests: [],
   }
