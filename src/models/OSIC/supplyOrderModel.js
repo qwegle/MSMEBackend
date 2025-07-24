@@ -45,11 +45,11 @@ const supplyOrderSchema = new mongoose.Schema({
       message: 'Invoice submission must be a PDF file link.',
     },
   },
-  payment_as_per_invoice: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
+  // payment_as_per_invoice: {
+  //   type: Number,
+  //   required: true,
+  //   min: 0,
+  // },
 }, {
   timestamps: true,
 });

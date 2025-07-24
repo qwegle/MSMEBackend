@@ -347,7 +347,7 @@ export const createSupplyOrder = async (req, res) => {
       supply_quantity,
       invoice_number,
       invoice_amount,
-      payment_as_per_invoice
+      // payment_as_per_invoice
     } = req.body;
     if (
       !tender_number || !tender_value || !supply_quantity ||
