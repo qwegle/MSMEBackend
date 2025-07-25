@@ -26,7 +26,24 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 app.use(helmet());
-app.use(cors());
+// app.use(cors());
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://msme-odisha.flutterflow.app'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true, // 🔥 Allow cookies and auth headers
+}));
 app.use(json());
 app.use(hpp());
 app.use(compression());
