@@ -28,7 +28,7 @@ if (process.env.NODE_ENV === 'development') {
 app.use(helmet());
 // app.use(cors());
 const allowedOrigins = [
-  'http://localhost:3000',
+  'https://msme.qwegle.info',
   'https://msme-odisha.flutterflow.app'
 ];
 
