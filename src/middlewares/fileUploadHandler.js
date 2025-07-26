@@ -43,19 +43,20 @@ async function uploadBufferToCloud(buffer, origName) {
       folder: 'MSME/pdfs',
       format: 'pdf',
       public_id: `${Date.now()}-${publicIdBase}`,
-      resource_type: 'raw', 
-      transformation: [
-        { quality: 'auto' },
-        { fetch_format: 'auto' }
-      ]
+      resource_type: 'raw',
+      type: 'upload',
+      access_mode: 'public',
     };
+
     const stream = cloudinaryV2.uploader.upload_stream(
       opts,
       (error, result) => (error ? reject(error) : resolve(result))
     );
+
     stream.end(buffer);
   });
 }
+
 
 export async function uploadToCloud(req, res, next) {
   try {
