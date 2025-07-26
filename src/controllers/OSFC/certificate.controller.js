@@ -1,7 +1,6 @@
 import { Types } from 'mongoose';
 import AppError from '../../utils/AppError.js';
 import catchAsync from '../../utils/catchAsync.js';
-
 import CertificateOrder from '../../models/OSFC/certificate.js';
 import OTSForm from '../../models/OSFC/otsform.js';
 import Acknowledgement from '../../models/OSFC/acknowledgement.js';
@@ -10,91 +9,71 @@ import SettlementOrder from '../../models/OSFC/settlementOrder.js';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import timezone from 'dayjs/plugin/timezone.js';
-
 dayjs.extend(utc);
 dayjs.extend(timezone);
-
-// Upload certificate
 export const uploadCertificateOrder = catchAsync(async (req, res, next) => {
-  const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
-  if (!filePath) return next(new AppError('PDF file is required', 400));
-
+  const fileUrl = req.file?.url;
+  if (!fileUrl) return next(new AppError('PDF file is required', 400));
   const { loan_number } = req.body;
   if (!loan_number) return next(new AppError('loan_number is required', 400));
-
   const otsForm = await OTSForm.findOne({ loan_number });
   if (!otsForm) return next(new AppError('OTSForm not found for provided loan_number', 404));
-
   const userId = otsForm.userId;
   const otsId = otsForm._id;
-
   const ackForm = await Acknowledgement.findOne({ ots_form_id: otsId });
   if (!ackForm) return next(new AppError('AckForm not found for this OTSForm', 404));
-
   const memo = await Memorandum.findOne({ ackId: ackForm._id });
   if (!memo) return next(new AppError('Memorandum not found for this AckForm', 404));
-
   const settlement = await SettlementOrder.findOne({ memoId: memo._id });
   if (!settlement) return next(new AppError('Settlement Order not found for this Certificate', 404));
-
   const existingCertificate = await CertificateOrder.findOne({ otsId });
   if (existingCertificate) {
     return next(new AppError('Certificate is already issued for this Loan Number', 400));
   }
-
   const newOrder = new CertificateOrder({
     userId,
     otsId,
     ackId: ackForm._id,
     memoId: memo._id,
     orderId: settlement._id,
-    certificate: filePath,
+    certificate: fileUrl,
   });
-
   await newOrder.save();
-
   const updatedOTS = await OTSForm.findByIdAndUpdate(
     otsId,
     { status_msg: 'Completed', status: 1 },
     { new: true }
   );
-
   if (!updatedOTS) {
     return next(new AppError('OTS Form not found for status update', 404));
   }
-
   res.status(201).json({
     message: 'Certificate order uploaded and status updated successfully',
     data: newOrder,
   });
 });
 
-// Re-upload certificate
-export const reuploadCertificateOrder = catchAsync(async (req, res, next) => {
-  const filePath = req.file ? `${process.env.NODE_APP_URL}/uploads/${req.file.filename}` : null;
-  if (!filePath) return next(new AppError('PDF file is required.', 400));
 
+export const reuploadCertificateOrder = catchAsync(async (req, res, next) => {
+  const fileUrl = req.file?.url;
+  if (!fileUrl) return next(new AppError('PDF file is required.', 400));
   const { loan_number } = req.body;
   if (!loan_number) return next(new AppError('loan_number is required.', 400));
-
   const otsForm = await OTSForm.findOne({ loan_number });
   if (!otsForm) return next(new AppError('OTSForm not found for provided loan_number.', 404));
-
   const existingCertificate = await CertificateOrder.findOne({ otsId: otsForm._id });
   if (!existingCertificate) {
     return next(new AppError('Certificate not found for this loan_number.', 404));
   }
-
-  existingCertificate.certificate = filePath;
+  existingCertificate.certificate = fileUrl;
   await existingCertificate.save();
-
   res.status(200).json({
     message: 'Certificate reuploaded successfully.',
     updatedCertificate: existingCertificate,
   });
 });
 
-// Get all certificates
+
 export const getAllCertificateOrders = catchAsync(async (req, res) => {
   const orders = await CertificateOrder.find()
     .populate({ path: 'userId', select: 'username email' })

@@ -376,8 +376,6 @@ export const createSupplyOrder = async (req, res) => {
   }
 };
 
-
-
 export const updateSupplyOrder = async (req, res) => {
   try {
     const { id } = req.params;
@@ -388,7 +386,6 @@ export const updateSupplyOrder = async (req, res) => {
     if (!existingOrder) {
       return res.status(404).json({ error: 'Supply order not found' });
     }
-    const fileBaseURL = process.env.NODE_APP_URL + '/uploads';
     const updatedFields = {
       tender_number: req.body.tender_number ?? existingOrder.tender_number,
       tender_value: req.body.tender_value ?? existingOrder.tender_value,
@@ -399,12 +396,8 @@ export const updateSupplyOrder = async (req, res) => {
         req.body.payment_as_per_invoice !== undefined
           ? Number(req.body.payment_as_per_invoice)
           : existingOrder.payment_as_per_invoice,
-      proof_of_supply: req.files?.proof_of_supply?.[0]
-        ? `${fileBaseURL}/${req.files.proof_of_supply[0].filename}`
-        : existingOrder.proof_of_supply,
-      invoice_submission: req.files?.invoice_submission?.[0]
-        ? `${fileBaseURL}/${req.files.invoice_submission[0].filename}`
-        : existingOrder.invoice_submission,
+      proof_of_supply: req.files?.proof_of_supply?.[0]?.url || existingOrder.proof_of_supply,
+      invoice_submission: req.files?.invoice_submission?.[0]?.url || existingOrder.invoice_submission,
     };
     const updatedOrder = await SupplyOrder.findByIdAndUpdate(id, updatedFields, {
       new: true,
