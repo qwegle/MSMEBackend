@@ -1,8 +1,19 @@
-import { registerUser, loginUser, register_ofsc_superadmin, register_ofsc_subadmin, forgotPasswordService, resetPasswordService, resendResetOTPService } from '../services/auth.service.js';
+import {
+  registerUser,
+  loginUser,
+  register_ofsc_superadmin,
+  register_ofsc_subadmin,
+  forgotPasswordService,
+  resetPasswordService,
+  resendResetOTPService,
+} from '../services/auth.service.js';
+
+import { encryptData, decryptRequestBody, sendEncryptedResponse } from '../utils/encryption.js';
 import { blacklistToken } from '../utils/tokenBlacklist.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/AppError.js';
 import User from '../models/user.js';
+import { compare, hash } from 'bcrypt';
 
 export const register = catchAsync(async (req, res) => {
   const result = await registerUser(req.body);
@@ -39,10 +50,13 @@ export function logout(req, res, next) {
   res.json({ message: 'Logout successful' });
 }
 
-export const forgotPassword = catchAsync(async (req, res) => {
-  const result = await forgotPasswordService(req.body.email);
-  res.status(200).json(result);
-});
+export const forgotPassword = [
+  decryptRequestBody,
+  catchAsync(async (req, res) => {
+    const result = await forgotPasswordService(req.decryptedBody.email);
+    sendEncryptedResponse(res, 200, result);
+  }),
+];
 
 export const resetPassword = catchAsync(async (req, res) => {
   const { otp, password } = req.body;
