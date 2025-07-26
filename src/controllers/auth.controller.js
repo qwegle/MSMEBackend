@@ -53,6 +53,7 @@ export function logout(req, res, next) {
 export const forgotPassword = [
   decryptRequestBody,
   catchAsync(async (req, res) => {
+    console.log(req.decryptedBody.email)
     const result = await forgotPasswordService(req.decryptedBody.email);
     sendEncryptedResponse(res, 200, result);
   }),
