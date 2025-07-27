@@ -7,22 +7,34 @@ import {
   resetPasswordService,
   resendResetOTPService,
 } from '../services/auth.service.js';
-
 import { encryptData, decryptRequestBody, sendEncryptedResponse } from '../utils/encryption.js';
 import { blacklistToken } from '../utils/tokenBlacklist.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/AppError.js';
 import User from '../models/user.js';
 import { compare, hash } from 'bcrypt';
+import { generateCaptcha, verifyCaptcha } from '../utils/captcha.js';
 
-export const register = catchAsync(async (req, res) => {
+export const register = catchAsync(async (req, res, next) => {
+  const { captcha, captchaToken } = req.body;
+  const isValid = verifyCaptcha(captchaToken, captcha);
+  if (!isValid) {
+    return next(new AppError('Invalid or expired CAPTCHA', 400));
+  }
   const result = await registerUser(req.body);
   res.status(201).json(result);
 });
+
 export const login = catchAsync(async (req, res) => {
+  const { captcha, captchaToken } = req.body;
+  const isValid = verifyCaptcha(captchaToken, captcha);
+  if (!isValid) {
+    return next(new AppError('Invalid or expired CAPTCHA', 400));
+  }
   const result = await loginUser(req.body);
   res.status(200).json(result);
 });
+
 export const register_OFSC_SuperAdmin = catchAsync(async (req, res, next) => {
   const { dev_pass } = req.body;
   if (!dev_pass || dev_pass != process.env.DEV_PASS) {
@@ -95,5 +107,15 @@ export const updateProfile = catchAsync(async (req, res, next) => {
   }
   await user.save();
   res.status(200).json({ message: 'Profile updated successfully' });
+});
+
+export const getCaptcha = catchAsync(async (req, res) => {
+  const { svg, token } = generateCaptcha();
+
+  res.setHeader('Content-Type', 'image/svg+xml');
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('captcha-token', token);
+
+  res.status(200).send(svg); // Send raw SVG
 });
 

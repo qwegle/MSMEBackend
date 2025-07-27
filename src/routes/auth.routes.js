@@ -8,9 +8,10 @@ import { register,
     forgotPassword, 
     resetPassword, 
     updateProfile, 
-    resendResetOTP, 
+    resendResetOTP,
+    getCaptcha, 
      } from '../controllers/auth.controller.js';
-import { authenticateToken} from '../middlewares/auth.middleware.js';
+import { authenticateToken } from '../middlewares/auth.middleware.js';
 // import  verifyAppCheck  from '../middlewares/appcheckVerification.js'
 const router = Router();
 
@@ -23,7 +24,7 @@ router.post('/forgot-password',  forgotPassword);
 router.post('/reset-password',  resetPassword);
 router.post('/resend-otp', resendResetOTP);
 router.post('/update-password',authenticateToken, updateProfile);
-
+router.get('/get-captcha', getCaptcha);
 router.get('/protected', authenticateToken, protectedRoute);
 
 export default router;

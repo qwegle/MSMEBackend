@@ -13,7 +13,7 @@ const jsonData = {
 };
 
 // Base64 ciphertext to decrypt (must match encryption format)
-const jsonResponse = "U2FsdGVkX1+2xFNJ9sfFTQygXyHIuwNAkPvM1lAT+/zoMhph1yibwRPgGLNsmLkMOit7kUJ3gGg7rEmFmXyMRg==";
+const jsonResponse = "Hw+gHP1NdJokYgXzKEaElg==";
 
 // Encrypt function using AES-CBC with static IV
 function encryptData(data) {
@@ -46,7 +46,7 @@ console.log("🔐 Encrypted Data:");
 console.log(encrypted);
 
 try {
-  const decrypted = decryptData(encrypted); // You can test jsonResponse here too
+  const decrypted = decryptData(jsonResponse); // You can test jsonResponse here too
   console.log("✅ Decrypted Data:");
   console.log(decrypted);
 } catch (e) {
