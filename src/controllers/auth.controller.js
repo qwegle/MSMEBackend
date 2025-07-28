@@ -111,11 +111,9 @@ export const updateProfile = catchAsync(async (req, res, next) => {
 
 export const getCaptcha = catchAsync(async (req, res) => {
   const { svg, token } = generateCaptcha();
-
   res.setHeader('Content-Type', 'image/svg+xml');
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('captcha-token', token);
-
   res.status(200).send(svg); // Send raw SVG
 });
 
