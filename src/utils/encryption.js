@@ -42,7 +42,7 @@ export function decryptRequestBody(req, res, next) {
     if (!payload) {
       throw new AppError('Missing encrypted data in request body', 400);
     }
-    console.log('🔐 Encrypted data:', payload);
+    console.log('Encrypted data:', payload);
     req.decryptedBody = decryptData(payload);
     if (
       !req.decryptedBody ||
