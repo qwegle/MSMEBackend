@@ -1,7 +1,7 @@
 import CryptoJS from 'crypto-js';
 import AppError from './AppError.js';
 
-const SECRET_KEY_HEX = 'b066c79cad3f5eed28a22f55ebaf54c7236cabc75477674f6f';
+const SECRET_KEY_HEX = 'b066c79cad3f5eed28a22f55ebaf54c7236b30e44bda6e736cabc75477674f6f';
 const key = CryptoJS.enc.Hex.parse(SECRET_KEY_HEX);
 
 // Generate random IV and prepend it to the ciphertext in hex format
