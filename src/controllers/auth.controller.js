@@ -138,9 +138,7 @@ export const updateProfile = [
   }),
 ];
 
-export const getCaptcha = [
-  decryptRequestBody,
-  catchAsync(async (req, res) => {
+export const getCaptcha = catchAsync(async (req, res) => {
   const captcha = generateCaptcha();
   await sendEncryptedResponse(res, 200, {
     message: 'Captcha generated successfully',
@@ -148,6 +146,5 @@ export const getCaptcha = [
     captchaQuestion: captcha.captchaQuestion,
     captchaToken: captcha.captchaToken,
   });
-}),
-]
+})
 
