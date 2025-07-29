@@ -1,57 +1,43 @@
+import mongoose from 'mongoose';
 import GovernmentOrder from '../../models/OSIC/governmentModel.js';
 import FloatTender from '../../models/OSIC/floatTender.js';
 import TenderResult from '../../models/OSIC/tenderResult.js';
 import SupplyOrder from '../../models/OSIC/supplyOrderModel.js';
-// import Bidder from '../../models/OSIC/bidder.js';
 import SanctionOrder from '../../models/OSIC/SanctionOrder.js';
 import AppError from '../../utils/AppError.js';
 import catchAsync from '../../utils/catchAsync.js';
+import { decryptRequestBody, sendEncryptedResponse } from '../../utils/encryption.js';
 
-export const createGovernmentOrder = async (req, res) => {
-  try {
-    const newOrder = new GovernmentOrder(req.body);
+export const createGovernmentOrder = [
+  decryptRequestBody,
+  catchAsync(async (req, res) => {
+    const newOrder = new GovernmentOrder(req.decryptedBody);
     await newOrder.save();
-    res.status(201).json({ message: 'Government Order created successfully', order: newOrder });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-};
+    sendEncryptedResponse(res, 201, { message: 'Government Order created', order: newOrder });
+  }),
+];
 
-export const updateGovernmentOrder = async (req, res) => {
-  try {
-    const { id } = req.body;
-    const updatedOrder = await GovernmentOrder.findByIdAndUpdate(id, req.body, {
-      new: true,
-      runValidators: true,
+export const updateGovernmentOrder = [
+  decryptRequestBody,
+  catchAsync(async (req, res, next) => {
+    const { id } = req.decryptedBody;
+    const updatedOrder = await GovernmentOrder.findByIdAndUpdate(id, req.decryptedBody, {
+      new: true, runValidators: true
     });
+    if (!updatedOrder) return next(new AppError('Government Order not found', 404));
+    sendEncryptedResponse(res, 200, { message: 'Order updated', order: updatedOrder });
+  }),
+];
 
-    if (!updatedOrder) {
-      return res.status(404).json({ error: 'Government Order not found' });
-    }
-
-    res.json({ message: 'Order updated successfully', order: updatedOrder });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-};
-
-export const filterGovernmentOrders = async (req, res) => {
-  try {
-    const { departmentName, pointOfContact, letterNumber } = req.body;
-    const page = parseInt(req.body.page) || 1;
-    const limit = parseInt(req.body.limit) || 10;
+export const filterGovernmentOrders = [
+  decryptRequestBody,
+  catchAsync(async (req, res) => {
+    const { departmentName, pointOfContact, letterNumber, page = 1, limit = 10 } = req.decryptedBody;
     const skip = (page - 1) * limit;
-
     const filters = {};
-    if (departmentName) {
-      filters.departmentName = new RegExp(departmentName, 'i'); // case-insensitive match
-    }
-    if (pointOfContact) {
-      filters.pointOfContact = new RegExp(pointOfContact, 'i');
-    }
-    if (letterNumber) {
-      filters.letterNumber = letterNumber;
-    }
+    if (departmentName) filters.departmentName = new RegExp(departmentName, 'i');
+    if (pointOfContact) filters.pointOfContact = new RegExp(pointOfContact, 'i');
+    if (letterNumber) filters.letterNumber = letterNumber;
 
     const [orders, totalCount] = await Promise.all([
       GovernmentOrder.find(filters).sort({ createdAt: -1 }).skip(skip).limit(limit),
@@ -59,251 +45,143 @@ export const filterGovernmentOrders = async (req, res) => {
     ]);
 
     const totalPages = Math.ceil(totalCount / limit);
-
-    // if (!orders.length) {
-    //   return res.status(404).json({ message: 'No government orders found matching the filters' });
-    // }
-
-    return res.status(200).json({
-      paginatedData: orders,
-      page,
-      limit,
-      totalItems: totalCount,
-      totalPages,
-      previousPage: page > 1 ? page - 1 : null,
-      nextPage: page < totalPages ? page + 1 : null,
-      currentPageCount: orders.length
+    sendEncryptedResponse(res, 200, {
+      paginatedData: orders, page, limit, totalItems: totalCount,
+      totalPages, previousPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null, currentPageCount: orders.length
     });
-  } catch (err) {
-    console.error('Error filtering government orders:', err);
-    res.status(500).json({ message: 'Server error', error: err.message });
-  }
-};
+  }),
+];
 
-
-export const createFloatTender = async (req, res) => {
-  try {
-    const tender = new FloatTender(req.body);
+// --- Float Tenders ---
+export const createFloatTender = [
+  decryptRequestBody,
+  catchAsync(async (req, res) => {
+    const tender = new FloatTender(req.decryptedBody);
     await tender.save();
-    res.status(201).json({ message: 'Tender floated successfully', tender });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-};
+    sendEncryptedResponse(res, 201, { message: 'Tender created', tender });
+  }),
+];
 
-export const updateFloatTender = async (req, res) => {
-  try {
-    const { id } = req.body;
-    const updatedTender = await FloatTender.findByIdAndUpdate(id, req.body, {
-      new: true,
-      runValidators: true,
+export const updateFloatTender = [
+  decryptRequestBody,
+  catchAsync(async (req, res, next) => {
+    const { id } = req.decryptedBody;
+    const updated = await FloatTender.findByIdAndUpdate(id, req.decryptedBody, {
+      new: true, runValidators: true
     });
+    if (!updated) return next(new AppError('Float Tender not found', 404));
+    sendEncryptedResponse(res, 200, { message: 'Tender updated', tender: updated });
+  }),
+];
 
-    if (!updatedTender) {
-      return res.status(404).json({ error: 'Float Tender not found' });
-    }
-
-    res.json({ message: 'Tender updated successfully', tender: updatedTender });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-};
-
-export const filterFloatTenders = async (req, res) => {
-  try {
-    const { project_title, tender_number } = req.body;
-    const page = parseInt(req.body.page) || 1;
-    const limit = parseInt(req.body.limit) || 10;
+export const filterFloatTenders = [
+  decryptRequestBody,
+  catchAsync(async (req, res) => {
+    const { project_title, tender_number, page = 1, limit = 10 } = req.decryptedBody;
     const skip = (page - 1) * limit;
     const filters = {};
-    if (project_title) {
-      filters.project_title = new RegExp(project_title, 'i'); // case-insensitive
-    }
-    if (tender_number) {
-      filters.tender_number = tender_number;
-    }
+    if (project_title) filters.project_title = new RegExp(project_title, 'i');
+    if (tender_number) filters.tender_number = tender_number;
+
     const [tenders, totalCount] = await Promise.all([
       FloatTender.find(filters).sort({ createdAt: -1 }).skip(skip).limit(limit),
       FloatTender.countDocuments(filters)
     ]);
-    const totalPages = Math.ceil(totalCount / limit);
-    if (!tenders.length) {
-      return res.status(404).json({ message: 'No float tenders found matching the filters' });
-    }
-    return res.status(200).json({
-      paginatedData: tenders,
-      page,
-      limit,
-      totalItems: totalCount,
-      totalPages,
-      previousPage: page > 1 ? page - 1 : null,
-      nextPage: page < totalPages ? page + 1 : null,
-      currentPageCount: tenders.length
-    });
-  } catch (err) {
-    console.error('Error filtering float tenders:', err);
-    res.status(500).json({ message: 'Server error', error: err.message });
-  }
-};
 
-export const createTenderResult = async (req, res) => {
-  try {
-    const { tender_number, bidder_details } = req.body;
+    const totalPages = Math.ceil(totalCount / limit);
+    sendEncryptedResponse(res, 200, {
+      paginatedData: tenders, page, limit, totalItems: totalCount,
+      totalPages, previousPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null, currentPageCount: tenders.length
+    });
+  }),
+];
+
+// --- Tender Results ---
+export const createTenderResult = [
+  decryptRequestBody,
+  catchAsync(async (req, res, next) => {
+    const { tender_number, bidder_details } = req.decryptedBody;
     if (!tender_number || !Array.isArray(bidder_details) || bidder_details.length === 0) {
-      return res.status(400).json({
-        error: 'tender_number and at least one bidder in bidder_details are required',
-      });
+      return next(new AppError('tender_number and bidder_details[] are required', 400));
     }
-    for (const bidder of bidder_details) {
-      const { name, bid_value, bidder_score } = bidder;
-      if (
-        !name ||
-        bid_value === undefined ||
-        bidder_score === undefined ||
-        typeof bid_value !== 'string' ||
-        typeof bidder_score !== 'string'
-      ) {
-        return res.status(400).json({
-          error: 'Each bidder must include name (string), bid_value (number), and bidder_score (number)',
-        });
-      }
-    }
+
     const result = new TenderResult({ tender_number, bidder_details });
     await result.save();
-    res.status(201).json({ message: 'Tender result recorded', result });
-  } catch (err) {
-    console.error('Error creating tender result:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-};
+    sendEncryptedResponse(res, 201, { message: 'Tender result recorded', result });
+  }),
+];
 
-export const getBidderDetailsByTenderNumber = async (req, res) => {
-  try {
-    const { tender_number } = req.body;
-
-    if (!tender_number) {
-      return res.status(400).json({ error: 'Tender number is required' });
-    }
-
-    const result = await TenderResult.findOne({ tender_number });
-
-    if (!result) {
-      return res.status(404).json({ error: 'Tender result not found' });
-    }
-
-    res.status(200).json({
-      tender_number: result.tender_number,
-      bidder_details: result.bidder_details,
-    });
-  } catch (err) {
-    console.error('Error fetching bidder details:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-};
-
-export const updateTenderResult = async (req, res) => {
-  try {
-    const { id } = req.body;
+export const updateTenderResult = [
+  decryptRequestBody,
+  catchAsync(async (req, res, next) => {
+    const { id, tender_number, bidder_details } = req.decryptedBody;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ error: 'Valid tender result ID is required' });
+      return next(new AppError('Valid tender result ID required', 400));
     }
-    const { tender_number, bidder_details } = req.body;
-    if (bidder_details && (!Array.isArray(bidder_details) || bidder_details.length === 0)) {
-      return res.status(400).json({
-        error: 'bidder_details must be a non-empty array if provided',
-      });
-    }
-    if (Array.isArray(bidder_details)) {
-      for (const bidder of bidder_details) {
-        const { name, bid_value, bidder_score } = bidder;
-        if (
-          !name ||
-          bid_value === undefined ||
-          bidder_score === undefined ||
-          typeof bid_value !== 'number' ||
-          typeof bidder_score !== 'number'
-        ) {
-          return res.status(400).json({
-            error:
-              'Each bidder must include name (string), bid_value (number), and bidder_score (number)',
-          });
-        }
-      }
-    }
+
     const updatedData = {};
     if (tender_number !== undefined) updatedData.tender_number = tender_number;
     if (bidder_details !== undefined) updatedData.bidder_details = bidder_details;
-    const updatedResult = await TenderResult.findByIdAndUpdate(id, updatedData, {
-      new: true,
-      runValidators: true,
+
+    const updated = await TenderResult.findByIdAndUpdate(id, updatedData, {
+      new: true, runValidators: true
     });
-    if (!updatedResult) {
-      return res.status(404).json({ error: 'Tender result not found' });
-    }
-    res.status(200).json({
-      message: 'Result updated successfully',
-      result: updatedResult,
+    if (!updated) return next(new AppError('Tender result not found', 404));
+
+    sendEncryptedResponse(res, 200, { message: 'Result updated', result: updated });
+  }),
+];
+
+export const getBidderDetailsByTenderNumber = [
+  decryptRequestBody,
+  catchAsync(async (req, res, next) => {
+    const { tender_number } = req.decryptedBody;
+    if (!tender_number) return next(new AppError('Tender number required', 400));
+
+    const result = await TenderResult.findOne({ tender_number });
+    if (!result) return next(new AppError('Tender result not found', 404));
+
+    sendEncryptedResponse(res, 200, {
+      tender_number: result.tender_number,
+      bidder_details: result.bidder_details,
     });
-  } catch (err) {
-    console.error('Error updating tender result:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-};
-export const filterTenderResults = async (req, res) => {
-  try {
-    const { tender_number, name,  } = req.body;
-    const page = parseInt(req.body.page) || 1;
-    const limit = parseInt(req.body.limit) || 10;
+  }),
+];
+
+export const filterTenderResults = [
+  decryptRequestBody,
+  catchAsync(async (req, res) => {
+    const { tender_number, name, page = 1, limit = 10 } = req.decryptedBody;
     const skip = (page - 1) * limit;
 
     const filters = {};
-
-    if (tender_number) {
-      filters.tender_number = tender_number;
-    }
-
+    if (tender_number) filters.tender_number = tender_number;
     if (name) {
       filters.bidder_details = {
-        $elemMatch: {
-          name: { $regex: name, $options: 'i' } // case-insensitive regex search
-        }
+        $elemMatch: { name: { $regex: name, $options: 'i' } }
       };
     }
 
     const [results, totalCount] = await Promise.all([
-      TenderResult.find(filters)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit),
-      TenderResult.countDocuments(filters)
+      TenderResult.find(filters).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      TenderResult.countDocuments(filters),
     ]);
 
     const totalPages = Math.ceil(totalCount / limit);
-
-    // if (!results.length) {
-    //   return res.status(404).json({ message: 'No tender results found matching the filters' });
-    // }
-
-    return res.status(200).json({
-      paginatedData: results,
-      page,
-      limit,
-      totalItems: totalCount,
-      totalPages,
-      previousPage: page > 1 ? page - 1 : null,
-      nextPage: page < totalPages ? page + 1 : null,
-      currentPageCount: results.length
+    sendEncryptedResponse(res, 200, {
+      paginatedData: results, page, limit, totalItems: totalCount,
+      totalPages, previousPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null, currentPageCount: results.length
     });
-  } catch (err) {
-    console.error('Error filtering tender results:', err);
-    res.status(500).json({ message: 'Server error', error: err.message });
-  }
-};
+  }),
+];
 
-export const getAllTenderResults = async (req, res) => {
-  try {
-    const page = parseInt(req.body.page) || 1;
-    const limit = parseInt(req.body.limit) || 10;
+export const getAllTenderResults = [
+  decryptRequestBody,
+  catchAsync(async (req, res) => {
+    const { page = 1, limit = 10 } = req.decryptedBody;
     const skip = (page - 1) * limit;
 
     const [results, totalCount] = await Promise.all([
@@ -312,24 +190,110 @@ export const getAllTenderResults = async (req, res) => {
     ]);
 
     const totalPages = Math.ceil(totalCount / limit);
-
-    return res.status(200).json({
-      paginatedData: results,
-      page,
-      limit,
-      totalItems: totalCount,
-      totalPages,
-      previousPage: page > 1 ? page - 1 : null,
-      nextPage: page < totalPages ? page + 1 : null,
-      currentPageCount: results.length
+    sendEncryptedResponse(res, 200, {
+      paginatedData: results, page, limit, totalItems: totalCount,
+      totalPages, previousPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null, currentPageCount: results.length
     });
-  } catch (err) {
-    console.error('Error fetching tender results:', err);
-    res.status(500).json({ message: 'Server error', error: err.message });
-  }
-};
+  }),
+];
 
+// --- Supply Orders ---
+export const filterSupplyOrders = [
+  decryptRequestBody,
+  catchAsync(async (req, res) => {
+    const { page = 1, limit = 10 } = req.decryptedBody;
+    const skip = (page - 1) * limit;
 
+    const [orders, totalCount] = await Promise.all([
+      SupplyOrder.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
+      SupplyOrder.countDocuments(),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
+    sendEncryptedResponse(res, 200, {
+      paginatedData: orders, page, limit, totalItems: totalCount,
+      totalPages, previousPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null, currentPageCount: orders.length
+    });
+  }),
+];
+
+export const getDashboardCounts = catchAsync(async (req, res) => {
+  const [govOrderCount, floatTenderCount, tenderResultCount, supplyOrderCount] = await Promise.all([
+    GovernmentOrder.countDocuments(),
+    FloatTender.countDocuments(),
+    TenderResult.countDocuments(),
+    SupplyOrder.countDocuments(),
+  ]);
+
+  sendEncryptedResponse(res, 200, {
+    governmentOrders: govOrderCount,
+    floatTenders: floatTenderCount,
+    tenderResults: tenderResultCount,
+    supplyOrders: supplyOrderCount,
+  });
+});
+
+// --- Sanction Orders ---
+export const createSanctionOrder = [
+  decryptRequestBody,
+  catchAsync(async (req, res) => {
+    const body = req.decryptedBody;
+    const sanctionOrderData = {
+      ...body,
+      proposingOfficer: {
+        name: body.proposingOfficer_name,
+        designation: body.proposingOfficer_designation,
+      },
+      recommendingOfficer: {
+        name: body.recommendingOfficer_name,
+        designation: body.recommendingOfficer_designation,
+      },
+      sanctioningAuthority: {
+        name: body.sanctioningAuthority_name,
+        designation: body.sanctioningAuthority_designation,
+      },
+      billReceiptDate: body.billReceiptDate ? new Date(body.billReceiptDate) : undefined,
+      advanceDate: body.advanceDate ? new Date(body.advanceDate) : undefined,
+      paidPartyDate: body.paidPartyDate ? new Date(body.paidPartyDate) : undefined,
+    };
+
+    const newOrder = await SanctionOrder.create(sanctionOrderData);
+    sendEncryptedResponse(res, 201, { status: 'success', data: newOrder });
+  }),
+];
+
+export const getAllSanctionOrders = catchAsync(async (req, res) => {
+  const orders = await SanctionOrder.find();
+  sendEncryptedResponse(res, 200, { status: 'success', results: orders.length, data: orders });
+});
+
+export const getSanctionOrderById = [
+  decryptRequestBody,
+  catchAsync(async (req, res, next) => {
+    const order = await SanctionOrder.findById(req.decryptedBody.id);
+    if (!order) return next(new AppError('Sanction Order not found', 404));
+    sendEncryptedResponse(res, 200, { status: 'success', data: order });
+  }),
+];
+
+export const updateSanctionOrder = [
+  decryptRequestBody,
+  catchAsync(async (req, res, next) => {
+    const updated = await SanctionOrder.findByIdAndUpdate(req.decryptedBody.id, req.decryptedBody, {
+      new: true, runValidators: true,
+    });
+    if (!updated) return next(new AppError('Sanction Order not found', 404));
+    sendEncryptedResponse(res, 200, { status: 'success', data: updated });
+  }),
+];
+
+export const deleteSanctionOrder = catchAsync(async (req, res, next) => {
+  const deleted = await SanctionOrder.findByIdAndDelete(req.params.id);
+  if (!deleted) return next(new AppError('Sanction Order not found', 404));
+  sendEncryptedResponse(res, 200, { status: 'success', data: null });
+});
 
 export const createSupplyOrder = async (req, res) => {
   try {
@@ -412,218 +376,3 @@ export const updateSupplyOrder = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
-export const filterSupplyOrders = async (req, res) => {
-  try {
-    const page = parseInt(req.body.page) || 1;
-    const limit = parseInt(req.body.limit) || 10;
-    const skip = (page - 1) * limit;
-    const [orders, totalCount] = await Promise.all([
-      SupplyOrder.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
-      SupplyOrder.countDocuments(),
-    ]);
-    const totalPages = Math.ceil(totalCount / limit);
-    return res.status(200).json({
-      paginatedData: orders,
-      page,
-      limit,
-      totalItems: totalCount,
-      totalPages,
-      previousPage: page > 1 ? page - 1 : null,
-      nextPage: page < totalPages ? page + 1 : null,
-      currentPageCount: orders.length,
-    });
-  } catch (err) {
-    console.error('Error fetching supply orders:', err);
-    res.status(500).json({ message: 'Server error', error: err.message });
-  }
-};
-
-export const getDashboardCounts = async (req, res) => {
-  try {
-    const [govOrderCount, floatTenderCount, tenderResultCount, supplyOrderCount] = await Promise.all([
-      GovernmentOrder.countDocuments(),
-      FloatTender.countDocuments(),
-      TenderResult.countDocuments(),
-      SupplyOrder.countDocuments(),
-    ]);
-
-    res.json({
-      governmentOrders: govOrderCount,
-      floatTenders: floatTenderCount,
-      tenderResults: tenderResultCount,
-      supplyOrders: supplyOrderCount,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to fetch counts' });
-  }
-};
-
-
-// export const createBidder = async (req, res, next) => {
-//   try {
-//     const { name, bid_value, bid_score } = req.body;
-//     if (!name || !bid_value || !bid_score) {
-//       return res.status(400).json({ message: 'All fields are required: name, bid_value, bid_score' });
-//     }
-//     const bidder = await Bidder.create({ name, bid_value, bid_score });
-//     res.status(201).json({
-//       status: 'success',
-//       data: bidder,
-//     });
-//   } catch (error) {
-//     console.error('Error creating bidder:', error);
-//     res.status(500).json({ message: 'Server error', error: error.message });
-//   }
-// };
-
-// export const getAllBidders = async (req, res) => {
-//   try {
-//     const bidders = await Bidder.find().sort({ createdAt: -1 });
-//     res.status(200).json({
-//       status: 'success',
-//       count: bidders.length,
-//       data: bidders,
-//     });
-//   } catch (error) {
-//     res.status(500).json({ message: 'Server error', error: error.message });
-//   }
-// };
-
-// export const deleteBidderById = async (req, res) => {
-//   try {
-//     const { id } = req.body;
-
-//     const bidder = await Bidder.findByIdAndDelete(id);
-
-//     if (!bidder) {
-//       return res.status(404).json({ message: 'Bidder not found' });
-//     }
-
-//     res.status(200).json({
-//       status: 'success',
-//       message: `Bidder with ID ${id} deleted successfully.`,
-//     });
-//   } catch (error) {
-//     res.status(500).json({ message: 'Server error', error: error.message });
-//   }
-// };
-
-
-// export const updateBidderById = async (req, res) => {
-//   try {
-//     const { id, name, bid_value, bid_score } = req.body;
-//     if (!id) {
-//       return res.status(400).json({ message: 'Bidder ID is required' });
-//     }
-//     if (!mongoose.Types.ObjectId.isValid(id)) {
-//       return res.status(400).json({ message: 'Invalid Bidder ID format' });
-//     }
-//     const updateFields = {};
-//     if (name !== undefined) updateFields.name = name;
-//     if (bid_value !== undefined) updateFields.bid_value = bid_value;
-//     if (bid_score !== undefined) updateFields.bid_score = bid_score;
-//     const updatedBidder = await Bidder.findByIdAndUpdate(
-//       id,
-//       updateFields,
-//       { new: true, runValidators: true }
-//     );
-//     if (!updatedBidder) {
-//       return res.status(404).json({ message: 'Bidder not found' });
-//     }
-//     res.status(200).json({
-//       status: 'success',
-//       data: updatedBidder,
-//     });
-//   } catch (error) {
-//     res.status(500).json({ message: 'Server error', error: error.message });
-//   }
-// };
-
-
-export const createSanctionOrder = catchAsync(async (req, res, next) => {
-  const {
-    proposingOfficer_name,
-    proposingOfficer_designation,
-    recommendingOfficer_name,
-    recommendingOfficer_designation,
-    sanctioningAuthority_name,
-    sanctioningAuthority_designation,
-    ...rest
-  } = req.body;
-
-  const sanctionOrderData = {
-    ...rest,
-    proposingOfficer: {
-      name: proposingOfficer_name,
-      designation: proposingOfficer_designation,
-    },
-    recommendingOfficer: {
-      name: recommendingOfficer_name,
-      designation: recommendingOfficer_designation,
-    },
-    sanctioningAuthority: {
-      name: sanctioningAuthority_name,
-      designation: sanctioningAuthority_designation,
-    },
-    // Optional: ensure dates are stored as Date objects
-    billReceiptDate: rest.billReceiptDate ? new Date(rest.billReceiptDate) : undefined,
-    advanceDate: rest.advanceDate ? new Date(rest.advanceDate) : undefined,
-    paidPartyDate: rest.paidPartyDate ? new Date(rest.paidPartyDate) : undefined,
-  };
-
-  const newOrder = await SanctionOrder.create(sanctionOrderData);
-
-  res.status(201).json({
-    status: 'success',
-    data: newOrder,
-  });
-});
-
-export const getAllSanctionOrders = catchAsync(async (req, res, next) => {
-  const orders = await SanctionOrder.find();
-  res.status(200).json({
-    status: 'success',
-    results: orders.length,
-    data: orders,
-  });
-});
-
-
-export const getSanctionOrderById = catchAsync(async (req, res, next) => {
-  const order = await SanctionOrder.findById(req.body.id);
-  if (!order) return next(new AppError('Sanction Order not found', 404));
-
-  res.status(200).json({
-    status: 'success',
-    data: order,
-  });
-});
-
-export const updateSanctionOrder = catchAsync(async (req, res, next) => {
-  const updatedOrder = await SanctionOrder.findByIdAndUpdate(req.body.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-
-  if (!updatedOrder) return next(new AppError('Sanction Order not found', 404));
-
-  res.status(200).json({
-    status: 'success',
-    data: updatedOrder,
-  });
-});
-
-export const deleteSanctionOrder = catchAsync(async (req, res, next) => {
-  const deleted = await SanctionOrder.findByIdAndDelete(req.params.id);
-  if (!deleted) return next(new AppError('Sanction Order not found', 404));
-
-  res.status(204).json({
-    status: 'success',
-    data: null,
-  });
-});
-
-
-
