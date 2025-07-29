@@ -93,9 +93,10 @@ export const filterAckForms = [
   decryptRequestBody,
   catchAsync(async (req, res, next) => {
     const { user_role, id: requesterId } = req.user;
-    const { userId, loan_number, branch, page = 1, limit = 10 } = req.decryptedBody;
+    const { userId, loan_number, branch } = req.decryptedBody;
+    const page = req.body.page && Number(req.body.page) > 0 ? Number(req.body.page) : 1;
+    const limit = req.body.limit && Number(req.body.limit) > 0 ? Number(req.body.limit) : 10;
     const skip = (page - 1) * limit;
-
     if (user_role === 2) {
       if (!userId || !Types.ObjectId.isValid(userId)) {
         return next(new AppError('User ID is required and must be valid for regular users.', 400));
@@ -110,7 +111,6 @@ export const filterAckForms = [
     } else if (user_role !== 0) {
       return next(new AppError('Access denied for this role.', 403));
     }
-
     const matchConditions = {};
     if (userId) {
       if (!Types.ObjectId.isValid(userId)) {
