@@ -41,14 +41,19 @@ export const verifyCaptcha = (encryptedToken, userInput) => {
   try {
     if (!encryptedToken || !userInput) return false;
     const decrypted = decryptData(encryptedToken);
-    const { answer , expiresAt } = JSON.parse(decrypted);
-    if (Date.now() > expiresAt) return false;
-    return userInput == answer;
+    const { answer, expiresAt } = decrypted;
+    if (!answer || !expiresAt) return false;
+    if (Date.now() > Number(expiresAt)) return false;
+    const userAnswer = Number(userInput?.toString().trim());
+    const expectedAnswer = Number(answer);
+    console.log('Comparing:', userAnswer, 'vs', expectedAnswer);
+    return userAnswer === expectedAnswer;
   } catch (err) {
     console.error('Captcha verification failed:', err.message);
     return false;
   }
 };
+
 
 const getRandomChars = (length = 5) => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'; // avoids confusing chars
