@@ -41,9 +41,9 @@ export const verifyCaptcha = (encryptedToken, userInput) => {
   try {
     if (!encryptedToken || !userInput) return false;
     const decrypted = decryptData(encryptedToken);
-    const { code, expiresAt } = JSON.parse(decrypted);
+    const { answer , expiresAt } = JSON.parse(decrypted);
     if (Date.now() > expiresAt) return false;
-    return userInput === code;
+    return userInput === answer;
   } catch (err) {
     console.error('Captcha verification failed:', err.message);
     return false;
