@@ -138,12 +138,16 @@ export const updateProfile = [
   }),
 ];
 
-export const getCaptcha = catchAsync(async (req, res) => {
-  const { svg, token } = generateCaptcha();
-  res.setHeader('Content-Type', 'image/svg+xml');
-  res.setHeader('Cache-Control', 'no-store');
-  res.setHeader('captcha-token', token);
-  res.setHeader('Access-Control-Expose-Headers', 'captcha-token');
-  res.status(200).send(svg);
-});
+export const getCaptcha = [
+  decryptRequestBody,
+  catchAsync(async (req, res) => {
+  const captcha = generateCaptcha();
+  await sendEncryptedResponse(res, 200, {
+    message: 'Captcha generated successfully',
+    captchaType: captcha.captchaType,
+    captchaQuestion: captcha.captchaQuestion,
+    captchaToken: captcha.captchaToken,
+  });
+}),
+]
 

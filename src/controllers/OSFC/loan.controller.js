@@ -110,7 +110,6 @@ export const filterLoans = [
   }),
 ];
 
-// Update loan
 export const updateLoan = [
   decryptRequestBody,
   catchAsync(async (req, res, next) => {
@@ -136,7 +135,6 @@ export const updateLoan = [
   }),
 ];
 
-// Delete loan
 export const deleteLoan = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 

@@ -3,7 +3,6 @@ import { MulterError } from 'multer';
 import { extname } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import cloudinary from '../config/cloudinary.js';
 import { v2 as cloudinaryV2 } from 'cloudinary';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -47,12 +46,10 @@ async function uploadBufferToCloud(buffer, origName) {
       type: 'upload',
       access_mode: 'public',
     };
-
     const stream = cloudinaryV2.uploader.upload_stream(
       opts,
       (error, result) => (error ? reject(error) : resolve(result))
     );
-
     stream.end(buffer);
   });
 }
