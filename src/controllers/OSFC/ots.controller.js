@@ -130,10 +130,8 @@ export const trackStatus = [
   catchAsync(async (req, res, next) => {
     const { loan_number } = req.decryptedBody;
     if (!loan_number) return next(new AppError('Loan number is required', 400));
-
     const application = await OTSForm.findOne({ loan_number });
     if (!application) return next(new AppError('Application not found', 404));
-
     const timeline = await generateStatusTimeline(application);
     sendEncryptedResponse(res, 200, { timeline });
   }),

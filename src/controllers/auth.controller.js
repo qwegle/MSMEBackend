@@ -7,19 +7,16 @@ import {
   resetPasswordService,
   resendResetOTPService,
 } from '../services/auth.service.js';
-
 import {
   decryptRequestBody,
   sendEncryptedResponse,
 } from '../utils/encryption.js';
-
 import { blacklistToken } from '../utils/tokenBlacklist.js';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/AppError.js';
 import User from '../models/user.js';
 import { compare, hash } from 'bcrypt';
 import { generateCaptcha, verifyCaptcha } from '../utils/captcha.js';
-
 export const register = [
   decryptRequestBody,
   catchAsync(async (req, res, next) => {
@@ -71,7 +68,7 @@ export function logout(req, res, next) {
   const token = authHeader?.split(' ')[1];
   if (!token) return next(new AppError('Token required', 401));
   blacklistToken(token);
-  res.json({ message: 'Logout successful' }); // No encryption needed
+  res.json({ message: 'Logout successful' });
 }
 
 export const forgotPassword = [
@@ -114,14 +111,11 @@ export const updateProfile = [
       currentPassword,
       newPassword,
     } = req.decryptedBody;
-
     const user = await User.findById(userId);
     if (!user) return next(new AppError('User not found', 404));
-
     if (username) user.username = username;
     if (phone) user.phone = phone;
     if (aadharNumber) user.aadharNumber = aadharNumber;
-
     if (newPassword) {
       if (!currentPassword) {
         return next(new AppError('Current password is required to change password', 400));
@@ -132,7 +126,6 @@ export const updateProfile = [
       }
       user.password = await hash(newPassword, 10);
     }
-
     await user.save();
     sendEncryptedResponse(res, 200, { message: 'Profile updated successfully' });
   }),
@@ -147,4 +140,3 @@ export const getCaptcha = catchAsync(async (req, res) => {
     captchaToken: captcha.captchaToken,
   });
 })
-

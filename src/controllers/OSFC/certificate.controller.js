@@ -37,7 +37,7 @@ export const uploadCertificateOrder =
       certificate: fileUrl,
     });
     await OTSForm.findByIdAndUpdate(otsForm._id, { status_msg: 'Completed', status: 1 });
-    sendEncryptedResponse(res, 201, {
+    res.status(201).json({
       message: 'Certificate order uploaded and status updated successfully',
       data: newOrder,
     });
@@ -54,7 +54,7 @@ export const reuploadCertificateOrder =
     if (!certificate) return next(new AppError('Certificate not found for this loan_number.', 404));
     certificate.certificate = fileUrl;
     await certificate.save();
-    sendEncryptedResponse(res, 200, {
+    res.status(201).json({
       message: 'Certificate reuploaded successfully.',
       updatedCertificate: certificate,
     });

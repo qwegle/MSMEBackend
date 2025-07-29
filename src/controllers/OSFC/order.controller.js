@@ -54,7 +54,7 @@ export const uploadSettlementOrder = catchAsync(async (req, res, next) => {
       { new: true }
     );
 
-    sendEncryptedResponse(res, 201, {
+    res.status(201).json({
       message: 'Settlement order created and application status updated successfully.',
       id: savedOrder._id,
     });
