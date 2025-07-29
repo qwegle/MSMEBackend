@@ -172,8 +172,10 @@ export const getCertificateCountsLast7Days = catchAsync(async (req, res) => {
 export const filterCertificateOrders = [
   decryptRequestBody,
   catchAsync(async (req, res, next) => {
-    const { loan_number, branch, userId, page = 1, limit = 10 } = req.decryptedBody;
+    const { loan_number, branch, userId} = req.decryptedBody;
     const { user_role } = req.user;
+    const page = req.body.page && Number(req.body.page) > 0 ? Number(req.body.page) : 1;
+    const limit = req.body.limit && Number(req.body.limit) > 0 ? Number(req.body.limit) : 10;
     const skip = (page - 1) * limit;
     if (user_role === 2) {
       if (!userId || !Types.ObjectId.isValid(userId)) {
