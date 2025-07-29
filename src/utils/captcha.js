@@ -44,8 +44,8 @@ export const verifyCaptcha = (encryptedToken, userInput) => {
     const { answer, expiresAt } = decrypted;
     if (!answer || !expiresAt) return false;
     if (Date.now() > Number(expiresAt)) return false;
-    const userAnswer = Number(userInput?.toString().trim());
-    const expectedAnswer = Number(answer);
+    const userAnswer = userInput.toString().trim();
+    const expectedAnswer = answer.toString().trim();
     console.log('Comparing:', userAnswer, 'vs', expectedAnswer);
     return userAnswer === expectedAnswer;
   } catch (err) {
@@ -53,6 +53,7 @@ export const verifyCaptcha = (encryptedToken, userInput) => {
     return false;
   }
 };
+
 
 
 const getRandomChars = (length = 5) => {
