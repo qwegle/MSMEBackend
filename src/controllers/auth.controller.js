@@ -143,5 +143,7 @@ export const getCaptcha = catchAsync(async (req, res) => {
   res.setHeader('Content-Type', 'image/svg+xml');
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('captcha-token', token);
-  res.status(200).send(svg); // Do not encrypt raw SVG
+  res.setHeader('Access-Control-Expose-Headers', 'captcha-token');
+  res.status(200).send(svg);
 });
+
