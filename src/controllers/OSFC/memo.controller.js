@@ -22,7 +22,7 @@ export const uploadPdf = catchAsync(async (req, res, next) => {
     const fileUrl = req.file?.url;
     if (!fileUrl) return next(new AppError('PDF file is required', 400));
 
-    const { loan_number } = req.decryptedBody;
+    const { loan_number } = req.body;
     if (!loan_number) return next(new AppError('loan_number is required', 400));
 
     const otsForm = await OTSForm.findOne({ loan_number });
@@ -57,7 +57,7 @@ export const reuploadMemo = catchAsync(async (req, res, next) => {
     const fileUrl = req.file?.url;
     if (!fileUrl) return next(new AppError('PDF file is required', 400));
 
-    const { loan_number } = req.decryptedBody;
+    const { loan_number } = req.body;
     if (!loan_number) return next(new AppError('loan_number is required', 400));
 
     const otsForm = await OTSForm.findOne({ loan_number });

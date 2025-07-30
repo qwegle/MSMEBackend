@@ -26,7 +26,7 @@ export const createAckForm = catchAsync(async (req, res, next) => {
       rac_date,
       name_of_recieving_officer,
       date_of_signature,
-    } = req.decryptedBody;
+    } = req.body;
     const sanitizedLoanNumber = sanitizeInput(loan_number);
     if (!sanitizedLoanNumber)
       return next(new AppError('Loan number is required', 400));

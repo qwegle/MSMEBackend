@@ -16,7 +16,7 @@ export const uploadCertificateOrder =
   catchAsync(async (req, res, next) => {
     const fileUrl = req.file?.url;
     if (!fileUrl) return next(new AppError('PDF file is required', 400));
-    const { loan_number } = req.decryptedBody;
+    const { loan_number } = req.body;
     if (!loan_number) return next(new AppError('loan_number is required', 400));
     const otsForm = await OTSForm.findOne({ loan_number });
     if (!otsForm) return next(new AppError('OTSForm not found for provided loan_number', 404));
@@ -46,7 +46,7 @@ export const reuploadCertificateOrder =
   catchAsync(async (req, res, next) => {
     const fileUrl = req.file?.url;
     if (!fileUrl) return next(new AppError('PDF file is required.', 400));
-    const { loan_number } = req.decryptedBody;
+    const { loan_number } = req.body;
     if (!loan_number) return next(new AppError('loan_number is required.', 400));
     const otsForm = await OTSForm.findOne({ loan_number });
     if (!otsForm) return next(new AppError('OTSForm not found for provided loan_number.', 404));
