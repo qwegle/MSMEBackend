@@ -72,7 +72,7 @@ async function uploadBufferToCloud(buffer, origName) {
     const publicIdBase = origName.replace(/\.pdf$/i, '').replace(/[^\w\d-]/g, '');
     const opts = {
       folder: 'MSME/pdfs',
-      public_id: `${Date.now()}-${publicIdBase}`,
+      public_id: `${Date.now()}-${publicIdBase}.pdf`,
       resource_type: 'raw',
       type: 'upload',
       access_mode: 'public',
