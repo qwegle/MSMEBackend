@@ -6,7 +6,8 @@ import {
   reuploadMemo,
   updateMemoStatus,
   getMemosByUserId,
-  getAllMemos
+  getAllMemos,
+  getAllMemosNE
 } from '../controllers/OSFC/memo.controller.js';
 
 import {
@@ -67,6 +68,13 @@ router.post(
   authorizeType(0, 1),
   getAllMemos
 );
+
+// router.post(
+//   '/filterMemosNE',
+//   // authenticateToken,
+//   // authorizeType(0, 1),
+//   getAllMemosNE
+// );
 
 export default router;
 

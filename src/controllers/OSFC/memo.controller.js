@@ -161,9 +161,10 @@ export const getMemosByUserId = [
 export const getAllMemos = [
   decryptRequestBody,
   catchAsync(async (req, res, next) => {
-    const { loan_number, userId, branch, status, page = 1, limit = 10 } = req.decryptedBody;
+    const { loan_number, userId, branch, status} = req.decryptedBody;
     const { user_role } = req.user;
-
+    const page = req.body.page && Number(req.body.page) > 0 ? Number(req.body.page) : 1;
+    const limit = req.body.limit && Number(req.body.limit) > 0 ? Number(req.body.limit) : 10;
     let memoFilter = {};
     let otsFilter = {};
 
@@ -244,3 +245,90 @@ export const getAllMemos = [
     });
   }),
 ];
+
+// export const getAllMemosNE = [
+//   catchAsync(async (req, res, next) => {
+//     const { loan_number, userId, branch, status} = req.body;
+//     const  user_role  = 0;
+//     const page = req.body.page && Number(req.body.page) > 0 ? Number(req.body.page) : 1;
+//     const limit = req.body.limit && Number(req.body.limit) > 0 ? Number(req.body.limit) : 10;
+//     let memoFilter = {};
+//     let otsFilter = {};
+
+//     // Role-based validation
+//     if (user_role === 2) {
+//       if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+//         return next(new AppError('User ID is required and must be valid for regular users.', 400));
+//       }
+//       if (branch) {
+//         return next(new AppError('Regular users are not allowed to filter by branch.', 403));
+//       }
+//     } else if (user_role === 1) {
+//       if (!branch) {
+//         return next(new AppError('Branch is required for sub-admins.', 400));
+//       }
+//     } else if (user_role !== 0) {
+//       return next(new AppError('Access denied: your role is not authorized to perform this operation.', 403));
+//     }
+
+//     if (loan_number) {
+//       const otsForm = await OTSForm.findOne({ loan_number });
+//       if (!otsForm) return next(new AppError('No OTS Form found for the given loan number', 404));
+//       memoFilter.otsFormId = otsForm._id;
+//     } else {
+//       if (userId && !mongoose.Types.ObjectId.isValid(userId)) {
+//         return next(new AppError('Invalid userId format.', 400));
+//       }
+
+//       if (userId) otsFilter.userId = userId;
+//       if (branch) otsFilter.branch = sanitizeInput(branch);
+//       if (status) memoFilter.status = status;
+
+//       const matchedOtsForms = await OTSForm.find(otsFilter).select('_id');
+//       if (!matchedOtsForms.length) {
+//         return res.status(200).json({
+//           paginatedData: [],
+//           page,
+//           limit,
+//           totalItems: 0,
+//           totalPages: 0,
+//           previousPage: null,
+//           nextPage: null,
+//           currentPageCount: 0,
+//         });
+//       }
+
+//       memoFilter.otsFormId = { $in: matchedOtsForms.map(ots => ots._id) };
+//     }
+
+//     const totalItems = await Memorandum.countDocuments(memoFilter);
+//     const totalPages = Math.ceil(totalItems / limit);
+//     const startIndex = (page - 1) * limit;
+
+//     const memos = await Memorandum.find(memoFilter)
+//       .sort({ createdAt: -1 })
+//       .skip(startIndex)
+//       .limit(limit)
+//       .populate('userId', 'username email user_type user_role branch aadharNumber')
+//       .populate('otsFormId')
+//       .populate('ackId');
+
+//     const paginatedData = memos.map(memo => ({
+//       ...memo.toObject(),
+//       createdAtFormatted: dayjs(memo.createdAt)
+//         .tz('Asia/Kolkata')
+//         .format('DD/MM/YYYY'),
+//     }));
+
+//     res.status(200).json({
+//       paginatedData,
+//       page,
+//       limit,
+//       totalItems,
+//       totalPages,
+//       previousPage: page > 1 ? page - 1 : null,
+//       nextPage: page < totalPages ? page + 1 : null,
+//       currentPageCount: paginatedData.length,
+//     });
+//   }),
+// ];
