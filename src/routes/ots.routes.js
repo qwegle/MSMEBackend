@@ -3,7 +3,7 @@ import { createOTSForm, updateOTSForm, trackStatus, filterOTS, getOTSStatusCount
 
 import { authenticateToken, authorizeRoles, authorizeType } from '../middlewares/auth.middleware.js';
 import validateRequest from '../middlewares/validateRequest.js';
-import otsFormSchema from '../validations/otsFormValidation.js';
+// import otsFormSchema from '../validations/otsFormValidation.js';
 
 const router = Router();
 
@@ -12,7 +12,7 @@ router.post(
     authenticateToken,
     authorizeRoles(2),
     authorizeType(0),
-    validateRequest(otsFormSchema),
+    // validateRequest(otsFormSchema),
     createOTSForm
 );
 router.put('/updateOTsform/:id', 

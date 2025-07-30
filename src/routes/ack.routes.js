@@ -31,7 +31,7 @@ router.post(
   validatePdfMagicNumber,
   uploadToCloud,
   multerErrorHandler,
-  validateRequest(ackFormValidation),
+  // validateRequest(ackFormValidation),
   createAckForm
 );
 
