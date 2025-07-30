@@ -14,8 +14,7 @@ const sanitizeInput = input =>
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export const createAckForm = 
-  catchAsync(async (req, res, next) => {
+export const createAckForm = catchAsync(async (req, res, next) => {
     const fileUrl = req.file?.url;
     if (!fileUrl) return next(new AppError('File is required', 400));
     const {
