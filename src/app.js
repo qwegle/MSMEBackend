@@ -19,31 +19,28 @@ const __dirname = dirname(__filename);
 const app = express();
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
-
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
-
-// app.use(helmet());
-// // app.use(cors());
-// const allowedOrigins = [
-//   'https://recaptchademo-w4a2bp.flutterflow.app',
-//   'http://127.0.0.1:5500',
-//   'https://msme.qwegle.info',
-//   'https://msme-odisha.flutterflow.app'
-// ];
-
-// app.use(cors({
-//   origin: function (origin, callback) {
-//     if (!origin) return callback(null, true);
-//     if (allowedOrigins.includes(origin)) {
-//       return callback(null, true);
-//     } else {
-//       return callback(new Error('Not allowed by CORS'));
-//     }
-//   },
-//   credentials: true,
-// }));
+app.use(helmet());
+// app.use(cors());
+const allowedOrigins = [
+  'https://recaptchademo-w4a2bp.flutterflow.app',
+  'http://127.0.0.1:5500',
+  'https://msme.qwegle.info',
+  'https://msme-odisha.flutterflow.app'
+];
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
 app.use(json());
 app.use(hpp());
 app.use(compression());
