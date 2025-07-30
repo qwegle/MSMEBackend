@@ -7,7 +7,7 @@ import {
   updateMemoStatus,
   getMemosByUserId,
   getAllMemos,
-  getAllMemosNE
+  // getAllMemosNE
 } from '../controllers/OSFC/memo.controller.js';
 
 import {
