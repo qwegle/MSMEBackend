@@ -23,6 +23,13 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 app.use(helmet());
+app.use((req, res, next) => {
+  res.setHeader(
+    'Permissions-Policy',
+    'geolocation=(), microphone=(), camera=(), fullscreen=(), payment=(), accelerometer=(), autoplay=(), usb=()'
+  );
+  next();
+});
 // app.use(cors());
 const allowedOrigins = [
   'https://recaptchademo-w4a2bp.flutterflow.app',
