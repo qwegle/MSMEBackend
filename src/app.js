@@ -14,15 +14,41 @@ import xss from 'xss';
 import connectDB from './config/db.js';
 import routes from './routes/index.js';
 import errorHandler from './middlewares/errorHandler.js';
+import { sendEncryptedResponse } from '../utils/encryption.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const app = express();
+
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
+
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 app.use(helmet());
+app.use((req, res, next) => {
+  res.setHeader('Referrer-Policy', 'same-origin');
+  next();
+});
+app.use((req, res, next) => {
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; " +
+    "script-src 'self'; " +
+    "style-src 'self'; " +
+    "img-src 'self' data:; " +
+    "connect-src 'self' https://msme.qwegle.info; " +
+    "frame-ancestors 'none'; " +
+    "base-uri 'self'; " +
+    "form-action 'self';"
+  );
+  next();
+});
+app.use((req, res, next) => {
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
 app.use((req, res, next) => {
   res.setHeader(
     'Permissions-Policy',
@@ -30,13 +56,13 @@ app.use((req, res, next) => {
   );
   next();
 });
-// app.use(cors());
 const allowedOrigins = [
   'https://recaptchademo-w4a2bp.flutterflow.app',
   'http://127.0.0.1:5500',
   'https://msme.qwegle.info',
   'https://msme-odisha.flutterflow.app'
 ];
+
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
@@ -48,10 +74,10 @@ app.use(cors({
   },
   credentials: true,
 }));
+
 app.use(json());
 app.use(hpp());
 app.use(compression());
-
 const sanitizeInput = (input) => {
   if (typeof input === 'string') return xss(input);
   if (Array.isArray(input)) return input.map(sanitizeInput);
@@ -74,13 +100,18 @@ app.use((req, res, next) => {
   req.params = mongoSanitize(sanitizeInput(req.params));
   next();
 });
-
-
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
-  message: 'Too many requests from this IP, please try again later.',
+  handler: (req, res) => {
+    sendEncryptedResponse(res, 429, {
+      message: 'Too many requests. Try again after sometime.',
+    });
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
+
 app.use('/api', limiter);
 app.use('/uploads', express.static(join(__dirname, 'uploads')));
 app.use('/api', routes);
@@ -100,7 +131,9 @@ app.use((err, req, res, next) => {
     message: err.message,
   });
 });
+
 app.use(errorHandler);
+
 const PORT = process.env.PORT || 3000;
 (async () => {
   try {
@@ -113,5 +146,5 @@ const PORT = process.env.PORT || 3000;
     process.exit(1);
   }
 })();
-export default app;
 
+export default app;

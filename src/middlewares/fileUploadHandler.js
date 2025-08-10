@@ -2,18 +2,12 @@ import multer, { MulterError } from 'multer';
 import { extname } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import cloudinary from '../config/cloudinary.js'; // ✅ Properly configured Cloudinary instance
+import cloudinary from '../config/cloudinary.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-// === ✅ Allowed MIME Types
 const ALLOWED_MIME = ['application/pdf'];
-
-// === 🧠 Multer memory storage for buffer uploads
 const memoryStorage = multer.memoryStorage();
-
-// === 🔍 File filter (PDF-only)
 const fileFilter = (req, file, cb) => {
   const extValid = extname(file.originalname).toLowerCase() === '.pdf';
   const mimeValid = ALLOWED_MIME.includes(file.mimetype);
@@ -23,33 +17,27 @@ const fileFilter = (req, file, cb) => {
   if (extValid && mimeValid) cb(null, true);
   else cb(new Error('Only PDF files are allowed!'));
 };
-
-// === 📥 Multer setup with 2MB limit
 const uploadMemory = multer({
   storage: memoryStorage,
   fileFilter,
   limits: { fileSize: 2 * 1024 * 1024 },
 });
-
-// === 🔄 Single & multi-field exports
 export const singlePdfUpload = uploadMemory.single('pdf');
 export const supplyOrderUpload = uploadMemory.fields([
   { name: 'proof_of_supply', maxCount: 1 },
   { name: 'invoice_submission', maxCount: 1 },
 ]);
-
-// === 🧪 Validate PDF magic number (%PDF)
 export function validatePdfMagicNumber(req, res, next) {
-  console.log('🔍 Running PDF magic number check...');
+  console.log('Running PDF magic number check...');
   const allFiles = []
     .concat(req.file || [])
     .concat(Object.values(req.files || {}).flat());
 
   for (const f of allFiles) {
-    console.log(`📄 Checking magic number for: ${f.originalname}`);
+    console.log(`Checking magic number for: ${f.originalname}`);
     const buf = f.buffer;
     if (!buf || buf.length < 4 || buf.slice(0, 4).toString() !== '%PDF') {
-      console.warn(`⛔ Invalid PDF magic number in file: ${f.originalname}`);
+      console.warn(`Invalid PDF magic number in file: ${f.originalname}`);
       return res.status(400).json({
         status: 'fail',
         message: `Invalid PDF content: ${f.originalname}`,
@@ -57,13 +45,12 @@ export function validatePdfMagicNumber(req, res, next) {
     }
   }
 
-  console.log('✅ All PDF files passed magic number check');
+  console.log('All PDF files passed magic number check');
   next();
 }
 
-// === ☁️ Upload buffer to Cloudinary
 async function uploadBufferToCloud(buffer, origName) {
-  console.log(`☁️ Uploading to Cloudinary: ${origName}`);
+  console.log(`Uploading to Cloudinary: ${origName}`);
   if (!buffer || !Buffer.isBuffer(buffer)) {
     throw new Error('Invalid or empty buffer provided for upload');
   }
@@ -80,44 +67,38 @@ async function uploadBufferToCloud(buffer, origName) {
 
     const stream = cloudinary.uploader.upload_stream(opts, (error, result) => {
       if (error) {
-        console.error('❌ Cloudinary upload error:', error);
+        console.error('Cloudinary upload error:', error);
         return reject(error);
       }
-      console.log(`✅ Cloudinary upload success: ${result.secure_url}`);
+      console.log(`Cloudinary upload success: ${result.secure_url}`);
       resolve(result);
     });
 
     stream.on('error', (streamErr) => {
-      console.error('❌ Stream error:', streamErr);
+      console.error('Stream error:', streamErr);
       reject(streamErr);
     });
 
     stream.end(buffer);
   });
 }
-
-// === 📤 Upload to Cloudinary middleware
 export async function uploadToCloud(req, res, next) {
   try {
-    console.log('🚀 uploadToCloud middleware triggered');
-
-    // Single file
+    console.log('uploadToCloud middleware triggered');
     if (req.file) {
-      console.log(`📦 Found single file: ${req.file.originalname}`);
+      console.log(`Found single file: ${req.file.originalname}`);
       const result = await uploadBufferToCloud(req.file.buffer, req.file.originalname);
       req.file = {
         url: result.secure_url,
         public_id: result.public_id,
       };
     }
-
-    // Multiple files
     if (req.files) {
-      console.log(`📦 Found multiple files: ${Object.keys(req.files).join(', ')}`);
+      console.log(`Found multiple files: ${Object.keys(req.files).join(', ')}`);
       for (const field of Object.keys(req.files)) {
         req.files[field] = await Promise.all(
           req.files[field].map(async (f) => {
-            console.log(`📤 Uploading field "${field}" file: ${f.originalname}`);
+            console.log(` Uploading field "${field}" file: ${f.originalname}`);
             const result = await uploadBufferToCloud(f.buffer, f.originalname);
             return {
               url: result.secure_url,
@@ -128,20 +109,18 @@ export async function uploadToCloud(req, res, next) {
       }
     }
 
-    console.log('✅ All files uploaded to Cloudinary');
+    console.log('All files uploaded to Cloudinary');
     next();
   } catch (err) {
-    console.error('❌ uploadToCloud error:', err);
+    console.error('uploadToCloud error:', err);
     return res.status(500).json({
       status: 'error',
       message: err?.message || 'Upload to Cloudinary failed',
     });
   }
 }
-
-// === ⚠️ Multer error handler
 export const multerErrorHandler = (err, req, res, next) => {
-  console.error('🐞 Caught in multerErrorHandler:', err);
+  console.error('Caught in multerErrorHandler:', err);
   const isMulterError = err instanceof MulterError;
   const isPdfError = typeof err?.message === 'string' && err.message.includes('Only PDF');
 

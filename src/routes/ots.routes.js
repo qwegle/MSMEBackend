@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { createOTSForm, updateOTSForm, trackStatus, filterOTS, getOTSStatusCounts, ApproveRejectOtsApplication, getUserStats } from '../controllers/OSFC/ots.controller.js';
 
 import { authenticateToken, authorizeRoles, authorizeType } from '../middlewares/auth.middleware.js';
+
+import { submitApplicationLimiter } from '../utils/limiters.js';
 import validateRequest from '../middlewares/validateRequest.js';
 // import otsFormSchema from '../validations/otsFormValidation.js';
 
@@ -12,6 +14,7 @@ router.post(
     authenticateToken,
     authorizeRoles(2),
     authorizeType(0),
+    submitApplicationLimiter,
     // validateRequest(otsFormSchema),
     createOTSForm
 );
@@ -19,6 +22,7 @@ router.put('/updateOTsform/:id',
     authenticateToken,
     authorizeRoles(2),
     authorizeType(0),
+    submitApplicationLimiter,
     updateOTSForm
 );
 router.post(
