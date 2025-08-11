@@ -7,7 +7,7 @@ import sendEmail from '../utils/sendEmail.js';
 import crypto from 'crypto';
 const { sign } = jwt;
 const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '30m';
 export async function registerUser({ username, email, password }) {
   const existingUser = await User.findOne({ email });
   if (existingUser) throw new AppError('Email already in use', 400);
@@ -76,7 +76,7 @@ export async function loginUser({ email, password }) {
       user_type: user.user_type,
       user_role: user.user_role,
       branch: user.branch,
-      jwtExt: JWT_EXPIRES_IN,
+      sessionExt: JWT_EXPIRES_IN,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt
     }
