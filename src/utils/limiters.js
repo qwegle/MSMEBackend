@@ -1,5 +1,5 @@
 import rateLimit from 'express-rate-limit';
-import { sendEncryptedResponse } from './utils/sendEncryptedResponse.js';
+import { sendEncryptedResponse } from '../utils/encryption.js';
 
 export const emailLimiter = rateLimit({
   windowMs: 60 * 1000,

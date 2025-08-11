@@ -14,19 +14,25 @@ import xss from 'xss';
 import connectDB from './config/db.js';
 import routes from './routes/index.js';
 import errorHandler from './middlewares/errorHandler.js';
-import { sendEncryptedResponse } from '../utils/encryption.js';
+import { sendEncryptedResponse } from './utils/encryption.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const app = express();
-
 app.disable('x-powered-by');
+app.use((req, res, next) => {
+  res.removeHeader('Server');
+  res.setHeader('Server', 'secure-gateway');
+  next();
+});
+
 app.set('trust proxy', 1);
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 app.use(helmet());
+
 app.use((req, res, next) => {
   res.setHeader('Referrer-Policy', 'same-origin');
   next();
@@ -62,7 +68,6 @@ const allowedOrigins = [
   'https://msme.qwegle.info',
   'https://msme-odisha.flutterflow.app'
 ];
-
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
@@ -111,7 +116,6 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-
 app.use('/api', limiter);
 app.use('/uploads', express.static(join(__dirname, 'uploads')));
 app.use('/api', routes);
@@ -126,14 +130,18 @@ app.use((err, req, res, next) => {
 });
 app.use((err, req, res, next) => {
   console.error('Error stack:', err.stack);
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(500).json({
+      status: 'error',
+      message: 'Internal server error',
+    });
+  }
   res.status(500).json({
     status: 'error',
     message: err.message,
   });
 });
-
 app.use(errorHandler);
-
 const PORT = process.env.PORT || 3000;
 (async () => {
   try {
