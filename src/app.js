@@ -15,75 +15,67 @@ import connectDB from './config/db.js';
 import routes from './routes/index.js';
 import errorHandler from './middlewares/errorHandler.js';
 import { sendEncryptedResponse } from './utils/encryption.js';
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const app = express();
 app.disable('x-powered-by');
+app.disable('etag');
 app.use((req, res, next) => {
   res.removeHeader('Server');
   res.setHeader('Server', 'secure-gateway');
   next();
 });
-
 app.set('trust proxy', 1);
-
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false
+}));
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'https://msme.qwegle.info,https://msme-odisha.flutterflow.app')
+  .split(',')
+  .map(o => o.trim());
+app.use((req, res, next) => {
+  const apiOrigin = process.env.NODE_APP_URL || 'https://msmebackend.onrender.com';
+  const connectSrcList = ["'self'", apiOrigin, ...allowedOrigins];
 
-app.use((req, res, next) => {
-  res.setHeader('Referrer-Policy', 'same-origin');
-  next();
-});
-app.use((req, res, next) => {
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; " +
-    "script-src 'self'; " +
-    "style-src 'self'; " +
-    "img-src 'self' data:; " +
-    "connect-src 'self' https://msme.qwegle.info; " +
-    "frame-ancestors 'none'; " +
-    "base-uri 'self'; " +
-    "form-action 'self';"
+    `default-src 'self';
+     script-src 'self';
+     style-src 'self';
+     img-src 'self' data:;
+     connect-src ${connectSrcList.join(' ')};
+     frame-ancestors 'none';
+     frame-src 'none';
+     object-src 'none';
+     upgrade-insecure-requests;
+     base-uri 'self';
+     form-action 'self';`
   );
-  next();
-});
-app.use((req, res, next) => {
   res.setHeader('X-XSS-Protection', '1; mode=block');
-  next();
-});
-app.use((req, res, next) => {
   res.setHeader(
     'Permissions-Policy',
     'geolocation=(), microphone=(), camera=(), fullscreen=(), payment=(), accelerometer=(), autoplay=(), usb=()'
   );
+
   next();
 });
-const allowedOrigins = [
-  'https://recaptchademo-w4a2bp.flutterflow.app',
-  'http://127.0.0.1:5500',
-  'https://msme.qwegle.info',
-  'https://msme-odisha.flutterflow.app'
-];
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
       return callback(null, true);
-    } else {
-      return callback(new Error('Not allowed by CORS'));
     }
+    return callback(new Error('Not allowed by CORS'));
   },
-  credentials: true,
+  credentials: true
 }));
-
 app.use(json());
 app.use(hpp());
 app.use(compression());
-const sanitizeInput = (input) => {
+const sanitizeInput = input => {
   if (typeof input === 'string') return xss(input);
   if (Array.isArray(input)) return input.map(sanitizeInput);
   if (typeof input === 'object' && input !== null) {
@@ -95,13 +87,9 @@ const sanitizeInput = (input) => {
   }
   return input;
 };
-
 app.use((req, res, next) => {
   req.body = mongoSanitize(sanitizeInput(req.body));
-  const sanitizedQuery = sanitizeInput({ ...req.query });
-  for (const key in sanitizedQuery) {
-    req.query[key] = sanitizedQuery[key];
-  }
+  req.query = sanitizeInput(mongoSanitize(req.query));
   req.params = mongoSanitize(sanitizeInput(req.params));
   next();
 });
@@ -110,36 +98,28 @@ const limiter = rateLimit({
   max: 100,
   handler: (req, res) => {
     sendEncryptedResponse(res, 429, {
-      message: 'Too many requests. Try again after sometime.',
+      message: 'Too many requests. Try again later.'
     });
   },
   standardHeaders: true,
-  legacyHeaders: false,
+  legacyHeaders: false
 });
 app.use('/api', limiter);
+app.use('/api', (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('Pragma', 'no-cache');
+  next();
+});
 app.use('/uploads', express.static(join(__dirname, 'uploads')));
 app.use('/api', routes);
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
     return res.status(400).json({
       status: 'fail',
-      message: 'Malformed JSON payload',
+      message: 'Malformed JSON payload'
     });
   }
   next(err);
-});
-app.use((err, req, res, next) => {
-  console.error('Error stack:', err.stack);
-  if (process.env.NODE_ENV === 'production') {
-    return res.status(500).json({
-      status: 'error',
-      message: 'Internal server error',
-    });
-  }
-  res.status(500).json({
-    status: 'error',
-    message: err.message,
-  });
 });
 app.use(errorHandler);
 const PORT = process.env.PORT || 3000;

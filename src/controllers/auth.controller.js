@@ -27,7 +27,6 @@ export const register = [
     sendEncryptedResponse(res, 201, result);
   }),
 ];
-
 export const login = [
   decryptRequestBody,
   catchAsync(async (req, res, next) => {
@@ -38,7 +37,6 @@ export const login = [
     sendEncryptedResponse(res, 200, result);
   }),
 ];
-
 export const register_OFSC_SuperAdmin = [
   decryptRequestBody,
   catchAsync(async (req, res, next) => {
@@ -50,7 +48,6 @@ export const register_OFSC_SuperAdmin = [
     sendEncryptedResponse(res, 201, result);
   }),
 ];
-
 export const register_OFSC_SubAdmin = [
   decryptRequestBody,
   catchAsync(async (req, res, next) => {
@@ -62,7 +59,6 @@ export const register_OFSC_SubAdmin = [
     sendEncryptedResponse(res, 201, result);
   }),
 ];
-
 export function logout(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader?.split(' ')[1];
@@ -70,7 +66,6 @@ export function logout(req, res, next) {
   blacklistToken(token);
   res.json({ message: 'Logout successful' });
 }
-
 export const forgotPassword = [
   decryptRequestBody,
   catchAsync(async (req, res) => {
@@ -78,7 +73,6 @@ export const forgotPassword = [
     sendEncryptedResponse(res, 200, result);
   }),
 ];
-
 export const resetPassword = [
   decryptRequestBody,
   catchAsync(async (req, res) => {
@@ -87,7 +81,6 @@ export const resetPassword = [
     sendEncryptedResponse(res, 200, result);
   }),
 ];
-
 export const resendResetOTP = [
   decryptRequestBody,
   catchAsync(async (req, res) => {
@@ -95,11 +88,9 @@ export const resendResetOTP = [
     sendEncryptedResponse(res, 200, result);
   }),
 ];
-
 export const protectedRoute = (req, res) => {
   sendEncryptedResponse(res, 200, { message: 'Access granted', user: req.user });
 };
-
 export const updateProfile = [
   decryptRequestBody,
   catchAsync(async (req, res, next) => {
@@ -111,7 +102,7 @@ export const updateProfile = [
       currentPassword,
       newPassword,
     } = req.decryptedBody;
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select('+passwordHistory +password');
     if (!user) return next(new AppError('User not found', 404));
     if (username) user.username = username;
     if (phone) user.phone = phone;
@@ -124,7 +115,18 @@ export const updateProfile = [
       if (!isMatch) {
         return next(new AppError('Current password is incorrect', 401));
       }
-      user.password = await hash(newPassword, 10);
+      const bcrypt = await import('bcrypt');
+      const isReused = await Promise.any(
+        (user.passwordHistory || []).map(oldHash => bcrypt.compare(newPassword, oldHash))
+      ).catch(() => false);
+
+      if (isReused) {
+        return next(new AppError('You cannot reuse your old passwords', 400));
+      }
+      user.passwordHistory = [user.password, ...(user.passwordHistory || [])].slice(0, 5);
+      user.password = await bcrypt.hash(newPassword, 10);
+      user.sessionVersion = (user.sessionVersion || 0) + 1;
+      user.passwordChangedAt = new Date();
     }
     await user.save();
     sendEncryptedResponse(res, 200, { message: 'Profile updated successfully' });
