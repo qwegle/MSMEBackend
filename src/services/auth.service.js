@@ -56,18 +56,20 @@ export async function loginUser({ email, password }) {
   if (!user) throw new AppError('Invalid credentials', 401);
   const isPasswordCorrect = await compare(password, user.password);
   if (!isPasswordCorrect) throw new AppError('Invalid credentials', 401);
-    const token = sign(
+  const token = sign(
     {
-        id: user._id,
-        user_role: user.user_role,
-        user_type: user.user_type,
-        branch: user.branch
+      id: user._id,
+      user_role: user.user_role,
+      user_type: user.user_type,
+      branch: user.branch
     },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRES_IN }
-    );
+  );
+  const { exp } = jwt.decode(token);
   return {
     token,
+    token_expiration: exp,
     message: 'Login successful',
     user: {
       id: user._id,
