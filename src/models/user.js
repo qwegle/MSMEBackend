@@ -11,7 +11,7 @@ const userSchema = new Schema({
       message: () => 
         `Password must be at least 12 characters long, contain uppercase, lowercase, number, and special character.`
     },
-    select: false // don't return password by default
+
   },
   email: { type: String, required: true, unique: true },
   phone: { type: String },

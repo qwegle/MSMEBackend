@@ -38,24 +38,22 @@ export const login = [
   }),
 ];
 export const register_OFSC_SuperAdmin = [
-  decryptRequestBody,
   catchAsync(async (req, res, next) => {
-    const { dev_pass } = req.decryptedBody;
+    const { dev_pass } = req.body;
     if (!dev_pass || dev_pass != process.env.DEV_PASS) {
       return next(new AppError('You are not authorized to use this endpoint', 401));
     }
-    const result = await register_ofsc_superadmin(req.decryptedBody);
+    const result = await register_ofsc_superadmin(req.body);
     sendEncryptedResponse(res, 201, result);
   }),
 ];
 export const register_OFSC_SubAdmin = [
-  decryptRequestBody,
   catchAsync(async (req, res, next) => {
-    const { dev_pass } = req.decryptedBody;
+    const { dev_pass } = req.body;
     if (!dev_pass || dev_pass != process.env.DEV_PASS) {
       return next(new AppError('You are not authorized to use this endpoint', 401));
     }
-    const result = await register_ofsc_subadmin(req.decryptedBody);
+    const result = await register_ofsc_subadmin(req.body);
     sendEncryptedResponse(res, 201, result);
   }),
 ];
