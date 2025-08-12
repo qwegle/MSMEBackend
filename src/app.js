@@ -98,8 +98,13 @@ const sanitizeInput = input => {
 };
 app.use((req, res, next) => {
   req.body = mongoSanitize(sanitizeInput(req.body));
-  req.query = sanitizeInput(mongoSanitize(req.query));
-  req.params = mongoSanitize(sanitizeInput(req.params));
+  Object.keys(req.query).forEach(key => {
+    req.query[key] = sanitizeInput(mongoSanitize(req.query[key]));
+  });
+  Object.keys(req.params).forEach(key => {
+    req.params[key] = sanitizeInput(mongoSanitize(req.params[key]));
+  });
+
   next();
 });
 const limiter = rateLimit({
