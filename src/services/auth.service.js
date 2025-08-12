@@ -8,8 +8,15 @@ import crypto from 'crypto';
 const { sign } = jwt;
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '30m';
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}$/;
 export async function registerUser({ username, email, password }) {
   const existingUser = await User.findOne({ email });
+    if (!passwordRegex.test(password)) {
+    throw new AppError(
+      'Password must be at least 12 characters long, contain uppercase, lowercase, number, and special character.',
+      400
+    );
+  }
   if (existingUser) throw new AppError('Email already in use', 400);
   const hashedPassword = await hash(password, 10);
   const newUser = new User({

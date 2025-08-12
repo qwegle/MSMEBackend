@@ -1,28 +1,18 @@
 import { Schema, model } from 'mongoose';
-
-// Strong password regex: 
-// - At least 12 characters
-// - At least 1 lowercase
-// - At least 1 uppercase
-// - At least 1 number
-// - At least 1 special character
+import bcrypt from 'bcrypt';
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}$/;
-
 const userSchema = new Schema({
   username: { type: String, required: true },
-
   password: { 
     type: String, 
     required: true,
     validate: {
-      validator: function(value) {
-        return passwordRegex.test(value);
-      },
-      message: props => 
+      validator: value => passwordRegex.test(value),
+      message: () => 
         `Password must be at least 12 characters long, contain uppercase, lowercase, number, and special character.`
-    }
+    },
+    select: false // don't return password by default
   },
-
   email: { type: String, required: true, unique: true },
   phone: { type: String },
   aadharNumber: { type: String },
@@ -31,9 +21,17 @@ const userSchema = new Schema({
   branch: { type: String },
   resetPasswordToken: { type: String },
   resetPasswordExpires: { type: Date },
-  resetPasswordLastSentAt: { type: Date }
+  resetPasswordLastSentAt: { type: Date },
+  sessionVersion: { type: Number, default: 0 },
+  passwordChangedAt: { type: Date }
 }, { timestamps: true });
 
-const User = model('User', userSchema);
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 12);
+  this.passwordChangedAt = new Date();
+  next();
+});
 
+const User = model('User', userSchema);
 export default User;
