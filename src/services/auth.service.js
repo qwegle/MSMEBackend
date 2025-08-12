@@ -68,7 +68,8 @@ export async function loginUser({ email, password }) {
       id: user._id,
       user_role: user.user_role,
       user_type: user.user_type,
-      branch: user.branch
+      branch: user.branch,
+      sessionVersion: user.sessionVersion
     },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRES_IN }

@@ -26,12 +26,5 @@ const userSchema = new Schema({
   passwordChangedAt: { type: Date }
 }, { timestamps: true });
 
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 12);
-  this.passwordChangedAt = new Date();
-  next();
-});
-
 const User = model('User', userSchema);
 export default User;
