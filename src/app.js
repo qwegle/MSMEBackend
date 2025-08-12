@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
+
 import express, { json } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -20,12 +21,27 @@ const __dirname = dirname(__filename);
 const app = express();
 app.disable('x-powered-by');
 app.disable('etag');
+app.set('trust proxy', 1);
 app.use((req, res, next) => {
   res.removeHeader('Server');
   res.setHeader('Server', 'secure-gateway');
   next();
 });
-app.set('trust proxy', 1);
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'https://msme.qwegle.info,https://msme-odisha.flutterflow.app')
+  .split(',')
+  .map(o => o.trim());
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+app.options('*', cors());
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
@@ -33,9 +49,7 @@ app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false
 }));
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'https://msme.qwegle.info,https://msme-odisha.flutterflow.app')
-  .split(',')
-  .map(o => o.trim());
+
 app.use((req, res, next) => {
   const apiOrigin = process.env.NODE_APP_URL || 'https://msmebackend.onrender.com';
   const connectSrcList = ["'self'", apiOrigin, ...allowedOrigins];
@@ -63,15 +77,6 @@ app.use((req, res, next) => {
 
   next();
 });
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true
-}));
 app.use(json());
 app.use(hpp());
 app.use(compression());
@@ -122,7 +127,9 @@ app.use((err, req, res, next) => {
   next(err);
 });
 app.use(errorHandler);
+
 const PORT = process.env.PORT || 3000;
+
 (async () => {
   try {
     await connectDB();
