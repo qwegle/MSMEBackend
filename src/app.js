@@ -1,6 +1,5 @@
 import dotenv from 'dotenv';
 dotenv.config();
-
 import express, { json } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -16,13 +15,9 @@ import connectDB from './config/db.js';
 import routes from './routes/index.js';
 import errorHandler from './middlewares/errorHandler.js';
 import { sendEncryptedResponse } from './utils/encryption.js';
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
 const app = express();
-
-// Disable revealing headers
 app.disable('x-powered-by');
 app.disable('etag');
 app.set('trust proxy', 1);
@@ -31,8 +26,6 @@ app.use((req, res, next) => {
   res.setHeader('Server', 'secure-gateway');
   next();
 });
-
-// CORS setup
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'https://msme.qwegle.info,https://msme-odisha.flutterflow.app')
   .split(',')
   .map(o => o.trim());
@@ -48,20 +41,13 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-
-
-// Dev logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
-
-// Helmet setup (CSP disabled here, custom CSP below)
 app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false
 }));
-
-// Custom CSP & security headers
 app.use((req, res, next) => {
   const apiOrigin = process.env.NODE_APP_URL || 'https://msmebackend.onrender.com';
   const connectSrcList = [
@@ -71,37 +57,33 @@ app.use((req, res, next) => {
     'https://*',
     'wss://*'
   ];
-
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader(
     'Content-Security-Policy',
-    `default-src 'self';
-     script-src 'self' 'unsafe-inline' 'unsafe-eval' https:;
-     style-src 'self' 'unsafe-inline' https:;
-     img-src 'self' data: https:;
-     connect-src ${connectSrcList.join(' ')};
-     font-src 'self' https: data:;
-     frame-ancestors 'self';
-     object-src 'none';
-     upgrade-insecure-requests;
-     base-uri 'self';
-     form-action 'self';`
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
+      "style-src 'self' 'unsafe-inline' https:",
+      "img-src 'self' data: https:",
+      `connect-src ${connectSrcList.join(' ')}`,
+      "font-src 'self' https: data:",
+      "frame-ancestors 'self'",
+      "object-src 'none'",
+      "upgrade-insecure-requests",
+      "base-uri 'self'",
+      "form-action 'self'"
+    ].join('; ')
   );
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader(
     'Permissions-Policy',
     'geolocation=(), microphone=(), camera=(), fullscreen=(), payment=(), accelerometer=(), autoplay=(), usb=()'
   );
-
   next();
 });
-
-// Middleware
 app.use(json());
 app.use(hpp());
 app.use(compression());
-
-// XSS & NoSQL sanitization
 const sanitizeInput = input => {
   if (typeof input === 'string') return xss(input);
   if (Array.isArray(input)) return input.map(sanitizeInput);
@@ -114,15 +96,12 @@ const sanitizeInput = input => {
   }
   return input;
 };
-
 app.use((req, res, next) => {
   req.body = mongoSanitize(sanitizeInput(req.body));
   req.query = sanitizeInput(mongoSanitize(req.query));
   req.params = mongoSanitize(sanitizeInput(req.params));
   next();
 });
-
-// Rate limiter
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -135,21 +114,13 @@ const limiter = rateLimit({
   legacyHeaders: false
 });
 app.use('/api', limiter);
-
-// No cache for API
 app.use('/api', (req, res, next) => {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('Pragma', 'no-cache');
   next();
 });
-
-// Static files
 app.use('/uploads', express.static(join(__dirname, 'uploads')));
-
-// Routes
 app.use('/api', routes);
-
-// Handle malformed JSON
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
     return res.status(400).json({
@@ -159,13 +130,8 @@ app.use((err, req, res, next) => {
   }
   next(err);
 });
-
-// Global error handler
 app.use(errorHandler);
-
 const PORT = process.env.PORT || 3000;
-
-// Start server
 (async () => {
   try {
     await connectDB();
