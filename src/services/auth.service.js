@@ -70,11 +70,11 @@ export async function loginUser({ email, password }) {
   );
   const token = sign(
     {
-      id: user._id,
-      user_role: user.user_role,
-      user_type: user.user_type,
-      branch: user.branch,
-      sessionVersion: user.sessionVersion
+      id: updatedUser._id,
+      user_role: updatedUser.user_role,
+      user_type: updatedUser.user_type,
+      branch: updatedUser.branch,
+      sessionVersion: updatedUser.sessionVersion
     },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRES_IN }
