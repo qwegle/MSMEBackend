@@ -63,8 +63,11 @@ export async function loginUser({ email, password }) {
   if (!user) throw new AppError('Invalid credentials', 401);
   const isPasswordCorrect = await compare(password, user.password);
   if (!isPasswordCorrect) throw new AppError('Invalid credentials', 401);
-  user.sessionVersion = (user.sessionVersion || 0) + 1;
-  await user.save({ validateBeforeSave: false });
+  const updatedUser = await User.findByIdAndUpdate(
+    user._id,
+    { $inc: { sessionVersion: 1 } },
+    { new: true }
+  );
   const token = sign(
     {
       id: user._id,
