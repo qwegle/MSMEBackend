@@ -33,7 +33,7 @@ const otsFormSchema = new Schema({
     check_box4: { type: Boolean,required: true} 
 }, { timestamps: true });
 
-// Track the old status_msg
+
 otsFormSchema.pre('findOneAndUpdate', async function (next) {
     const query = this.getQuery(); // filter used in the update
     const docToUpdate = await this.model.findOne(query).lean();
@@ -46,7 +46,6 @@ otsFormSchema.pre('findOneAndUpdate', async function (next) {
 });
 
 
-// After saving, send email if status_msg changed
 otsFormSchema.post('findOneAndUpdate', async function (doc) {
     if (!doc || !this._oldStatusMsg) return;
 
