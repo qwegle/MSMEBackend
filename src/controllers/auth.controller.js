@@ -133,10 +133,10 @@ export const updateProfile = [
 
 export const getCaptcha = catchAsync(async (req, res) => {
   const captcha = generateCaptcha();
-  return sendEncryptedResponse(res, 200, {
+  await sendEncryptedResponse(res, 200, {
     message: 'Captcha generated successfully',
     captchaType: captcha.captchaType,
     captchaQuestion: captcha.captchaQuestion,
     captchaToken: captcha.captchaToken,
   });
-});
+})
