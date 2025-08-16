@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
+
 import express, { json } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -29,7 +30,6 @@ app.use((req, res, next) => {
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'https://msme.qwegle.info,https://msme-odisha.flutterflow.app')
   .split(',')
   .map(o => o.trim());
-
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -41,6 +41,7 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+app.options('*', cors());
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
@@ -81,6 +82,18 @@ app.use((req, res, next) => {
   );
   next();
 });
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  handler: (req, res) => {
+    sendEncryptedResponse(res, 429, {
+      message: 'Too many requests. Try again later.'
+    });
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+app.use('/api', limiter);
 app.use(json());
 app.use(hpp());
 app.use(compression());
@@ -104,21 +117,8 @@ app.use((req, res, next) => {
   Object.keys(req.params).forEach(key => {
     req.params[key] = sanitizeInput(mongoSanitize(req.params[key]));
   });
-
   next();
 });
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  handler: (req, res) => {
-    sendEncryptedResponse(res, 429, {
-      message: 'Too many requests. Try again later.'
-    });
-  },
-  standardHeaders: true,
-  legacyHeaders: false
-});
-app.use('/api', limiter);
 app.use('/api', (req, res, next) => {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('Pragma', 'no-cache');
