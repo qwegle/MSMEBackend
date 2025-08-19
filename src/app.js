@@ -1,6 +1,5 @@
 import dotenv from 'dotenv';
 dotenv.config();
-
 import express, { json } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -16,7 +15,6 @@ import connectDB from './config/db.js';
 import routes from './routes/index.js';
 import errorHandler from './middlewares/errorHandler.js';
 import { sendEncryptedResponse } from './utils/encryption.js';
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const app = express();
@@ -65,7 +63,7 @@ app.use((req, res, next) => {
     'Content-Security-Policy',
     [
       "default-src 'self'",
-      "script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com", // add your CDN domains
+      "script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
       "style-src 'self' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
       "img-src 'self' data: https: blob:",
       `connect-src ${connectSrcList.join(' ')}`,

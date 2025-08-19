@@ -12,11 +12,11 @@ export async function authenticateToken(req, res, next) {
       return next(new AppError('Token required', 401));
     }
     if (isBlacklisted(token)) {
-      return next(new AppError('Token is invalid (logged out)', 403));
+      return next(new AppError('Token is invalid (logged out)', 401));
     }
     verify(token, JWT_SECRET, async (err, decoded) => {
       if (err) {
-        return next(new AppError('Invalid or expired token', 403));
+        return next(new AppError('Invalid or expired token', 401));
       }
       const user = await User.findById(decoded.id).select('+sessionVersion +passwordChangedAt');
       if (!user) {
