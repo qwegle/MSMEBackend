@@ -16,6 +16,7 @@ import connectDB from './config/db.js';
 import routes from './routes/index.js';
 import errorHandler from './middlewares/errorHandler.js';
 import { sendEncryptedResponse } from './utils/encryption.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const app = express();
@@ -58,23 +59,27 @@ app.use((req, res, next) => {
     'https://*',
     'wss://*'
   ];
+
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader(
     'Content-Security-Policy',
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
-      "style-src 'self' 'unsafe-inline' https:",
-      "img-src 'self' data: https:",
+      "script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com", // add your CDN domains
+      "style-src 'self' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
+      "img-src 'self' data: https: blob:",
       `connect-src ${connectSrcList.join(' ')}`,
-      "font-src 'self' https: data:",
+      "font-src 'self' https://fonts.gstatic.com data:",
       "frame-ancestors 'self'",
       "object-src 'none'",
       "upgrade-insecure-requests",
       "base-uri 'self'",
-      "form-action 'self'"
+      "form-action 'self'",
+      "report-to csp-endpoint",
+      "report-uri /csp-violation-report"
     ].join('; ')
   );
+
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader(
     'Permissions-Policy',
@@ -97,6 +102,7 @@ app.use('/api', limiter);
 app.use(json());
 app.use(hpp());
 app.use(compression());
+
 const sanitizeInput = input => {
   if (typeof input === 'string') return xss(input);
   if (Array.isArray(input)) return input.map(sanitizeInput);
@@ -109,6 +115,7 @@ const sanitizeInput = input => {
   }
   return input;
 };
+
 app.use((req, res, next) => {
   req.body = mongoSanitize(sanitizeInput(req.body));
   Object.keys(req.query).forEach(key => {
@@ -136,6 +143,7 @@ app.use((err, req, res, next) => {
   next(err);
 });
 app.use(errorHandler);
+
 const PORT = process.env.PORT || 3000;
 (async () => {
   try {
