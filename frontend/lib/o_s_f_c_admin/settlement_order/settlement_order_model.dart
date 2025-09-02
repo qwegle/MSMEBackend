@@ -26,7 +26,7 @@ class SettlementOrderModel extends FlutterFlowModel<SettlementOrderWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'k8gv7lur' /* Enter Loan number... is requir... */,
+        '2af6dscr' /* Enter Loan number... is requir... */,
       );
     }
 
@@ -51,13 +51,13 @@ class SettlementOrderModel extends FlutterFlowModel<SettlementOrderWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'z90w7ccv' /* Search Loan Number is required */,
+        'fqrtojuw' /* Search Loan Number is required */,
       );
     }
 
     if (val.length < 13) {
       return FFLocalizations.of(context).getText(
-        'x6spew88' /* Enter full 13-character loan n... */,
+        'vjwsk14b' /* Enter full 13-character loan n... */,
       );
     }
 

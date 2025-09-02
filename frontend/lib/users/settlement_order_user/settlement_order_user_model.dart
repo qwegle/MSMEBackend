@@ -26,13 +26,13 @@ class SettlementOrderUserModel
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'zr53n234' /* Search Loan Number is required */,
+        'zmr1i9co' /* Search Loan Number is required */,
       );
     }
 
     if (val.length < 13) {
       return FFLocalizations.of(context).getText(
-        'jhdffql6' /* Enter full 13-character loan n... */,
+        'xupz74w3' /* Enter full 13-character loan n... */,
       );
     }
 

@@ -27,7 +27,7 @@ class ExsitingLoanApplicationStatusAdminModel
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'c1htoxea' /* Search Loan Number is required */,
+        'lqozdc0y' /* Search Loan Number is required */,
       );
     }
 

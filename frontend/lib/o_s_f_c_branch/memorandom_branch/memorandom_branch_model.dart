@@ -56,13 +56,13 @@ class MemorandomBranchModel extends FlutterFlowModel<MemorandomBranchWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'xot8qf2g' /* Search your loan number... is ... */,
+        'nkdppjfq' /* Search your loan number... is ... */,
       );
     }
 
     if (val.length < 13) {
       return FFLocalizations.of(context).getText(
-        '1a435648' /* Enter full 13-character loan n... */,
+        '5hm5avez' /* Enter full 13-character loan n... */,
       );
     }
 

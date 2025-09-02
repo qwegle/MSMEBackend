@@ -82,13 +82,13 @@ class ApplicationListAdminModel
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        '56576t9l' /* Search Loan Number is required */,
+        'ja4shlhw' /* Search Loan Number is required */,
       );
     }
 
     if (val.length < 13) {
       return FFLocalizations.of(context).getText(
-        '9wvzs4ke' /* Enter full 13-character loan n... */,
+        'uc7s7cnw' /* Enter full 13-character loan n... */,
       );
     }
 
@@ -126,13 +126,13 @@ class ApplicationListAdminModel
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'cnr7ni6o' /* Search Loan Number is required */,
+        '8eqtb09z' /* Search Loan Number is required */,
       );
     }
 
     if (val.length < 13) {
       return FFLocalizations.of(context).getText(
-        'bbjmp2z7' /* Enter full 13-character loan n... */,
+        'tjspy3nb' /* Enter full 13-character loan n... */,
       );
     }
 
@@ -170,13 +170,13 @@ class ApplicationListAdminModel
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'q2t4rx5z' /* Search Loan Number is required */,
+        'yv6dezgz' /* Search Loan Number is required */,
       );
     }
 
     if (val.length < 13) {
       return FFLocalizations.of(context).getText(
-        'fptiv0yp' /* Enter full 13-character loan n... */,
+        'xe82cuw0' /* Enter full 13-character loan n... */,
       );
     }
 

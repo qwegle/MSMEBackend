@@ -81,7 +81,10 @@ class _DashboardOkviWidgetState extends State<DashboardOkviWidget> {
                       wrapWithModel(
                         model: _model.mainwebnavOkviModel,
                         updateCallback: () => safeSetState(() {}),
-                        child: MainwebnavOkviWidget(),
+                        child: MainwebnavOkviWidget(
+                          clr: FlutterFlowTheme.of(context).rejected,
+                          backClr: FlutterFlowTheme.of(context).redTrans,
+                        ),
                       ),
                       Expanded(
                         child: Column(

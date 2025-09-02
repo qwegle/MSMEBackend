@@ -32,13 +32,13 @@ class AcknowledgementSlipUserModel
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'gas1na3t' /* Search your loan number is req... */,
+        'jyoms5j6' /* Search your loan number is req... */,
       );
     }
 
     if (val.length < 13) {
       return FFLocalizations.of(context).getText(
-        'zu2snpkg' /* Enter full 13-character loan n... */,
+        'ewxa0und' /* Enter full 13-character loan n... */,
       );
     }
 

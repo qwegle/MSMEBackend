@@ -26,13 +26,13 @@ class ExsitingLoanApplicationStatusModel
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'gj484cot' /* Search Loan Number is required */,
+        'syrlkfzq' /* Search Loan Number is required */,
       );
     }
 
     if (val.length < 6) {
       return FFLocalizations.of(context).getText(
-        'j03ac9sg' /* Enter full 13-character loan n... */,
+        'fohk245o' /* Enter full 13-character loan n... */,
       );
     }
 

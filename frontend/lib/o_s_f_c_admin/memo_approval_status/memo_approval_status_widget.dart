@@ -2413,170 +2413,170 @@ class _MemoApprovalStatusWidgetState extends State<MemoApprovalStatusWidget> {
                                                                             ],
                                                                           ),
                                                                         ),
-                                                                        if (getJsonField(
-                                                                              listItem,
-                                                                              r'''$.ots.loan_number''',
-                                                                            ) ==
-                                                                            getJsonField(
-                                                                              FFAppState().SettOrderReff,
-                                                                              r'''$.userId.loan_number''',
-                                                                            ))
-                                                                          Padding(
-                                                                            padding:
-                                                                                EdgeInsets.all(16.0),
-                                                                            child:
-                                                                                Row(
-                                                                              mainAxisSize: MainAxisSize.max,
-                                                                              mainAxisAlignment: MainAxisAlignment.end,
-                                                                              crossAxisAlignment: CrossAxisAlignment.end,
-                                                                              children: [
-                                                                                FFButtonWidget(
-                                                                                  onPressed: () async {
-                                                                                    await showModalBottomSheet(
-                                                                                      isScrollControlled: true,
-                                                                                      backgroundColor: Colors.transparent,
-                                                                                      enableDrag: false,
-                                                                                      context: context,
-                                                                                      builder: (context) {
-                                                                                        return GestureDetector(
-                                                                                          onTap: () {
-                                                                                            FocusScope.of(context).unfocus();
-                                                                                            FocusManager.instance.primaryFocus?.unfocus();
-                                                                                          },
-                                                                                          child: Padding(
-                                                                                            padding: MediaQuery.viewInsetsOf(context),
-                                                                                            child: RemarkWidget(),
-                                                                                          ),
-                                                                                        );
-                                                                                      },
-                                                                                    ).then((value) => safeSetState(() {}));
-                                                                                  },
-                                                                                  text: FFLocalizations.of(context).getText(
-                                                                                    '5at0oedh' /* Reject */,
-                                                                                  ),
-                                                                                  options: FFButtonOptions(
-                                                                                    height: 40.0,
-                                                                                    padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                                                                                    iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                                                                    color: FlutterFlowTheme.of(context).rejected,
-                                                                                    textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                                                                                          font: GoogleFonts.interTight(
-                                                                                            fontWeight: FlutterFlowTheme.of(context).titleSmall.fontWeight,
-                                                                                            fontStyle: FlutterFlowTheme.of(context).titleSmall.fontStyle,
-                                                                                          ),
-                                                                                          color: Colors.white,
-                                                                                          letterSpacing: 0.0,
-                                                                                          fontWeight: FlutterFlowTheme.of(context).titleSmall.fontWeight,
-                                                                                          fontStyle: FlutterFlowTheme.of(context).titleSmall.fontStyle,
-                                                                                        ),
-                                                                                    elevation: 0.0,
-                                                                                    borderRadius: BorderRadius.circular(8.0),
-                                                                                  ),
-                                                                                ),
-                                                                                FFButtonWidget(
-                                                                                  onPressed: () async {
-                                                                                    showModalBottomSheet(
-                                                                                      isScrollControlled: true,
-                                                                                      backgroundColor: Colors.transparent,
-                                                                                      enableDrag: false,
-                                                                                      context: context,
-                                                                                      builder: (context) {
-                                                                                        return GestureDetector(
-                                                                                          onTap: () {
-                                                                                            FocusScope.of(context).unfocus();
-                                                                                            FocusManager.instance.primaryFocus?.unfocus();
-                                                                                          },
-                                                                                          child: Padding(
-                                                                                            padding: MediaQuery.viewInsetsOf(context),
-                                                                                            child: LoaderWidget(),
-                                                                                          ),
-                                                                                        );
-                                                                                      },
-                                                                                    ).then((value) => safeSetState(() {}));
-
-                                                                                    _model.apiResult3fr = await MsmeOsfcGroup.updateMemoStatusCall.call(
-                                                                                      memoId: widget.memoID,
-                                                                                      status: 1,
-                                                                                      authToken: currentAuthenticationToken,
-                                                                                      remarks: 'Approved',
-                                                                                    );
-
-                                                                                    if ((_model.apiResult3fr?.succeeded ?? true)) {
-                                                                                      ScaffoldMessenger.of(context).showSnackBar(
-                                                                                        SnackBar(
-                                                                                          content: Text(
-                                                                                            'Successfull',
-                                                                                            style: GoogleFonts.interTight(
-                                                                                              color: FlutterFlowTheme.of(context).primaryText,
-                                                                                            ),
-                                                                                          ),
-                                                                                          duration: Duration(milliseconds: 4000),
-                                                                                          backgroundColor: FlutterFlowTheme.of(context).approved,
-                                                                                        ),
-                                                                                      );
-                                                                                      _model.apiSettlementOrder = await MsmeOsfcGroup.filterOrdersCall.call(
-                                                                                        authToken: currentAuthenticationToken,
-                                                                                      );
-
-                                                                                      FFAppState().SettOrderReff = getJsonField(
-                                                                                        (_model.apiSettlementOrder?.jsonBody ?? ''),
-                                                                                        r'''$''',
-                                                                                      );
-                                                                                      safeSetState(() {});
-                                                                                      Navigator.pop(context);
-
-                                                                                      context.pushNamed(
-                                                                                        SettlementOrderWidget.routeName,
-                                                                                        extra: <String, dynamic>{
-                                                                                          kTransitionInfoKey: TransitionInfo(
-                                                                                            hasTransition: true,
-                                                                                            transitionType: PageTransitionType.fade,
-                                                                                            duration: Duration(milliseconds: 1000),
-                                                                                          ),
+                                                                        Expanded(
+                                                                          child:
+                                                                              Column(
+                                                                            mainAxisSize:
+                                                                                MainAxisSize.max,
+                                                                            children: [
+                                                                              if ('0' == FFAppState().MemoHideShow)
+                                                                                Padding(
+                                                                                  padding: EdgeInsets.all(16.0),
+                                                                                  child: Row(
+                                                                                    mainAxisSize: MainAxisSize.max,
+                                                                                    mainAxisAlignment: MainAxisAlignment.end,
+                                                                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                                                                    children: [
+                                                                                      FFButtonWidget(
+                                                                                        onPressed: () async {
+                                                                                          await showModalBottomSheet(
+                                                                                            isScrollControlled: true,
+                                                                                            backgroundColor: Colors.transparent,
+                                                                                            enableDrag: false,
+                                                                                            context: context,
+                                                                                            builder: (context) {
+                                                                                              return GestureDetector(
+                                                                                                onTap: () {
+                                                                                                  FocusScope.of(context).unfocus();
+                                                                                                  FocusManager.instance.primaryFocus?.unfocus();
+                                                                                                },
+                                                                                                child: Padding(
+                                                                                                  padding: MediaQuery.viewInsetsOf(context),
+                                                                                                  child: RemarkWidget(),
+                                                                                                ),
+                                                                                              );
+                                                                                            },
+                                                                                          ).then((value) => safeSetState(() {}));
                                                                                         },
-                                                                                      );
-                                                                                    } else {
-                                                                                      ScaffoldMessenger.of(context).showSnackBar(
-                                                                                        SnackBar(
-                                                                                          content: Text(
-                                                                                            'Something went. Please try again.',
-                                                                                            style: GoogleFonts.interTight(
-                                                                                              color: FlutterFlowTheme.of(context).primaryText,
-                                                                                            ),
-                                                                                          ),
-                                                                                          duration: Duration(milliseconds: 4000),
-                                                                                          backgroundColor: FlutterFlowTheme.of(context).rejected,
+                                                                                        text: FFLocalizations.of(context).getText(
+                                                                                          '5at0oedh' /* Reject */,
                                                                                         ),
-                                                                                      );
-                                                                                    }
+                                                                                        options: FFButtonOptions(
+                                                                                          height: 40.0,
+                                                                                          padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                                                                                          iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                                                                          color: FlutterFlowTheme.of(context).rejected,
+                                                                                          textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                                                                                                font: GoogleFonts.interTight(
+                                                                                                  fontWeight: FlutterFlowTheme.of(context).titleSmall.fontWeight,
+                                                                                                  fontStyle: FlutterFlowTheme.of(context).titleSmall.fontStyle,
+                                                                                                ),
+                                                                                                color: Colors.white,
+                                                                                                letterSpacing: 0.0,
+                                                                                                fontWeight: FlutterFlowTheme.of(context).titleSmall.fontWeight,
+                                                                                                fontStyle: FlutterFlowTheme.of(context).titleSmall.fontStyle,
+                                                                                              ),
+                                                                                          elevation: 0.0,
+                                                                                          borderRadius: BorderRadius.circular(8.0),
+                                                                                        ),
+                                                                                      ),
+                                                                                      FFButtonWidget(
+                                                                                        onPressed: () async {
+                                                                                          showModalBottomSheet(
+                                                                                            isScrollControlled: true,
+                                                                                            backgroundColor: Colors.transparent,
+                                                                                            enableDrag: false,
+                                                                                            context: context,
+                                                                                            builder: (context) {
+                                                                                              return GestureDetector(
+                                                                                                onTap: () {
+                                                                                                  FocusScope.of(context).unfocus();
+                                                                                                  FocusManager.instance.primaryFocus?.unfocus();
+                                                                                                },
+                                                                                                child: Padding(
+                                                                                                  padding: MediaQuery.viewInsetsOf(context),
+                                                                                                  child: LoaderWidget(),
+                                                                                                ),
+                                                                                              );
+                                                                                            },
+                                                                                          ).then((value) => safeSetState(() {}));
 
-                                                                                    safeSetState(() {});
-                                                                                  },
-                                                                                  text: FFLocalizations.of(context).getText(
-                                                                                    'pp7kupa6' /* Approved */,
-                                                                                  ),
-                                                                                  options: FFButtonOptions(
-                                                                                    height: 40.0,
-                                                                                    padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                                                                                    iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                                                                    color: Color(0xFF352C87),
-                                                                                    textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                                                                                          font: GoogleFonts.interTight(
-                                                                                            fontWeight: FlutterFlowTheme.of(context).titleSmall.fontWeight,
-                                                                                            fontStyle: FlutterFlowTheme.of(context).titleSmall.fontStyle,
-                                                                                          ),
-                                                                                          color: Colors.white,
-                                                                                          letterSpacing: 0.0,
-                                                                                          fontWeight: FlutterFlowTheme.of(context).titleSmall.fontWeight,
-                                                                                          fontStyle: FlutterFlowTheme.of(context).titleSmall.fontStyle,
+                                                                                          _model.apiResult3fr = await MsmeOsfcGroup.updateMemoStatusCall.call(
+                                                                                            memoId: widget.memoID,
+                                                                                            status: 1,
+                                                                                            authToken: currentAuthenticationToken,
+                                                                                            remarks: 'Approved',
+                                                                                          );
+
+                                                                                          if ((_model.apiResult3fr?.succeeded ?? true)) {
+                                                                                            ScaffoldMessenger.of(context).showSnackBar(
+                                                                                              SnackBar(
+                                                                                                content: Text(
+                                                                                                  'Successfull',
+                                                                                                  style: GoogleFonts.interTight(
+                                                                                                    color: FlutterFlowTheme.of(context).primaryText,
+                                                                                                  ),
+                                                                                                ),
+                                                                                                duration: Duration(milliseconds: 4000),
+                                                                                                backgroundColor: FlutterFlowTheme.of(context).approved,
+                                                                                              ),
+                                                                                            );
+                                                                                            _model.apiSettlementOrder = await MsmeOsfcGroup.filterOrdersCall.call(
+                                                                                              authToken: currentAuthenticationToken,
+                                                                                            );
+
+                                                                                            FFAppState().SettOrderReff = getJsonField(
+                                                                                              (_model.apiSettlementOrder?.jsonBody ?? ''),
+                                                                                              r'''$''',
+                                                                                            );
+                                                                                            safeSetState(() {});
+                                                                                            Navigator.pop(context);
+
+                                                                                            context.pushNamed(
+                                                                                              SettlementOrderWidget.routeName,
+                                                                                              extra: <String, dynamic>{
+                                                                                                kTransitionInfoKey: TransitionInfo(
+                                                                                                  hasTransition: true,
+                                                                                                  transitionType: PageTransitionType.fade,
+                                                                                                  duration: Duration(milliseconds: 1000),
+                                                                                                ),
+                                                                                              },
+                                                                                            );
+                                                                                          } else {
+                                                                                            ScaffoldMessenger.of(context).showSnackBar(
+                                                                                              SnackBar(
+                                                                                                content: Text(
+                                                                                                  'Something went. Please try again.',
+                                                                                                  style: GoogleFonts.interTight(
+                                                                                                    color: FlutterFlowTheme.of(context).primaryText,
+                                                                                                  ),
+                                                                                                ),
+                                                                                                duration: Duration(milliseconds: 4000),
+                                                                                                backgroundColor: FlutterFlowTheme.of(context).rejected,
+                                                                                              ),
+                                                                                            );
+                                                                                          }
+
+                                                                                          safeSetState(() {});
+                                                                                        },
+                                                                                        text: FFLocalizations.of(context).getText(
+                                                                                          'pp7kupa6' /* Approved */,
                                                                                         ),
-                                                                                    elevation: 0.0,
-                                                                                    borderRadius: BorderRadius.circular(8.0),
+                                                                                        options: FFButtonOptions(
+                                                                                          height: 40.0,
+                                                                                          padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                                                                                          iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                                                                          color: Color(0xFF352C87),
+                                                                                          textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                                                                                                font: GoogleFonts.interTight(
+                                                                                                  fontWeight: FlutterFlowTheme.of(context).titleSmall.fontWeight,
+                                                                                                  fontStyle: FlutterFlowTheme.of(context).titleSmall.fontStyle,
+                                                                                                ),
+                                                                                                color: Colors.white,
+                                                                                                letterSpacing: 0.0,
+                                                                                                fontWeight: FlutterFlowTheme.of(context).titleSmall.fontWeight,
+                                                                                                fontStyle: FlutterFlowTheme.of(context).titleSmall.fontStyle,
+                                                                                              ),
+                                                                                          elevation: 0.0,
+                                                                                          borderRadius: BorderRadius.circular(8.0),
+                                                                                        ),
+                                                                                      ),
+                                                                                    ].divide(SizedBox(width: 16.0)),
                                                                                   ),
                                                                                 ),
-                                                                              ].divide(SizedBox(width: 16.0)),
-                                                                            ),
+                                                                            ],
                                                                           ),
+                                                                        ),
                                                                       ],
                                                                     ),
                                                                   ),

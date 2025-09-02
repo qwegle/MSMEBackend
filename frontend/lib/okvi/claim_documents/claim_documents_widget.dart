@@ -83,7 +83,10 @@ class _ClaimDocumentsWidgetState extends State<ClaimDocumentsWidget> {
                       wrapWithModel(
                         model: _model.mainwebnavOkviModel,
                         updateCallback: () => safeSetState(() {}),
-                        child: MainwebnavOkviWidget(),
+                        child: MainwebnavOkviWidget(
+                          clr3: FlutterFlowTheme.of(context).rejected,
+                          backClr3: FlutterFlowTheme.of(context).redTrans,
+                        ),
                       ),
                       Expanded(
                         child: Column(

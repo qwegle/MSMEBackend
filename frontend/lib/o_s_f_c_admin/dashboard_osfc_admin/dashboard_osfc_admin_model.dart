@@ -28,13 +28,13 @@ class DashboardOsfcAdminModel
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'hklnii6v' /* Search Loan Number is required */,
+        't5wqc3fu' /* Search Loan Number is required */,
       );
     }
 
     if (val.length < 13) {
       return FFLocalizations.of(context).getText(
-        '3zibljs6' /* Enter full 13-character loan n... */,
+        '3mcn196r' /* Enter full 13-character loan n... */,
       );
     }
 

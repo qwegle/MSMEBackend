@@ -9,7 +9,42 @@ import 'mainwebnav_okvi_model.dart';
 export 'mainwebnav_okvi_model.dart';
 
 class MainwebnavOkviWidget extends StatefulWidget {
-  const MainwebnavOkviWidget({super.key});
+  const MainwebnavOkviWidget({
+    super.key,
+    this.clr,
+    this.clr1,
+    this.clr2,
+    this.clr3,
+    this.clr4,
+    this.clr5,
+    this.clr6,
+    this.clr7,
+    this.backClr,
+    this.backClr1,
+    this.backClr2,
+    this.backClr3,
+    this.backClr4,
+    this.backClr5,
+    this.backClr6,
+    this.backClr7,
+  });
+
+  final Color? clr;
+  final Color? clr1;
+  final Color? clr2;
+  final Color? clr3;
+  final Color? clr4;
+  final Color? clr5;
+  final Color? clr6;
+  final Color? clr7;
+  final Color? backClr;
+  final Color? backClr1;
+  final Color? backClr2;
+  final Color? backClr3;
+  final Color? backClr4;
+  final Color? backClr5;
+  final Color? backClr6;
+  final Color? backClr7;
 
   @override
   State<MainwebnavOkviWidget> createState() => _MainwebnavOkviWidgetState();
@@ -199,7 +234,7 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                 child: Container(
                                   width: double.infinity,
                                   decoration: BoxDecoration(
-                                    color: Color(0x62FF5963),
+                                    color: widget.backClr,
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   child: Padding(
@@ -219,8 +254,11 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                         children: [
                                           Icon(
                                             Icons.home_rounded,
-                                            color: FlutterFlowTheme.of(context)
-                                                .rejected,
+                                            color: valueOrDefault<Color>(
+                                              widget.clr,
+                                              FlutterFlowTheme.of(context)
+                                                  .secondaryText,
+                                            ),
                                             size: 24.0,
                                           ),
                                           Padding(
@@ -245,9 +283,13 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                                               .bodyMedium
                                                               .fontStyle,
                                                     ),
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .rejected,
+                                                    color:
+                                                        valueOrDefault<Color>(
+                                                      widget.clr,
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .secondaryText,
+                                                    ),
                                                     fontSize: 12.0,
                                                     letterSpacing: 0.0,
                                                     fontWeight: FontWeight.w500,
@@ -271,6 +313,7 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                 child: Container(
                                   width: double.infinity,
                                   decoration: BoxDecoration(
+                                    color: widget.backClr1,
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   child: Padding(
@@ -290,8 +333,11 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                         children: [
                                           FaIcon(
                                             FontAwesomeIcons.box,
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryText,
+                                            color: valueOrDefault<Color>(
+                                              widget.clr1,
+                                              FlutterFlowTheme.of(context)
+                                                  .secondaryText,
+                                            ),
                                             size: 20.0,
                                           ),
                                           Padding(
@@ -316,9 +362,13 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                                               .bodyMedium
                                                               .fontStyle,
                                                     ),
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .secondaryText,
+                                                    color:
+                                                        valueOrDefault<Color>(
+                                                      widget.clr1,
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .secondaryText,
+                                                    ),
                                                     fontSize: 12.0,
                                                     letterSpacing: 0.0,
                                                     fontWeight: FontWeight.w500,
@@ -342,6 +392,7 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                 child: Container(
                                   width: double.infinity,
                                   decoration: BoxDecoration(
+                                    color: widget.backClr2,
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   child: Padding(
@@ -361,8 +412,11 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                         children: [
                                           Icon(
                                             Icons.inventory_2_outlined,
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryText,
+                                            color: valueOrDefault<Color>(
+                                              widget.clr2,
+                                              FlutterFlowTheme.of(context)
+                                                  .secondaryText,
+                                            ),
                                             size: 24.0,
                                           ),
                                           Padding(
@@ -387,9 +441,13 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                                               .bodyMedium
                                                               .fontStyle,
                                                     ),
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .secondaryText,
+                                                    color:
+                                                        valueOrDefault<Color>(
+                                                      widget.clr2,
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .secondaryText,
+                                                    ),
                                                     fontSize: 12.0,
                                                     letterSpacing: 0.0,
                                                     fontWeight: FontWeight.w500,
@@ -413,6 +471,7 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                 child: Container(
                                   width: double.infinity,
                                   decoration: BoxDecoration(
+                                    color: widget.backClr3,
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   child: Padding(
@@ -432,8 +491,11 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                         children: [
                                           Icon(
                                             Icons.upload_file,
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryText,
+                                            color: valueOrDefault<Color>(
+                                              widget.clr3,
+                                              FlutterFlowTheme.of(context)
+                                                  .secondaryText,
+                                            ),
                                             size: 24.0,
                                           ),
                                           Padding(
@@ -458,9 +520,13 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                                               .bodyMedium
                                                               .fontStyle,
                                                     ),
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .secondaryText,
+                                                    color:
+                                                        valueOrDefault<Color>(
+                                                      widget.clr3,
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .secondaryText,
+                                                    ),
                                                     fontSize: 12.0,
                                                     letterSpacing: 0.0,
                                                     fontWeight: FontWeight.w500,
@@ -484,6 +550,7 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                 child: Container(
                                   width: double.infinity,
                                   decoration: BoxDecoration(
+                                    color: widget.backClr4,
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   child: Padding(
@@ -503,8 +570,11 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                         children: [
                                           Icon(
                                             Icons.remove_red_eye_outlined,
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryText,
+                                            color: valueOrDefault<Color>(
+                                              widget.clr4,
+                                              FlutterFlowTheme.of(context)
+                                                  .secondaryText,
+                                            ),
                                             size: 24.0,
                                           ),
                                           Padding(
@@ -529,9 +599,13 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                                               .bodyMedium
                                                               .fontStyle,
                                                     ),
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .secondaryText,
+                                                    color:
+                                                        valueOrDefault<Color>(
+                                                      widget.clr4,
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .secondaryText,
+                                                    ),
                                                     fontSize: 12.0,
                                                     letterSpacing: 0.0,
                                                     fontWeight: FontWeight.w500,
@@ -555,6 +629,7 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                 child: Container(
                                   width: double.infinity,
                                   decoration: BoxDecoration(
+                                    color: widget.backClr5,
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   child: Padding(
@@ -565,8 +640,7 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                       children: [
                                         Icon(
                                           Icons.upload_file,
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryText,
+                                          color: widget.clr5,
                                           size: 24.0,
                                         ),
                                         Padding(
@@ -588,9 +662,11 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                                             .bodyMedium
                                                             .fontStyle,
                                                   ),
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .secondaryText,
+                                                  color: valueOrDefault<Color>(
+                                                    widget.clr5,
+                                                    FlutterFlowTheme.of(context)
+                                                        .secondaryText,
+                                                  ),
                                                   fontSize: 12.0,
                                                   letterSpacing: 0.0,
                                                   fontWeight: FontWeight.w500,
@@ -613,6 +689,7 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                 child: Container(
                                   width: double.infinity,
                                   decoration: BoxDecoration(
+                                    color: widget.backClr6,
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   child: Padding(
@@ -623,8 +700,11 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                       children: [
                                         Icon(
                                           Icons.upload_file,
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryText,
+                                          color: valueOrDefault<Color>(
+                                            widget.clr6,
+                                            FlutterFlowTheme.of(context)
+                                                .secondaryText,
+                                          ),
                                           size: 24.0,
                                         ),
                                         Padding(
@@ -646,9 +726,11 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                                             .bodyMedium
                                                             .fontStyle,
                                                   ),
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .secondaryText,
+                                                  color: valueOrDefault<Color>(
+                                                    widget.clr6,
+                                                    FlutterFlowTheme.of(context)
+                                                        .secondaryText,
+                                                  ),
                                                   fontSize: 12.0,
                                                   letterSpacing: 0.0,
                                                   fontWeight: FontWeight.w500,
@@ -671,6 +753,7 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                 child: Container(
                                   width: double.infinity,
                                   decoration: BoxDecoration(
+                                    color: widget.backClr7,
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   child: Padding(
@@ -681,8 +764,11 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                       children: [
                                         Icon(
                                           Icons.upload_file,
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryText,
+                                          color: valueOrDefault<Color>(
+                                            widget.clr7,
+                                            FlutterFlowTheme.of(context)
+                                                .secondaryText,
+                                          ),
                                           size: 24.0,
                                         ),
                                         Padding(
@@ -704,9 +790,11 @@ class _MainwebnavOkviWidgetState extends State<MainwebnavOkviWidget> {
                                                             .bodyMedium
                                                             .fontStyle,
                                                   ),
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .secondaryText,
+                                                  color: valueOrDefault<Color>(
+                                                    widget.clr7,
+                                                    FlutterFlowTheme.of(context)
+                                                        .secondaryText,
+                                                  ),
                                                   fontSize: 12.0,
                                                   letterSpacing: 0.0,
                                                   fontWeight: FontWeight.w500,

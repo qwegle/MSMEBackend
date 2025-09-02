@@ -17,7 +17,7 @@ class UploadAckModel extends FlutterFlowModel<UploadAckWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        '45r8enkz' /*  Loan number is required */,
+        'fh6k6mit' /*  Loan number is required */,
       );
     }
 
@@ -33,7 +33,7 @@ class UploadAckModel extends FlutterFlowModel<UploadAckWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        's0nvw14f' /* Field is required */,
+        '8c3i5x6i' /* Field is required */,
       );
     }
 
@@ -50,7 +50,7 @@ class UploadAckModel extends FlutterFlowModel<UploadAckWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'rs4vq0j8' /* Field is required */,
+        '9xu46mnk' /* Field is required */,
       );
     }
 
@@ -64,7 +64,7 @@ class UploadAckModel extends FlutterFlowModel<UploadAckWidget> {
   String? _rACAMountTextControllerValidator(BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        '7cc5zjur' /* Field is required */,
+        'jy1q8w1u' /* Field is required */,
       );
     }
 
@@ -83,7 +83,7 @@ class UploadAckModel extends FlutterFlowModel<UploadAckWidget> {
   String? _oSFCMRNoTextControllerValidator(BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'kqz9vywi' /* Field is required */,
+        'ucvdxv60' /* Field is required */,
       );
     }
 

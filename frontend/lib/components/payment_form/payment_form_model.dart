@@ -187,7 +187,7 @@ class PaymentFormModel extends FlutterFlowModel<PaymentFormWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'dk5rlwji' /* Field is required */,
+        'oupnaktm' /* Field is required */,
       );
     }
 
@@ -287,7 +287,7 @@ class PaymentFormModel extends FlutterFlowModel<PaymentFormWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        '3j5tuvj0' /* Field is required */,
+        'd7lvubzu' /* Field is required */,
       );
     }
 
@@ -303,7 +303,7 @@ class PaymentFormModel extends FlutterFlowModel<PaymentFormWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'a8xtujut' /* Field is required */,
+        '22w288yq' /* Field is required */,
       );
     }
 
@@ -319,7 +319,7 @@ class PaymentFormModel extends FlutterFlowModel<PaymentFormWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        '26olvb76' /* Field is required */,
+        'x50oxvmv' /* Field is required */,
       );
     }
 
@@ -335,7 +335,7 @@ class PaymentFormModel extends FlutterFlowModel<PaymentFormWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        '5cw0rowb' /* Field is required */,
+        'fr1dtbg1' /* Field is required */,
       );
     }
 
@@ -351,7 +351,7 @@ class PaymentFormModel extends FlutterFlowModel<PaymentFormWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'cjxs85nv' /* Field is required */,
+        'k6gckabq' /* Field is required */,
       );
     }
 
@@ -367,7 +367,7 @@ class PaymentFormModel extends FlutterFlowModel<PaymentFormWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        '0ig1p3li' /* Field is required */,
+        'a1jexymm' /* Field is required */,
       );
     }
 

@@ -30,13 +30,13 @@ class MemorandomAdminModel extends FlutterFlowModel<MemorandomAdminWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        '7rb6h29w' /* Search Loan Number is required */,
+        '7jtua2f7' /* Search Loan Number is required */,
       );
     }
 
     if (val.length < 13) {
       return FFLocalizations.of(context).getText(
-        'zq1i2hdb' /* Enter full 13-character loan n... */,
+        'zjn7f6qb' /* Enter full 13-character loan n... */,
       );
     }
 

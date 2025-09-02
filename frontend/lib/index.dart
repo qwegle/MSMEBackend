@@ -105,3 +105,4 @@ export '/osic/password_change_osic/password_change_osic_widget.dart'
     show PasswordChangeOsicWidget;
 export '/osic/view_user_details_page/view_user_details_page_widget.dart'
     show ViewUserDetailsPageWidget;
+export '/auth/login_okvi/login_okvi_widget.dart' show LoginOkviWidget;

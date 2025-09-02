@@ -45,13 +45,13 @@ class OtsFormStatusModel extends FlutterFlowModel<OtsFormStatusWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'uqgqaj98' /* Search Loan Number is required */,
+        'qknaqri1' /* Search Loan Number is required */,
       );
     }
 
     if (val.length < 13) {
       return FFLocalizations.of(context).getText(
-        'apep31yg' /* Enter full 13-character loan n... */,
+        'r5eqnlpa' /* Enter full 13-character loan n... */,
       );
     }
 

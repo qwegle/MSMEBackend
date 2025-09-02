@@ -30,7 +30,7 @@ class SupplyOrderModel extends FlutterFlowModel<SupplyOrderWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'pscvnayz' /* Field is required */,
+        'vdkqa6hn' /* Field is required */,
       );
     }
 
@@ -45,7 +45,7 @@ class SupplyOrderModel extends FlutterFlowModel<SupplyOrderWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        '2uitqvmq' /* Field is required */,
+        'ro22xjnt' /* Field is required */,
       );
     }
 
@@ -60,7 +60,7 @@ class SupplyOrderModel extends FlutterFlowModel<SupplyOrderWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'r6j7foom' /* Field is required */,
+        '93zecepb' /* Field is required */,
       );
     }
 
@@ -83,7 +83,7 @@ class SupplyOrderModel extends FlutterFlowModel<SupplyOrderWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'd07kon2e' /* Field is required */,
+        'oy72hgbh' /* Field is required */,
       );
     }
 

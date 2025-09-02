@@ -68,13 +68,14 @@ class RegisterOkviModel extends FlutterFlowModel<RegisterOkviWidget> {
     return null;
   }
 
-  // Stores action output result for [Backend Call - API (OKVI Login)] action in Button widget.
+  // Stores action output result for [Backend Call - API (Otp Verify)] action in Button widget.
   ApiCallResponse? otpVerifiedAPI;
-  // State field(s) for NameTextField widget.
-  FocusNode? nameTextFieldFocusNode;
-  TextEditingController? nameTextFieldTextController;
-  String? Function(BuildContext, String?)? nameTextFieldTextControllerValidator;
-  String? _nameTextFieldTextControllerValidator(
+  // State field(s) for InstitutionNameTextField widget.
+  FocusNode? institutionNameTextFieldFocusNode;
+  TextEditingController? institutionNameTextFieldTextController;
+  String? Function(BuildContext, String?)?
+      institutionNameTextFieldTextControllerValidator;
+  String? _institutionNameTextFieldTextControllerValidator(
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
@@ -85,12 +86,12 @@ class RegisterOkviModel extends FlutterFlowModel<RegisterOkviWidget> {
     return null;
   }
 
-  // State field(s) for EmailTextField widget.
-  FocusNode? emailTextFieldFocusNode1;
-  TextEditingController? emailTextFieldTextController1;
+  // State field(s) for InstitutionEmailTextField widget.
+  FocusNode? institutionEmailTextFieldFocusNode;
+  TextEditingController? institutionEmailTextFieldTextController;
   String? Function(BuildContext, String?)?
-      emailTextFieldTextController1Validator;
-  String? _emailTextFieldTextController1Validator(
+      institutionEmailTextFieldTextControllerValidator;
+  String? _institutionEmailTextFieldTextControllerValidator(
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
@@ -101,15 +102,15 @@ class RegisterOkviModel extends FlutterFlowModel<RegisterOkviWidget> {
     return null;
   }
 
-  // State field(s) for DistrictDropDown widget.
-  String? districtDropDownValue;
-  FormFieldController<String>? districtDropDownValueController;
-  // State field(s) for AadhaarNoTextField widget.
-  FocusNode? aadhaarNoTextFieldFocusNode;
-  TextEditingController? aadhaarNoTextFieldTextController;
+  // State field(s) for InstitutionDistrictDropDown widget.
+  String? institutionDistrictDropDownValue;
+  FormFieldController<String>? institutionDistrictDropDownValueController;
+  // State field(s) for InstitutionAadhaarNoTextField widget.
+  FocusNode? institutionAadhaarNoTextFieldFocusNode;
+  TextEditingController? institutionAadhaarNoTextFieldTextController;
   String? Function(BuildContext, String?)?
-      aadhaarNoTextFieldTextControllerValidator;
-  String? _aadhaarNoTextFieldTextControllerValidator(
+      institutionAadhaarNoTextFieldTextControllerValidator;
+  String? _institutionAadhaarNoTextFieldTextControllerValidator(
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
@@ -203,28 +204,15 @@ class RegisterOkviModel extends FlutterFlowModel<RegisterOkviWidget> {
     return null;
   }
 
+  // State field(s) for DoyouhaveOKVIBRegdNoDropDown widget.
+  String? doyouhaveOKVIBRegdNoDropDownValue;
+  FormFieldController<String>? doyouhaveOKVIBRegdNoDropDownValueController;
   // State field(s) for OKVIBRegdNoTextField widget.
   FocusNode? oKVIBRegdNoTextFieldFocusNode;
   TextEditingController? oKVIBRegdNoTextFieldTextController;
   String? Function(BuildContext, String?)?
       oKVIBRegdNoTextFieldTextControllerValidator;
   String? _oKVIBRegdNoTextFieldTextControllerValidator(
-      BuildContext context, String? val) {
-    if (val == null || val.isEmpty) {
-      return FFLocalizations.of(context).getText(
-        '1700o60l' /* Enter OKVIB regd. no is requir... */,
-      );
-    }
-
-    return null;
-  }
-
-  // State field(s) for RegdWithKVICTextField widget.
-  FocusNode? regdWithKVICTextFieldFocusNode;
-  TextEditingController? regdWithKVICTextFieldTextController;
-  String? Function(BuildContext, String?)?
-      regdWithKVICTextFieldTextControllerValidator;
-  String? _regdWithKVICTextFieldTextControllerValidator(
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
@@ -235,29 +223,21 @@ class RegisterOkviModel extends FlutterFlowModel<RegisterOkviWidget> {
     return null;
   }
 
+  // State field(s) for RegdWithKVICDropDown widget.
+  String? regdWithKVICDropDownValue;
+  FormFieldController<String>? regdWithKVICDropDownValueController;
   // State field(s) for KVICRegdNoTextField widget.
   FocusNode? kVICRegdNoTextFieldFocusNode;
   TextEditingController? kVICRegdNoTextFieldTextController;
   String? Function(BuildContext, String?)?
       kVICRegdNoTextFieldTextControllerValidator;
-  String? _kVICRegdNoTextFieldTextControllerValidator(
-      BuildContext context, String? val) {
-    if (val == null || val.isEmpty) {
-      return FFLocalizations.of(context).getText(
-        '2na126tf' /* Enter KVIC regd. no is require... */,
-      );
-    }
-
-    return null;
-  }
-
   DateTime? datePicked;
-  // State field(s) for EmailTextField widget.
-  FocusNode? emailTextFieldFocusNode2;
-  TextEditingController? emailTextFieldTextController2;
+  // State field(s) for BankACNoTextField widget.
+  FocusNode? bankACNoTextFieldFocusNode;
+  TextEditingController? bankACNoTextFieldTextController;
   String? Function(BuildContext, String?)?
-      emailTextFieldTextController2Validator;
-  String? _emailTextFieldTextController2Validator(
+      bankACNoTextFieldTextControllerValidator;
+  String? _bankACNoTextFieldTextControllerValidator(
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
@@ -268,12 +248,12 @@ class RegisterOkviModel extends FlutterFlowModel<RegisterOkviWidget> {
     return null;
   }
 
-  // State field(s) for EmailTextField widget.
-  FocusNode? emailTextFieldFocusNode3;
-  TextEditingController? emailTextFieldTextController3;
+  // State field(s) for ACHolderNameTextField widget.
+  FocusNode? aCHolderNameTextFieldFocusNode;
+  TextEditingController? aCHolderNameTextFieldTextController;
   String? Function(BuildContext, String?)?
-      emailTextFieldTextController3Validator;
-  String? _emailTextFieldTextController3Validator(
+      aCHolderNameTextFieldTextControllerValidator;
+  String? _aCHolderNameTextFieldTextControllerValidator(
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
@@ -284,12 +264,12 @@ class RegisterOkviModel extends FlutterFlowModel<RegisterOkviWidget> {
     return null;
   }
 
-  // State field(s) for EmailTextField widget.
-  FocusNode? emailTextFieldFocusNode4;
-  TextEditingController? emailTextFieldTextController4;
+  // State field(s) for IFSCCodeTextField widget.
+  FocusNode? iFSCCodeTextFieldFocusNode;
+  TextEditingController? iFSCCodeTextFieldTextController;
   String? Function(BuildContext, String?)?
-      emailTextFieldTextController4Validator;
-  String? _emailTextFieldTextController4Validator(
+      iFSCCodeTextFieldTextControllerValidator;
+  String? _iFSCCodeTextFieldTextControllerValidator(
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
@@ -300,12 +280,12 @@ class RegisterOkviModel extends FlutterFlowModel<RegisterOkviWidget> {
     return null;
   }
 
-  // State field(s) for EmailTextField widget.
-  FocusNode? emailTextFieldFocusNode5;
-  TextEditingController? emailTextFieldTextController5;
+  // State field(s) for NameoftheBankBranchTextField widget.
+  FocusNode? nameoftheBankBranchTextFieldFocusNode;
+  TextEditingController? nameoftheBankBranchTextFieldTextController;
   String? Function(BuildContext, String?)?
-      emailTextFieldTextController5Validator;
-  String? _emailTextFieldTextController5Validator(
+      nameoftheBankBranchTextFieldTextControllerValidator;
+  String? _nameoftheBankBranchTextFieldTextControllerValidator(
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
@@ -316,12 +296,12 @@ class RegisterOkviModel extends FlutterFlowModel<RegisterOkviWidget> {
     return null;
   }
 
-  // State field(s) for EmailTextField widget.
-  FocusNode? emailTextFieldFocusNode6;
-  TextEditingController? emailTextFieldTextController6;
+  // State field(s) for SecretaryNameTextField widget.
+  FocusNode? secretaryNameTextFieldFocusNode;
+  TextEditingController? secretaryNameTextFieldTextController;
   String? Function(BuildContext, String?)?
-      emailTextFieldTextController6Validator;
-  String? _emailTextFieldTextController6Validator(
+      secretaryNameTextFieldTextControllerValidator;
+  String? _secretaryNameTextFieldTextControllerValidator(
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
@@ -332,12 +312,12 @@ class RegisterOkviModel extends FlutterFlowModel<RegisterOkviWidget> {
     return null;
   }
 
-  // State field(s) for EmailTextField widget.
-  FocusNode? emailTextFieldFocusNode7;
-  TextEditingController? emailTextFieldTextController7;
+  // State field(s) for SecretaryNumberTextField widget.
+  FocusNode? secretaryNumberTextFieldFocusNode;
+  TextEditingController? secretaryNumberTextFieldTextController;
   String? Function(BuildContext, String?)?
-      emailTextFieldTextController7Validator;
-  String? _emailTextFieldTextController7Validator(
+      secretaryNumberTextFieldTextControllerValidator;
+  String? _secretaryNumberTextFieldTextControllerValidator(
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
@@ -348,12 +328,12 @@ class RegisterOkviModel extends FlutterFlowModel<RegisterOkviWidget> {
     return null;
   }
 
-  // State field(s) for EmailTextField widget.
-  FocusNode? emailTextFieldFocusNode8;
-  TextEditingController? emailTextFieldTextController8;
+  // State field(s) for SecretaryAddressTextField widget.
+  FocusNode? secretaryAddressTextFieldFocusNode;
+  TextEditingController? secretaryAddressTextFieldTextController;
   String? Function(BuildContext, String?)?
-      emailTextFieldTextController8Validator;
-  String? _emailTextFieldTextController8Validator(
+      secretaryAddressTextFieldTextControllerValidator;
+  String? _secretaryAddressTextFieldTextControllerValidator(
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
@@ -364,12 +344,12 @@ class RegisterOkviModel extends FlutterFlowModel<RegisterOkviWidget> {
     return null;
   }
 
-  // State field(s) for EmailTextField widget.
-  FocusNode? emailTextFieldFocusNode9;
-  TextEditingController? emailTextFieldTextController9;
+  // State field(s) for PresidentNameTextField widget.
+  FocusNode? presidentNameTextFieldFocusNode;
+  TextEditingController? presidentNameTextFieldTextController;
   String? Function(BuildContext, String?)?
-      emailTextFieldTextController9Validator;
-  String? _emailTextFieldTextController9Validator(
+      presidentNameTextFieldTextControllerValidator;
+  String? _presidentNameTextFieldTextControllerValidator(
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
@@ -380,12 +360,12 @@ class RegisterOkviModel extends FlutterFlowModel<RegisterOkviWidget> {
     return null;
   }
 
-  // State field(s) for EmailTextField widget.
-  FocusNode? emailTextFieldFocusNode10;
-  TextEditingController? emailTextFieldTextController10;
+  // State field(s) for PresidentNumberTextField widget.
+  FocusNode? presidentNumberTextFieldFocusNode;
+  TextEditingController? presidentNumberTextFieldTextController;
   String? Function(BuildContext, String?)?
-      emailTextFieldTextController10Validator;
-  String? _emailTextFieldTextController10Validator(
+      presidentNumberTextFieldTextControllerValidator;
+  String? _presidentNumberTextFieldTextControllerValidator(
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
@@ -396,12 +376,12 @@ class RegisterOkviModel extends FlutterFlowModel<RegisterOkviWidget> {
     return null;
   }
 
-  // State field(s) for EmailTextField widget.
-  FocusNode? emailTextFieldFocusNode11;
-  TextEditingController? emailTextFieldTextController11;
+  // State field(s) for PresidentAddressTextField widget.
+  FocusNode? presidentAddressTextFieldFocusNode;
+  TextEditingController? presidentAddressTextFieldTextController;
   String? Function(BuildContext, String?)?
-      emailTextFieldTextController11Validator;
-  String? _emailTextFieldTextController11Validator(
+      presidentAddressTextFieldTextControllerValidator;
+  String? _presidentAddressTextFieldTextControllerValidator(
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
@@ -473,6 +453,16 @@ class RegisterOkviModel extends FlutterFlowModel<RegisterOkviWidget> {
       );
     }
 
+    if (val.length < 12) {
+      return 'Requires at least 12 characters.';
+    }
+
+    if (!RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@\$!%*?&]).{12,}\$')
+        .hasMatch(val)) {
+      return FFLocalizations.of(context).getText(
+        'xvyibxj4' /* Password must be at least 12 c... */,
+      );
+    }
     return null;
   }
 
@@ -506,12 +496,12 @@ class RegisterOkviModel extends FlutterFlowModel<RegisterOkviWidget> {
         _verifyEmailTextFieldTextControllerValidator;
     oTPVerifyEmailTextFieldTextControllerValidator =
         _oTPVerifyEmailTextFieldTextControllerValidator;
-    nameTextFieldTextControllerValidator =
-        _nameTextFieldTextControllerValidator;
-    emailTextFieldTextController1Validator =
-        _emailTextFieldTextController1Validator;
-    aadhaarNoTextFieldTextControllerValidator =
-        _aadhaarNoTextFieldTextControllerValidator;
+    institutionNameTextFieldTextControllerValidator =
+        _institutionNameTextFieldTextControllerValidator;
+    institutionEmailTextFieldTextControllerValidator =
+        _institutionEmailTextFieldTextControllerValidator;
+    institutionAadhaarNoTextFieldTextControllerValidator =
+        _institutionAadhaarNoTextFieldTextControllerValidator;
     pANNoTextFieldTextControllerValidator =
         _pANNoTextFieldTextControllerValidator;
     gSTRegistrationNoTextFieldTextControllerValidator =
@@ -524,30 +514,26 @@ class RegisterOkviModel extends FlutterFlowModel<RegisterOkviWidget> {
         _aDMDICRegdNoTextFieldTextControllerValidator;
     oKVIBRegdNoTextFieldTextControllerValidator =
         _oKVIBRegdNoTextFieldTextControllerValidator;
-    regdWithKVICTextFieldTextControllerValidator =
-        _regdWithKVICTextFieldTextControllerValidator;
-    kVICRegdNoTextFieldTextControllerValidator =
-        _kVICRegdNoTextFieldTextControllerValidator;
-    emailTextFieldTextController2Validator =
-        _emailTextFieldTextController2Validator;
-    emailTextFieldTextController3Validator =
-        _emailTextFieldTextController3Validator;
-    emailTextFieldTextController4Validator =
-        _emailTextFieldTextController4Validator;
-    emailTextFieldTextController5Validator =
-        _emailTextFieldTextController5Validator;
-    emailTextFieldTextController6Validator =
-        _emailTextFieldTextController6Validator;
-    emailTextFieldTextController7Validator =
-        _emailTextFieldTextController7Validator;
-    emailTextFieldTextController8Validator =
-        _emailTextFieldTextController8Validator;
-    emailTextFieldTextController9Validator =
-        _emailTextFieldTextController9Validator;
-    emailTextFieldTextController10Validator =
-        _emailTextFieldTextController10Validator;
-    emailTextFieldTextController11Validator =
-        _emailTextFieldTextController11Validator;
+    bankACNoTextFieldTextControllerValidator =
+        _bankACNoTextFieldTextControllerValidator;
+    aCHolderNameTextFieldTextControllerValidator =
+        _aCHolderNameTextFieldTextControllerValidator;
+    iFSCCodeTextFieldTextControllerValidator =
+        _iFSCCodeTextFieldTextControllerValidator;
+    nameoftheBankBranchTextFieldTextControllerValidator =
+        _nameoftheBankBranchTextFieldTextControllerValidator;
+    secretaryNameTextFieldTextControllerValidator =
+        _secretaryNameTextFieldTextControllerValidator;
+    secretaryNumberTextFieldTextControllerValidator =
+        _secretaryNumberTextFieldTextControllerValidator;
+    secretaryAddressTextFieldTextControllerValidator =
+        _secretaryAddressTextFieldTextControllerValidator;
+    presidentNameTextFieldTextControllerValidator =
+        _presidentNameTextFieldTextControllerValidator;
+    presidentNumberTextFieldTextControllerValidator =
+        _presidentNumberTextFieldTextControllerValidator;
+    presidentAddressTextFieldTextControllerValidator =
+        _presidentAddressTextFieldTextControllerValidator;
     commiteeNameTextControllerValidator = _commiteeNameTextControllerValidator;
     commiteeMibileNoTextControllerValidator =
         _commiteeMibileNoTextControllerValidator;
@@ -570,14 +556,14 @@ class RegisterOkviModel extends FlutterFlowModel<RegisterOkviWidget> {
     oTPVerifyEmailTextFieldFocusNode?.dispose();
     oTPVerifyEmailTextFieldTextController?.dispose();
 
-    nameTextFieldFocusNode?.dispose();
-    nameTextFieldTextController?.dispose();
+    institutionNameTextFieldFocusNode?.dispose();
+    institutionNameTextFieldTextController?.dispose();
 
-    emailTextFieldFocusNode1?.dispose();
-    emailTextFieldTextController1?.dispose();
+    institutionEmailTextFieldFocusNode?.dispose();
+    institutionEmailTextFieldTextController?.dispose();
 
-    aadhaarNoTextFieldFocusNode?.dispose();
-    aadhaarNoTextFieldTextController?.dispose();
+    institutionAadhaarNoTextFieldFocusNode?.dispose();
+    institutionAadhaarNoTextFieldTextController?.dispose();
 
     pANNoTextFieldFocusNode?.dispose();
     pANNoTextFieldTextController?.dispose();
@@ -597,41 +583,38 @@ class RegisterOkviModel extends FlutterFlowModel<RegisterOkviWidget> {
     oKVIBRegdNoTextFieldFocusNode?.dispose();
     oKVIBRegdNoTextFieldTextController?.dispose();
 
-    regdWithKVICTextFieldFocusNode?.dispose();
-    regdWithKVICTextFieldTextController?.dispose();
-
     kVICRegdNoTextFieldFocusNode?.dispose();
     kVICRegdNoTextFieldTextController?.dispose();
 
-    emailTextFieldFocusNode2?.dispose();
-    emailTextFieldTextController2?.dispose();
+    bankACNoTextFieldFocusNode?.dispose();
+    bankACNoTextFieldTextController?.dispose();
 
-    emailTextFieldFocusNode3?.dispose();
-    emailTextFieldTextController3?.dispose();
+    aCHolderNameTextFieldFocusNode?.dispose();
+    aCHolderNameTextFieldTextController?.dispose();
 
-    emailTextFieldFocusNode4?.dispose();
-    emailTextFieldTextController4?.dispose();
+    iFSCCodeTextFieldFocusNode?.dispose();
+    iFSCCodeTextFieldTextController?.dispose();
 
-    emailTextFieldFocusNode5?.dispose();
-    emailTextFieldTextController5?.dispose();
+    nameoftheBankBranchTextFieldFocusNode?.dispose();
+    nameoftheBankBranchTextFieldTextController?.dispose();
 
-    emailTextFieldFocusNode6?.dispose();
-    emailTextFieldTextController6?.dispose();
+    secretaryNameTextFieldFocusNode?.dispose();
+    secretaryNameTextFieldTextController?.dispose();
 
-    emailTextFieldFocusNode7?.dispose();
-    emailTextFieldTextController7?.dispose();
+    secretaryNumberTextFieldFocusNode?.dispose();
+    secretaryNumberTextFieldTextController?.dispose();
 
-    emailTextFieldFocusNode8?.dispose();
-    emailTextFieldTextController8?.dispose();
+    secretaryAddressTextFieldFocusNode?.dispose();
+    secretaryAddressTextFieldTextController?.dispose();
 
-    emailTextFieldFocusNode9?.dispose();
-    emailTextFieldTextController9?.dispose();
+    presidentNameTextFieldFocusNode?.dispose();
+    presidentNameTextFieldTextController?.dispose();
 
-    emailTextFieldFocusNode10?.dispose();
-    emailTextFieldTextController10?.dispose();
+    presidentNumberTextFieldFocusNode?.dispose();
+    presidentNumberTextFieldTextController?.dispose();
 
-    emailTextFieldFocusNode11?.dispose();
-    emailTextFieldTextController11?.dispose();
+    presidentAddressTextFieldFocusNode?.dispose();
+    presidentAddressTextFieldTextController?.dispose();
 
     commiteeNameFocusNode?.dispose();
     commiteeNameTextController?.dispose();

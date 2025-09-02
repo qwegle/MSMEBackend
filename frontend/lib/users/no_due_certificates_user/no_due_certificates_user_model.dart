@@ -38,7 +38,7 @@ class NoDueCertificatesUserModel
 
     if (val.length < 13) {
       return FFLocalizations.of(context).getText(
-        'og16loe0' /* Enter full 13-character loan n... */,
+        'prbbr7qg' /* Enter full 13-character loan n... */,
       );
     }
 

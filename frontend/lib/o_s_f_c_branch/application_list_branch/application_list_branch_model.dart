@@ -38,13 +38,13 @@ class ApplicationListBranchModel
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        '6x1ty9pa' /* loan number is required */,
+        'grqqfa7b' /* loan number is required */,
       );
     }
 
     if (val.length < 13) {
       return FFLocalizations.of(context).getText(
-        'rwf03co3' /* Enter full 13-character loan n... */,
+        '00lpt6tf' /* Enter full 13-character loan n... */,
       );
     }
 
@@ -88,7 +88,7 @@ class ApplicationListBranchModel
 
     if (val.length < 13) {
       return FFLocalizations.of(context).getText(
-        'uwi2pnze' /* Enter full 13-character loan n... */,
+        '1jzdwh6c' /* Enter full 13-character loan n... */,
       );
     }
 
@@ -128,13 +128,13 @@ class ApplicationListBranchModel
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'lta4gnqu' /* Loan Number is required */,
+        't1tjrol3' /* Loan Number is required */,
       );
     }
 
     if (val.length < 13) {
       return FFLocalizations.of(context).getText(
-        'p7td64s0' /* Enter full 13-character loan n... */,
+        'npll1eoc' /* Enter full 13-character loan n... */,
       );
     }
 
@@ -174,13 +174,13 @@ class ApplicationListBranchModel
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'c6mo0afg' /* Search Loan Number is required */,
+        'dgrg2k86' /* Search Loan Number is required */,
       );
     }
 
     if (val.length < 13) {
       return FFLocalizations.of(context).getText(
-        'ik6kfeoz' /* Enter full 13-character loan n... */,
+        'vtqgqq4c' /* Enter full 13-character loan n... */,
       );
     }
 

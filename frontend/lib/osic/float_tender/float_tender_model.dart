@@ -31,7 +31,7 @@ class FloatTenderModel extends FlutterFlowModel<FloatTenderWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'jueie0xp' /* Field is required */,
+        '17kpo2oa' /* Field is required */,
       );
     }
 
@@ -46,7 +46,7 @@ class FloatTenderModel extends FlutterFlowModel<FloatTenderWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'o64uxfrt' /* Field is required */,
+        'w63sdxrk' /* Field is required */,
       );
     }
 

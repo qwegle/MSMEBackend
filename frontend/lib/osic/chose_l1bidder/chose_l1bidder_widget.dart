@@ -1572,6 +1572,8 @@ class _ChoseL1bidderWidgetState extends State<ChoseL1bidderWidget>
                                                                                           r'''$.bidder_details.name''',
                                                                                           true,
                                                                                         ) as List?)!
+                                                                                            .map<String>((e) => e.toString())
+                                                                                            .toList()
                                                                                             .cast<String>(),
                                                                                         onChanged: (val) => safeSetState(() => _model.dropDownValue = val),
                                                                                         width: 200.0,

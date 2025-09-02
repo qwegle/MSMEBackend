@@ -94,7 +94,10 @@ class _OpeningStocksWidgetState extends State<OpeningStocksWidget> {
                       wrapWithModel(
                         model: _model.mainwebnavOkviModel,
                         updateCallback: () => safeSetState(() {}),
-                        child: MainwebnavOkviWidget(),
+                        child: MainwebnavOkviWidget(
+                          clr1: FlutterFlowTheme.of(context).rejected,
+                          backClr1: FlutterFlowTheme.of(context).redTrans,
+                        ),
                       ),
                       Expanded(
                         child: Column(

@@ -13,7 +13,7 @@ const _kPrivateApiFunctionName = 'ffPrivateApiCall';
 /// Start MSME OSFC Group Code
 
 class MsmeOsfcGroup {
-  static String getBaseUrl() => 'https://msmebackend.onrender.com';
+  static String getBaseUrl() => 'https://msmeortpsa.odisha.gov.in/apiv1';
   static Map<String, String> headers = {};
   static RegisterCall registerCall = RegisterCall();
   static SupportCall supportCall = SupportCall();
@@ -3085,7 +3085,7 @@ class MsmeOsicGroup {
   static String getBaseUrl({
     String? authToken = '',
   }) =>
-      'https://msmebackend.onrender.com';
+      'https://msmeortpsa.odisha.gov.in/apiv1';
   static Map<String, String> headers = {
     'Authorization': 'Bearer [authToken]',
   };
@@ -4141,24 +4141,109 @@ class OkviGroup {
       ClaimDocumentsAuditCertificateCall();
   static ClaimDocumentsBankDepositProofCall claimDocumentsBankDepositProofCall =
       ClaimDocumentsBankDepositProofCall();
+  static TestCall testCall = TestCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCall testCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCall testCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCall testCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCall testCopyCopyCopyCall = TestCopyCopyCopyCall();
+  static TestCopyCopyCall testCopyCopyCall = TestCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCall testCopyCall = TestCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall();
+  static TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall
+      testCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall =
+      TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall();
 }
 
 class OKVILoginCall {
   Future<ApiCallResponse> call({
+    String? email = '',
+    String? password = '',
     String? authToken = '',
   }) async {
     final baseUrl = OkviGroup.getBaseUrl(
       authToken: authToken,
     );
 
+    final ffApiRequestBody = '''
+{
+  "email": "${escapeStringForJson(email)}",
+  "password": "${escapeStringForJson(password)}"
+}''';
     return ApiManager.instance.makeApiCall(
       callName: 'OKVI Login',
       apiUrl: '${baseUrl}/api/OKVI/closingstock/create',
-      callType: ApiCallType.GET,
+      callType: ApiCallType.POST,
       headers: {
         'Authorization': 'Bearer ${authToken}',
       },
       params: {},
+      body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: false,
@@ -4195,6 +4280,7 @@ class OKVIRegisterCall {
     String? presidentInfoMobile = '',
     String? presidentInfoAddress = '',
     dynamic committeeMembersJson,
+    String? password = '',
     String? authToken = '',
   }) async {
     final baseUrl = OkviGroup.getBaseUrl(
@@ -4205,50 +4291,42 @@ class OKVIRegisterCall {
     final ffApiRequestBody = '''
 {
   "institutionInfo": {
-    "name": "Sample Institution",
-    "email": "sample@example.com",
-    "district": "Cuttack",
-    "gmdicType": "GMDIC",
-    "address": "Institution Address"
+    "name": "${escapeStringForJson(institutionInfoName)}",
+    "email": "${escapeStringForJson(institutionInfoEmail)}",
+    "district": "${escapeStringForJson(institutionInfoDist)}",
+    "gmdicType": "${escapeStringForJson(institutionInfoGmdicType)}",
+    "address": "${escapeStringForJson(institutionInfoAdress)}"
   },
   "registrationInfo": {
-    "regdWithADM": "ADM Office Name",
-    "admRegdNo": "ADM123456",
-    "regdWithOKVIB": "Yes",
-    "hasOkvibRegdNo": "Yes",
-    "okvibRegdNo": "OKVIB12345",
-    "regdWithKVIC": "Yes",
-    "kvicRegdNo": "KVIC98765",
-    "validityTill": "2026-03-31"
+    "regdWithADM": "${escapeStringForJson(registrationInfoRegdWithADM)}",
+    "admRegdNo": "${escapeStringForJson(registrationInfoAdmRegdNo)}",
+    "regdWithOKVIB": "${escapeStringForJson(registrationInfoRegdWithOKVIB)}",
+    "hasOkvibRegdNo": "${escapeStringForJson(registrationInfoHasOkvibRegdNo)}",
+    "okvibRegdNo": "${escapeStringForJson(registrationInfoOkvibRegdNo)}",
+    "regdWithKVIC": "${escapeStringForJson(registrationInfoRegdWithKVIC)}",
+    "kvicRegdNo": "${escapeStringForJson(registrationInfoKvicRegdNo)}",
+    "validityTill": "${escapeStringForJson(registrationInfoValidityTill)}"
   },
   "bankDetails": {
-    "accountNo": "123456789012",
-    "accountHolderName": "John Doe",
-    "ifscCode": "SBIN0001234",
-    "bankBranch": "Main Branch, Cuttack"
+    "accountNo": "${escapeStringForJson(bankDetailsAccountNo)}",
+    "accountHolderName": "${escapeStringForJson(bankDetailsAccountHolderName)}",
+    "ifscCode": "${escapeStringForJson(bankDetailsIfscCode)}",
+    "bankBranch": "${escapeStringForJson(bankDetailsBankBranch)}"
   },
   "secretaryInfo": {
-    "name": "Secretary Name",
-    "mobile": "9876543210",
-    "address": "Secretary Address"
+    "name": "${escapeStringForJson(secretaryInfoName)}",
+    "mobile": "${escapeStringForJson(secretaryInfoMobile)}",
+    "address": "${escapeStringForJson(secretaryInfoAddress)}"
   },
   "presidentInfo": {
-    "name": "President Name",
-    "mobile": "9123456789",
-    "address": "President Address"
+    "name": "${escapeStringForJson(presidentInfoName)}",
+    "mobile": "${escapeStringForJson(presidentInfoMobile)}",
+    "address": "${escapeStringForJson(presidentInfoAddress)}"
   },
   "committeeMembers": [
-    {
-      "name": "Member One",
-      "mobile": "9000000001",
-      "address": "Member One Address"
-    },
-    {
-      "name": "Member Two",
-      "mobile": "9000000002",
-      "address": "Member Two Address"
-    }
-  ]
+    ${committeeMembers}
+  ],
+  "password": "${escapeStringForJson(password)}"
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'OKVI Register',
@@ -4552,6 +4630,777 @@ class ClaimDocumentsBankDepositProofCall {
       },
       params: {},
       bodyType: BodyType.NONE,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'test',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName:
+          'test Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName:
+          'test Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName:
+          'test Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName:
+          'test Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName:
+          'test Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'test Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'test Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'test Copy Copy Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'test Copy Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'test Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'test Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'test Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'test Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'test Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'test Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName:
+          'test Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName:
+          'test Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName:
+          'test Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName:
+          'test Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'test Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName:
+          'test Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName:
+          'test Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName:
+          'test Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName:
+          'test Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName:
+          'test Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName:
+          'test Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName:
+          'test Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall {
+  Future<ApiCallResponse> call({
+    String? authToken = '',
+  }) async {
+    final baseUrl = OkviGroup.getBaseUrl(
+      authToken: authToken,
+    );
+
+    return ApiManager.instance.makeApiCall(
+      callName:
+          'test Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy',
+      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      callType: ApiCallType.GET,
+      headers: {
+        'Authorization': 'Bearer ${authToken}',
+      },
+      params: {},
       returnBody: true,
       encodeBodyUtf8: false,
       decodeUtf8: false,

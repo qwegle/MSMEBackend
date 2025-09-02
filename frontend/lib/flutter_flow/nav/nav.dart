@@ -435,6 +435,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: ViewUserDetailsPageWidget.routePath,
           requireAuth: true,
           builder: (context, params) => ViewUserDetailsPageWidget(),
+        ),
+        FFRoute(
+          name: LoginOkviWidget.routeName,
+          path: LoginOkviWidget.routePath,
+          builder: (context, params) => LoginOkviWidget(),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );

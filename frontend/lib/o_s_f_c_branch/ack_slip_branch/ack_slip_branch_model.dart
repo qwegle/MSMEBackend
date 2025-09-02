@@ -28,7 +28,7 @@ class AckSlipBranchModel extends FlutterFlowModel<AckSlipBranchWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'g9xhjtpz' /* Search your loan number is req... */,
+        'lxh2dd0t' /* Search your loan number is req... */,
       );
     }
 

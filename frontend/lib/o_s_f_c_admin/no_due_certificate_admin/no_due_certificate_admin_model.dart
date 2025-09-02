@@ -52,13 +52,13 @@ class NoDueCertificateAdminModel
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'fuoma55e' /* Search Loan Number is required */,
+        'hf9mghn2' /* Search Loan Number is required */,
       );
     }
 
     if (val.length < 13) {
       return FFLocalizations.of(context).getText(
-        'mlpul6a2' /* Enter full 13-character loan n... */,
+        'w7urrky6' /* Enter full 13-character loan n... */,
       );
     }
 

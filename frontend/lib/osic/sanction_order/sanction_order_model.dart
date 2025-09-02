@@ -285,7 +285,7 @@ class SanctionOrderModel extends FlutterFlowModel<SanctionOrderWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'q95nhe6s' /* Field is required */,
+        '9k8pg2x7' /* Field is required */,
       );
     }
 
@@ -301,7 +301,7 @@ class SanctionOrderModel extends FlutterFlowModel<SanctionOrderWidget> {
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        '2wziaqr3' /* Field is required */,
+        'elko9lz3' /* Field is required */,
       );
     }
 

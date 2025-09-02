@@ -494,7 +494,7 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Please enter a valid email address',
       'or': '',
     },
-    'i8479ttv': {
+    '7q8f9o1f': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -523,7 +523,7 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Captcha is required',
       'or': '',
     },
-    'ad2f29wl': {
+    '4ue0nttk': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -941,7 +941,7 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Enter full 13-character loan number.',
       'or': '',
     },
-    '0445qwtk': {
+    'mcue80lg': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -1025,15 +1025,15 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Clear',
       'or': 'ଖାଲି କରନ୍ତୁ',
     },
-    '56576t9l': {
+    'ja4shlhw': {
       'en': 'Search Loan Number is required',
       'or': '',
     },
-    '9wvzs4ke': {
+    'uc7s7cnw': {
       'en': 'Enter full 13-character loan number.',
       'or': '',
     },
-    '0svh534j': {
+    '3g9j0mf7': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -1117,15 +1117,15 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Clear',
       'or': 'ଖାଲି କରନ୍ତୁ',
     },
-    'cnr7ni6o': {
+    '8eqtb09z': {
       'en': 'Search Loan Number is required',
       'or': '',
     },
-    'bbjmp2z7': {
+    'tjspy3nb': {
       'en': 'Enter full 13-character loan number.',
       'or': '',
     },
-    '5pim6p5e': {
+    'zduae9y2': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -1209,15 +1209,15 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Clear',
       'or': 'ଖାଲି କରନ୍ତୁ',
     },
-    'q2t4rx5z': {
+    'yv6dezgz': {
       'en': 'Search Loan Number is required',
       'or': '',
     },
-    'fptiv0yp': {
+    'xe82cuw0': {
       'en': 'Enter full 13-character loan number.',
       'or': '',
     },
-    'blx8d5wv': {
+    'r1vphe2c': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -1316,7 +1316,7 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Loan number is required',
       'or': '',
     },
-    '2onnej4y': {
+    '16hbukid': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -1336,15 +1336,15 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Clear',
       'or': 'ଖାଲି କରନ୍ତୁ',
     },
-    'fuoma55e': {
+    'hf9mghn2': {
       'en': 'Search Loan Number is required',
       'or': '',
     },
-    'mlpul6a2': {
+    'w7urrky6': {
       'en': 'Enter full 13-character loan number.',
       'or': '',
     },
-    'q740tgbj': {
+    'qvxv7s3a': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -2661,15 +2661,15 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Clear',
       'or': 'ଖାଲି କରନ୍ତୁ',
     },
-    'uqgqaj98': {
+    'qknaqri1': {
       'en': 'Search Loan Number is required',
       'or': '',
     },
-    'apep31yg': {
+    'r5eqnlpa': {
       'en': 'Enter full 13-character loan number.',
       'or': '',
     },
-    'ixf59duw': {
+    'v5qs6xdh': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -3069,11 +3069,11 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Search your loan number... is required',
       'or': '',
     },
-    'og16loe0': {
+    'prbbr7qg': {
       'en': 'Enter full 13-character loan number.',
       'or': '',
     },
-    's7xj718p': {
+    'cdj0r7c1': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -3305,15 +3305,15 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Clear',
       'or': 'ଖାଲି କରନ୍ତୁ',
     },
-    'gj484cot': {
+    'syrlkfzq': {
       'en': 'Search Loan Number is required',
       'or': '',
     },
-    'j03ac9sg': {
+    'fohk245o': {
       'en': 'Enter full 13-character loan number.',
       'or': '',
     },
-    'hvht9rwm': {
+    'ujyr1fjm': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -3408,15 +3408,15 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Clear',
       'or': 'ଖାଲି କରନ୍ତୁ',
     },
-    'vu6y2iwo': {
+    '9d5dtgmh': {
       'en': 'loan number is required',
       'or': '',
     },
-    '0zijpy8i': {
+    '0ryynu2s': {
       'en': 'Enter full 13-character loan number.',
       'or': '',
     },
-    'u6xu521x': {
+    'c4xpsrmq': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -4244,15 +4244,15 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Clear',
       'or': 'ଖାଲି କରନ୍ତୁ',
     },
-    '6x1ty9pa': {
+    'grqqfa7b': {
       'en': 'loan number is required',
       'or': '',
     },
-    'rwf03co3': {
+    '00lpt6tf': {
       'en': 'Enter full 13-character loan number.',
       'or': '',
     },
-    '2o9f6bcz': {
+    'gnjjdto4': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -4340,11 +4340,11 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': ' Loan Number is required',
       'or': '',
     },
-    'uwi2pnze': {
+    '1jzdwh6c': {
       'en': 'Enter full 13-character loan number.',
       'or': '',
     },
-    'pabczuzv': {
+    'p36jb1g9': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -4428,15 +4428,15 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Clear',
       'or': 'ଖାଲି କରନ୍ତୁ',
     },
-    'lta4gnqu': {
+    't1tjrol3': {
       'en': 'Loan Number is required',
       'or': '',
     },
-    'p7td64s0': {
+    'npll1eoc': {
       'en': 'Enter full 13-character loan number.',
       'or': '',
     },
-    'tmetd476': {
+    'bqk20ucf': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -4520,15 +4520,15 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Clear',
       'or': 'ଖାଲି କରନ୍ତୁ',
     },
-    'c6mo0afg': {
+    'dgrg2k86': {
       'en': 'Search Loan Number is required',
       'or': '',
     },
-    'ik6kfeoz': {
+    'vtqgqq4c': {
       'en': 'Enter full 13-character loan number.',
       'or': '',
     },
-    'ou88d8hy': {
+    '4hohjftk': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -4627,7 +4627,7 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Loan number is required',
       'or': '',
     },
-    'anvhkw39': {
+    'pv4i1g39': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -4671,15 +4671,15 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Clear',
       'or': 'ଖାଲି କରନ୍ତୁ',
     },
-    'xot8qf2g': {
+    'nkdppjfq': {
       'en': 'Search your loan number... is required',
       'or': '',
     },
-    '1a435648': {
+    '5hm5avez': {
       'en': 'Enter full 13-character loan number.',
       'or': '',
     },
-    'uh6tg6ok': {
+    'l6ygs9v2': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -8296,7 +8296,7 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Field is required',
       'or': '',
     },
-    'oopf23kz': {
+    'iwtzdy67': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -8304,7 +8304,7 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Field is required',
       'or': '',
     },
-    'xlu13m5x': {
+    '60m2i9q7': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -8597,19 +8597,19 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Bid Opening Date',
       'or': 'ବିଡ୍ ଖୋଲିବା ତାରିଖ',
     },
-    'jueie0xp': {
+    '17kpo2oa': {
       'en': 'Field is required',
       'or': '',
     },
-    'soz5b4hp': {
+    'k6aclh91': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
-    'o64uxfrt': {
+    'w63sdxrk': {
       'en': 'Field is required',
       'or': '',
     },
-    'zzk36khs': {
+    '6oajfgda': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -9585,35 +9585,35 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Invoice Amount',
       'or': 'ଇନଭଏସ୍ ଅନୁସାରେ ପେମେଣ୍ଟ',
     },
-    'pscvnayz': {
+    'vdkqa6hn': {
       'en': 'Field is required',
       'or': '',
     },
-    'os96rt87': {
+    'gyzshl4o': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
-    '2uitqvmq': {
+    'ro22xjnt': {
       'en': 'Field is required',
       'or': '',
     },
-    'h4vckry7': {
+    '8j77dxac': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
-    'r6j7foom': {
+    '93zecepb': {
       'en': 'Field is required',
       'or': '',
     },
-    'vzr80kn9': {
+    'jw6kzkp9': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
-    'd07kon2e': {
+    'oy72hgbh': {
       'en': 'Field is required',
       'or': '',
     },
-    'w4q3qw4i': {
+    'zxxoefdh': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -9877,7 +9877,7 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Clear',
       'or': 'ଖାଲି କରନ୍ତୁ',
     },
-    'c1htoxea': {
+    'lqozdc0y': {
       'en': 'Search Loan Number is required',
       'or': '',
     },
@@ -9885,7 +9885,7 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Enter full 6-character loan number.',
       'or': '',
     },
-    '7mvt2oe5': {
+    'wa189cvo': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -9980,15 +9980,15 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Clear',
       'or': 'ଖାଲି କରନ୍ତୁ',
     },
-    'zaethqva': {
+    'vu4vu5b3': {
       'en': 'Search your loan number is required',
       'or': '',
     },
-    'z1a03hgt': {
+    'szfyr3s1': {
       'en': 'Enter full 6-character loan number.',
       'or': '',
     },
-    'c958yr00': {
+    'gq246iuu': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -10125,15 +10125,15 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Clear',
       'or': 'ଖାଲି କରନ୍ତୁ',
     },
-    'hklnii6v': {
+    't5wqc3fu': {
       'en': 'Search Loan Number is required',
       'or': '',
     },
-    '3zibljs6': {
+    '3mcn196r': {
       'en': 'Enter full 13-character loan number.',
       'or': '',
     },
-    'uf0j9hog': {
+    'hao81vil': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -10349,15 +10349,15 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Search your loan number...',
       'or': 'ଆପଣଙ୍କର ଋଣ ନମ୍ବର ଖୋଜନ୍ତୁ...',
     },
-    'gas1na3t': {
+    'jyoms5j6': {
       'en': 'Search your loan number is required',
       'or': '',
     },
-    'zu2snpkg': {
+    'ewxa0und': {
       'en': 'Enter full 13-character loan number.',
       'or': '',
     },
-    '8hhqpk1l': {
+    'mf20z02r': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -10561,15 +10561,15 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Search your loan number...',
       'or': 'ଆପଣଙ୍କର ଋଣ ନମ୍ବର ଖୋଜନ୍ତୁ...',
     },
-    'ad2aca1i': {
+    'ips0y9s5': {
       'en': 'Search your loan number... is required',
       'or': '',
     },
-    'urmnpgt3': {
+    'vyt4jbyk': {
       'en': 'Enter full 13-character loan number.',
       'or': '',
     },
-    'vwo0stpf': {
+    'y2smoerv': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -10777,7 +10777,7 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Search your loan number...',
       'or': 'ଆପଣଙ୍କର ଋଣ ନମ୍ବର ଖୋଜନ୍ତୁ...',
     },
-    'g9xhjtpz': {
+    'lxh2dd0t': {
       'en': 'Search your loan number is required',
       'or': '',
     },
@@ -10785,7 +10785,7 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Enter full 13-character loan number.',
       'or': '',
     },
-    'g8x1z7in': {
+    'z7qop7mh': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -11426,15 +11426,15 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Clear',
       'or': 'ଖାଲି କରନ୍ତୁ',
     },
-    '7rb6h29w': {
+    '7jtua2f7': {
       'en': 'Search Loan Number is required',
       'or': '',
     },
-    'zq1i2hdb': {
+    'zjn7f6qb': {
       'en': 'Enter full 13-character loan number.',
       'or': '',
     },
-    '6k913jan': {
+    '9fdg6viq': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -12133,11 +12133,11 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Submit',
       'or': 'ଦାଖଲ କରନ୍ତୁ',
     },
-    'k8gv7lur': {
+    '2af6dscr': {
       'en': 'Enter Loan number... is required',
       'or': '',
     },
-    'gz1a3jzi': {
+    't57mlwk2': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -12157,15 +12157,15 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Clear',
       'or': 'ଖାଲି କରନ୍ତୁ',
     },
-    'z90w7ccv': {
+    'fqrtojuw': {
       'en': 'Search Loan Number is required',
       'or': '',
     },
-    'x6spew88': {
+    'vjwsk14b': {
       'en': 'Enter full 13-character loan number.',
       'or': '',
     },
-    'sj6eh078': {
+    'qu2ieb3v': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -12574,15 +12574,15 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Clear',
       'or': 'ଖାଲି କରନ୍ତୁ',
     },
-    'zr53n234': {
+    'zmr1i9co': {
       'en': 'Search Loan Number is required',
       'or': '',
     },
-    'jhdffql6': {
+    'xupz74w3': {
       'en': 'Enter full 13-character loan number.',
       'or': '',
     },
-    'ikp3q49u': {
+    'mpt54xt0': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -13253,26 +13253,58 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'or': 'ADM/DIC ରେଜିଷ୍ଟର ନମ୍ବର ଲେଖନ୍ତୁ',
     },
     'zpsw8j7b': {
-      'en': 'OKVIB Regd. No*',
+      'en': 'Do you have OKVIB Regd. No?',
       'or': 'OKVIB ପଞ୍ଜିକୃତ ନାଁ*',
     },
-    'dftyk2wd': {
-      'en': 'Enter OKVIB regd. no',
-      'or': 'OKVIB ରେଜିଷ୍ଟ୍ରେସନ୍ ନମ୍ବର ଲେଖନ୍ତୁ।',
+    'gelzr96i': {
+      'en': 'Select...',
+      'or': '',
+    },
+    'b421dwik': {
+      'en': 'Search...',
+      'or': '',
+    },
+    'ppiweo13': {
+      'en': 'Yes',
+      'or': '',
+    },
+    'qftlfv90': {
+      'en': 'No',
+      'or': '',
     },
     'f1yogd6x': {
-      'en': 'Regd. With KVIC*',
+      'en': 'OKVIB Regd. No*',
       'or': 'KVIC ସହିତ ପଞ୍ଜିକୃତ*',
     },
     'dg28udoi': {
       'en': 'Enter regd. with KVIC',
       'or': 'KVIC ସହିତ regd. ଲେଖନ୍ତୁ',
     },
-    '77lwnmjd': {
-      'en': 'KVIC Regd. No',
-      'or': 'KVIC ରେଜିଷ୍ଟର ନମ୍ବର',
+    'drx1qc4u': {
+      'en': 'Regd. With KVIC*',
+      'or': 'OKVIB ପଞ୍ଜିକୃତ ନାଁ*',
     },
-    'efszuo6w': {
+    'vykniu6z': {
+      'en': 'Select...',
+      'or': '',
+    },
+    'n96t6r42': {
+      'en': 'Search...',
+      'or': '',
+    },
+    '4ckops75': {
+      'en': 'Yes',
+      'or': '',
+    },
+    'jrpqaia2': {
+      'en': 'No',
+      'or': '',
+    },
+    'eu8b7av8': {
+      'en': 'KVIC Regd. No*',
+      'or': 'KVIC ସହିତ ପଞ୍ଜିକୃତ*',
+    },
+    'gpzh4ugm': {
       'en': 'Enter KVIC regd. no',
       'or': 'KVIC ରେଜିଷ୍ଟର ନମ୍ବର ଲେଖନ୍ତୁ',
     },
@@ -13496,14 +13528,6 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Please choose an option from the dropdown',
       'or': 'ଦୟାକରି ଡ୍ରପଡାଉନରୁ ଗୋଟିଏ ବିକଳ୍ପ ବାଛନ୍ତୁ।',
     },
-    '1700o60l': {
-      'en': 'Enter OKVIB regd. no is required',
-      'or': 'OKVIB ରେଜିଷ୍ଟର ନମ୍ବର ଲେଖନ୍ତୁ। ଆବଶ୍ୟକ ନାହିଁ।',
-    },
-    'eop99qkf': {
-      'en': 'Please choose an option from the dropdown',
-      'or': 'ଦୟାକରି ଡ୍ରପଡାଉନରୁ ଗୋଟିଏ ବିକଳ୍ପ ବାଛନ୍ତୁ।',
-    },
     'dzrwa2x9': {
       'en': 'Enter regd. with KVIC is required',
       'or': 'KVIC ସହିତ regd. ଲେଖନ୍ତୁ ଆବଶ୍ୟକ।',
@@ -13512,13 +13536,13 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Please choose an option from the dropdown',
       'or': 'ଦୟାକରି ଡ୍ରପଡାଉନରୁ ଗୋଟିଏ ବିକଳ୍ପ ବାଛନ୍ତୁ।',
     },
-    '2na126tf': {
+    '5fgtt167': {
       'en': 'Enter KVIC regd. no is required',
-      'or': 'KVIC ରେଜିଷ୍ଟର ନମ୍ବର ଲେଖନ୍ତୁ। ଆବଶ୍ୟକ ନାହିଁ।',
+      'or': '',
     },
-    'u44ubtvu': {
+    'i8479ttv': {
       'en': 'Please choose an option from the dropdown',
-      'or': 'ଦୟାକରି ଡ୍ରପଡାଉନରୁ ଗୋଟିଏ ବିକଳ୍ପ ବାଛନ୍ତୁ।',
+      'or': '',
     },
     'jwk5dehl': {
       'en': 'Enter bank A/C no is required',
@@ -13627,6 +13651,11 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
     'x3827kqt': {
       'en': 'Password is required',
       'or': 'ପାସୱାର୍ଡ ଆବଶ୍ୟକ',
+    },
+    'xvyibxj4': {
+      'en':
+          'Password must be at least 12 characters and include:\n• One uppercase letter (A–Z)\n• One lowercase letter (a–z)\n• One number (0–9)\n• One special character (@\$!%*?&)',
+      'or': '',
     },
     'azu27wfi': {
       'en': 'Please choose an option from the dropdown',
@@ -15926,43 +15955,43 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
-    '7amn2bfa': {
+    'aqc5nn64': {
       'en': 'Field is required',
       'or': '',
     },
-    'fipv8i6f': {
+    'i9z01pel': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
-    'mr4yebxy': {
+    's5h0oshx': {
       'en': 'Field is required',
       'or': '',
     },
-    'ovlhyexj': {
+    '1rjqqmgx': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
-    'vk02xn80': {
+    '1bo6d5zn': {
       'en': 'Field is required',
       'or': '',
     },
-    'lu73nl2h': {
+    'gf351hw8': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
-    'q95nhe6s': {
+    '9k8pg2x7': {
       'en': 'Field is required',
       'or': '',
     },
-    'rph720wh': {
+    'n1dojo6y': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
-    '2wziaqr3': {
+    'elko9lz3': {
       'en': 'Field is required',
       'or': '',
     },
-    'nb41yoz0': {
+    'kv444wp8': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -16810,6 +16839,124 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'or': 'ଘର',
     },
   },
+  // LoginOkvi
+  {
+    'dq4nyfg5': {
+      'en': 'Shri Mohan Charan Majhi',
+      'or': 'ଶ୍ରୀ ମୋହନ ଚରଣ ମାଝୀ',
+    },
+    'uz6p984w': {
+      'en': 'Hon’ble Chief Minister of Odisha',
+      'or': 'ଓଡ଼ିଶାର ମାନ୍ୟବର ମୁଖ୍ୟମନ୍ତ୍ରୀ',
+    },
+    'v1ili4v3': {
+      'en':
+          'Micro, Small & Medium Enterprise Department , Government of Odisha',
+      'or': 'ସୂକ୍ଷ୍ମ, କ୍ଷୁଦ୍ର ଏବଂ ମଧ୍ୟମ ଉଦ୍ୟୋଗ ବିଭାଗ, ଓଡ଼ିଶା ସରକାର',
+    },
+    '12ve5xwe': {
+      'en':
+          'Micro, Small & Medium Enterprise Department , Government of Odisha',
+      'or': 'ସୂକ୍ଷ୍ମ, କ୍ଷୁଦ୍ର ଏବଂ ମଧ୍ୟମ ଉଦ୍ୟୋଗ ବିଭାଗ, ଓଡ଼ିଶା ସରକାର',
+    },
+    's1o1q01t': {
+      'en': 'MSME',
+      'or': 'ଏମଏସଏମଇ',
+    },
+    '9217fodz': {
+      'en': 'MSME Web Portal',
+      'or': 'MSME ୱେବ୍ ପୋର୍ଟାଲ',
+    },
+    'rjx9eha5': {
+      'en': 'Welcome! Sign in to your account',
+      'or': 'ସ୍ୱାଗତ! ଆପଣଙ୍କ ଆକାଉଣ୍ଟରେ ସାଇନ୍ ଇନ୍ କରନ୍ତୁ',
+    },
+    'br8edm7k': {
+      'en': 'Your Email',
+      'or': 'ତୁମର ଇମେଲ୍',
+    },
+    'vb3vb5s8': {
+      'en': 'Your Email',
+      'or': 'ତୁମର ଇମେଲ୍',
+    },
+    'y9uowcnq': {
+      'en': 'Password',
+      'or': 'ପାସୱାର୍ଡ',
+    },
+    '9zmvl1pc': {
+      'en': 'Password',
+      'or': 'ପାସୱାର୍ଡ',
+    },
+    '6l4fhpx3': {
+      'en': 'Enter captcha',
+      'or': '',
+    },
+    'm4uonvez': {
+      'en': 'Remember Me',
+      'or': 'ମୋତେ ମନେରଖନ୍ତୁ',
+    },
+    'rpnnowmr': {
+      'en': 'Forgot Password?',
+      'or': 'ପାସୱାର୍ଡ ଭୁଲି ଯାଇଛନ୍ତି କି?',
+    },
+    '6f6gi34f': {
+      'en': 'Login',
+      'or': 'ଲଗ୍ଇନ୍',
+    },
+    'y9rsz2wq': {
+      'en': 'Don’t have any acount?  ',
+      'or': 'ଆପଣଙ୍କର କୌଣସି ଆକାଉଣ୍ଟ ନାହିଁ କି?',
+    },
+    'vfc6ewjq': {
+      'en': 'Register as User',
+      'or': 'ଉପଭୋକ୍ତା ଭାବରେ ପଞ୍ଜୀକୃତ କରନ୍ତୁ',
+    },
+    '7ywoqma5': {
+      'en': 'Industries Registration',
+      'or': 'ଶିଳ୍ପ ପଞ୍ଜୀକରଣ',
+    },
+    '7nilpnyb': {
+      'en': 'Vendor Registration',
+      'or': 'ବିକ୍ରେତା ପଞ୍ଜିକରଣ',
+    },
+    't4jd7w51': {
+      'en': 'Field is required',
+      'or': 'କ୍ଷେତ୍ର ଆବଶ୍ୟକ ଅଟେ',
+    },
+    'q5v6ogti': {
+      'en': 'Please enter a valid email address',
+      'or': '',
+    },
+    'xkjrn3r0': {
+      'en': 'Please choose an option from the dropdown',
+      'or': 'ଦୟାକରି ଡ୍ରପଡାଉନରୁ ଗୋଟିଏ ବିକଳ୍ପ ବାଛନ୍ତୁ।',
+    },
+    'exp3qjnm': {
+      'en': 'Field is required',
+      'or': 'କ୍ଷେତ୍ର ଆବଶ୍ୟକ ଅଟେ',
+    },
+    'dvfup8e6': {
+      'en':
+          'Password must be at least 8 characters and include:\n• One uppercase letter (A–Z)\n• One lowercase letter (a–z)\n• One number (0–9)\n• One special character (@\$!%*?&)',
+      'or': '',
+    },
+    'w7zer2wj': {
+      'en': 'Please choose an option from the dropdown',
+      'or': 'ଦୟାକରି ଡ୍ରପଡାଉନରୁ ଗୋଟିଏ ବିକଳ୍ପ ବାଛନ୍ତୁ।',
+    },
+    '1abk7nj7': {
+      'en': 'Captcha is required',
+      'or': '',
+    },
+    'o7znbaz8': {
+      'en': 'Please choose an option from the dropdown',
+      'or': '',
+    },
+    '7k2uo2ub': {
+      'en': 'Home',
+      'or': 'ଘର',
+    },
+  },
   // Header
   {
     'ssftmvxs': {
@@ -17164,43 +17311,43 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Submit',
       'or': 'ଦାଖଲ କରନ୍ତୁ',
     },
-    '45r8enkz': {
+    'fh6k6mit': {
       'en': ' Loan number is required',
       'or': '',
     },
-    '6mae0hgi': {
+    'b1qpfglo': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
-    's0nvw14f': {
+    '8c3i5x6i': {
       'en': 'Field is required',
       'or': '',
     },
-    'afejqpm0': {
+    'onxt07j7': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
-    'rs4vq0j8': {
+    '9xu46mnk': {
       'en': 'Field is required',
       'or': '',
     },
-    'ieyi13tk': {
+    'g49fqtz8': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
-    '7cc5zjur': {
+    'jy1q8w1u': {
       'en': 'Field is required',
       'or': '',
     },
-    'rqojyzxd': {
+    'qhahlucd': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
-    'kqz9vywi': {
+    'ucvdxv60': {
       'en': 'Field is required',
       'or': '',
     },
-    'rivpl09q': {
+    'l4mr7gvt': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -17499,11 +17646,11 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
-    'dk5rlwji': {
+    'oupnaktm': {
       'en': 'Field is required',
       'or': '',
     },
-    'rzmpcpuf': {
+    'fxtgt142': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
@@ -17595,51 +17742,51 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
       'en': 'Paid Party On Date',
       'or': 'ବିଡ୍ ମୂଲ୍ୟ',
     },
-    '3j5tuvj0': {
+    'd7lvubzu': {
       'en': 'Field is required',
       'or': '',
     },
-    '0nj5ez6o': {
+    'tfu4igfs': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
-    'a8xtujut': {
+    '22w288yq': {
       'en': 'Field is required',
       'or': '',
     },
-    'hzm5h3p1': {
+    'x94teua8': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
-    '26olvb76': {
+    'x50oxvmv': {
       'en': 'Field is required',
       'or': '',
     },
-    '61c8qgcv': {
+    '7zxn222u': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
-    '5cw0rowb': {
+    'fr1dtbg1': {
       'en': 'Field is required',
       'or': '',
     },
-    'czwu7f4o': {
+    '3wfydkij': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
-    'cjxs85nv': {
+    'k6gckabq': {
       'en': 'Field is required',
       'or': '',
     },
-    'dic5fccc': {
+    '01zrbc0p': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },
-    '0ig1p3li': {
+    'a1jexymm': {
       'en': 'Field is required',
       'or': '',
     },
-    'bsjsz6bf': {
+    'yjdavw77': {
       'en': 'Please choose an option from the dropdown',
       'or': '',
     },

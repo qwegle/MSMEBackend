@@ -26,13 +26,13 @@ class NoDueCertificateviewModel
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'vu6y2iwo' /* loan number is required */,
+        '9d5dtgmh' /* loan number is required */,
       );
     }
 
     if (val.length < 13) {
       return FFLocalizations.of(context).getText(
-        '0zijpy8i' /* Enter full 13-character loan n... */,
+        '0ryynu2s' /* Enter full 13-character loan n... */,
       );
     }
 

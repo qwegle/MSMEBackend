@@ -301,6 +301,10 @@ class FFAppState extends ChangeNotifier {
               }).toList() ??
               _TenderBidderDtails;
     });
+    await _safeInitAsync(() async {
+      _MemoHideShow =
+          await secureStorage.getString('ff_MemoHideShow') ?? _MemoHideShow;
+    });
   }
 
   void update(VoidCallback callback) {
@@ -819,6 +823,17 @@ class FFAppState extends ChangeNotifier {
   String get CaptchaNumber => _CaptchaNumber;
   set CaptchaNumber(String value) {
     _CaptchaNumber = value;
+  }
+
+  String _MemoHideShow = '';
+  String get MemoHideShow => _MemoHideShow;
+  set MemoHideShow(String value) {
+    _MemoHideShow = value;
+    secureStorage.setString('ff_MemoHideShow', value);
+  }
+
+  void deleteMemoHideShow() {
+    secureStorage.delete(key: 'ff_MemoHideShow');
   }
 }
 

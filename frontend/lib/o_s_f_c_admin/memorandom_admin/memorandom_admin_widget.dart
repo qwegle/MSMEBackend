@@ -1430,7 +1430,7 @@ class _MemorandomAdminWidgetState extends State<MemorandomAdminWidget> {
                                                                                           valueOrDefault<String>(
                                                                                             getJsonField(
                                                                                               applicationListItem,
-                                                                                              r'''$.otsFormId.createdAt''',
+                                                                                              r'''$.remarks''',
                                                                                             )?.toString(),
                                                                                             '0',
                                                                                           ),
@@ -1476,6 +1476,10 @@ class _MemorandomAdminWidgetState extends State<MemorandomAdminWidget> {
                                                                                           (_model.userReffDetailsViews?.jsonBody ?? ''),
                                                                                           r'''$''',
                                                                                         );
+                                                                                        FFAppState().MemoHideShow = getJsonField(
+                                                                                          applicationListItem,
+                                                                                          r'''$.status''',
+                                                                                        ).toString();
                                                                                         safeSetState(() {});
 
                                                                                         context.pushNamed(

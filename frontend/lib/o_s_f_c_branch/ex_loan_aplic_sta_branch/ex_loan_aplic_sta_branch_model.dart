@@ -25,13 +25,13 @@ class ExLoanAplicStaBranchModel
       BuildContext context, String? val) {
     if (val == null || val.isEmpty) {
       return FFLocalizations.of(context).getText(
-        'zaethqva' /* Search your loan number is req... */,
+        'vu4vu5b3' /* Search your loan number is req... */,
       );
     }
 
     if (val.length < 6) {
       return FFLocalizations.of(context).getText(
-        'z1a03hgt' /* Enter full 6-character loan nu... */,
+        'szfyr3s1' /* Enter full 6-character loan nu... */,
       );
     }
 
