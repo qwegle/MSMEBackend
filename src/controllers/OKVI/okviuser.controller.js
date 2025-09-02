@@ -127,7 +127,20 @@ export const sendOtp = catchAsync(async (req, res, next) => {
   await sendEmail({
     to: email,
     subject: 'Your OTP for OKVI Email Verification',
-    text: `Your OTP is ${otp}. It is valid for 10 minutes.`
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 8px;">
+        <h2 style="text-align: center; color: #4CAF50;">OKVI Email Verification</h2>
+        <p style="font-size: 16px;">Hello,</p>
+        <p style="font-size: 16px;">Use the following One-Time Password (OTP) to verify your email address. This OTP is valid for <strong>10 minutes</strong>.</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <span style="font-size: 32px; font-weight: bold; color: #ffffff; background: #4CAF50; padding: 10px 20px; border-radius: 6px; display: inline-block; letter-spacing: 3px;">
+            ${otp}
+          </span>
+        </div>
+        <p style="font-size: 14px; color: #666;">If you didn’t request this, you can safely ignore this email.</p>
+        <p style="margin-top: 30px; font-size: 14px; color: #999;">Best regards,<br/>The OKVI Team</p>
+      </div>
+    `
   });
 
   res.status(200).json({
