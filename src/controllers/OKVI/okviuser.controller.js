@@ -21,12 +21,11 @@ export const registerOkviUser = catchAsync(async (req, res, next) => {
       return next(new AppError('Unauthorized to register as admin', 403));
     }
   }
-  const hashedPassword = await hash(password, 12);
   const newUser = await OkviAuth.create({
     name,
     email,
-    password: hashedPassword,
-    role: role || 2 
+    password, // Password will be hashed by the schema pre-save middleware
+    role: role || 3 // Default to regular user role
   });
   res.status(201).json({
     status: 'success',

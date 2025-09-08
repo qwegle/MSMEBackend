@@ -1,4 +1,4 @@
-import Holiday from '../../models/OKVI/hoildayFestival.js';
+import Holiday from '../../models/OKVI/holidayFestival.js';
 import catchAsync from '../../utils/catchAsync.js';
 import AppError from '../../utils/AppError.js';
 import mongoose from 'mongoose';
@@ -21,7 +21,7 @@ export const createHoliday = catchAsync(async (req, res, next) => {
       startDate,
       endDate,
       type,
-      createdBy: req.user._id,
+      createdBy: req.user.id,
     });
     res.status(201).json({ status: 'success', data: holiday });
   } catch (err) {

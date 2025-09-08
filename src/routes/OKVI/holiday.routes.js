@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import { createHoliday, getHolidays, deleteHoliday, updateHoliday } from '../../controllers/OKVI/holiday.controller.js'; // corrected the controller name
-import { authenticateToken, authorizeRoles, authorizeType } from '../../middlewares/auth.middleware.js';
+import { createHoliday, getHolidays, deleteHoliday, updateHoliday } from '../../controllers/OKVI/holiday.controller.js';
+import { authenticateOkviToken, authorizeOkviRoles } from '../../middlewares/okviAuth.middleware.js';
 
 const router = Router();
-router.get('/getAllHolidays', authenticateToken, getHolidays);
-router.post('/createHoliday', authenticateToken, authorizeRoles(0), createHoliday);
-router.put('/updateHoliday', authenticateToken, authorizeRoles(0), updateHoliday);
-router.delete('/deleteHoliday', authenticateToken, authorizeRoles(0), deleteHoliday);
+router.get('/getAllHolidays', authenticateOkviToken, getHolidays);
+router.post('/createHoliday', authenticateOkviToken, authorizeOkviRoles(0), createHoliday);
+router.put('/updateHoliday', authenticateOkviToken, authorizeOkviRoles(0), updateHoliday);
+router.delete('/deleteHoliday', authenticateOkviToken, authorizeOkviRoles(0), deleteHoliday);
 
 export default router;

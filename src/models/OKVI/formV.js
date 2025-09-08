@@ -11,22 +11,6 @@ const formVSchema = new mongoose.Schema({
   totalSaleAmt:   { type: Number, required: true },  
   totalRebateAmt: { type: Number, required: true },  
 
-  sub_admin_status: { 
-    type: Number,
-    enum: [0, 1, 2],    // 0 = Pending, 1 = Approved, 2 = Rejected
-    default: 0,
-  },
-  super_admin_status: { 
-    type: Number,
-    enum: [0, 1, 2],    // 0 = Pending, 1 = Approved, 2 = Rejected
-    default: 0,
-  },
-  addl_admin_status: {
-    type: Number,
-    enum: [0, 1, 2],    // 0 = Pending, 1 = Approved, 2 = Rejected
-    default: 0,
-  },
-
   createdAt: { type: Date, default: Date.now },
 });
 

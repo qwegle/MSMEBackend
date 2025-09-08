@@ -7,7 +7,7 @@ const bankDepositProofSchema = new mongoose.Schema({
   formVId: {type: mongoose.Schema.Types.ObjectId, ref: 'FormV', required: true },
   formVIId: {type: mongoose.Schema.Types.ObjectId, ref: 'FormVI', required: true },
   dcId: {type: mongoose.Schema.Types.ObjectId, ref: 'DeclarationCertificate', required: true},
-  acId: {type: mongoose.Schema.Types.ObjectId, red: 'AuditCertificate', required: true}, 
+  acId: {type: mongoose.Schema.Types.ObjectId, ref: 'AuditCertificate', required: true}, 
   institutionName: { type: String, required: true },
   address: { type: String, required: true },
   festival: { type: String, required: true },

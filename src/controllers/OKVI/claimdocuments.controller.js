@@ -2,14 +2,16 @@
 import catchAsync from '../../utils/catchAsync.js';
 import AppError from '../../utils/AppError.js';
 import Form1 from '../../models/OKVI/formI.js';
-import FormV from '../../models/OKVI/FormV.js';
-import FormVI from '../../models/OKVI/FormVI.js';
-import DeclarationCertificate from '../../models/OKVI/DeclarationCertificate.js';
-import AuditCertificate from '../../models/OKVI/AuditCertificate.js';
-import BankDepositProof from '../../models/OKVI/BankDepositProof.js';
+import FormV from '../../models/OKVI/formV.js';
+import FormVI from '../../models/OKVI/formVI.js';
+import DeclarationCertificate from '../../models/OKVI/declarationCertificate.js';
+import AuditCertificate from '../../models/OKVI/auditCertificate.js';
+import BankDepositProof from '../../models/OKVI/bankproof.js';
 import OpeningStock from '../../models/OKVI/openingstock.js';
 import ClosingStock from '../../models/OKVI/closingstock.js';
-import Holiday from '../../models/OKVI/hoildayFestival.js'
+import Holiday from '../../models/OKVI/holidayFestival.js';
+import ClaimApplication from '../../models/OKVI/claimApplication.js';
+import OkviAuth from '../../models/OKVI/okviauth.js';
 
 const getStocks = async (userId, festivalId) => {
   const openingStock = await OpeningStock.findOne({ user: userId, festivalId });
@@ -240,4 +242,187 @@ export const uploadBankDepositProof = catchAsync(async (req, res, next) => {
   });
 
   res.status(201).json({ status: 'success', data: proof });
+});
+
+// Final submit - creates claim application and submits for approval
+export const finalSubmitClaim = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  const { festivalName } = req.body;
+
+  if (!festivalName) {
+    return next(new AppError('Festival name is required', 400));
+  }
+
+  const festival = await getFestival(festivalName);
+  const { openingStock, closingStock } = await getStocks(userId, festival._id);
+
+  // Check if all required documents are submitted
+  const form1 = await Form1.findOne({ openingStockId: openingStock._id });
+  const formV = await FormV.findOne({ formIId: form1?._id });
+  const formVI = await FormVI.findOne({ formIId: form1?._id });
+  const declarationCert = await DeclarationCertificate.findOne({ openingStockId: openingStock._id });
+  const auditCert = await AuditCertificate.findOne({ openingStockId: openingStock._id });
+  const bankProof = await BankDepositProof.findOne({ openingStockId: openingStock._id });
+
+  if (!form1 || !formV || !formVI || !declarationCert || !auditCert || !bankProof) {
+    return next(new AppError('Please submit all required forms and documents before final submission', 400));
+  }
+
+  // Check if claim application already exists
+  let claimApplication = await ClaimApplication.findOne({
+    userId,
+    festivalId: festival._id,
+    openingStockId: openingStock._id
+  });
+
+  if (claimApplication && claimApplication.status !== 'draft') {
+    return next(new AppError('Claim application already submitted', 400));
+  }
+
+  // Find GMDIC for initial assignment
+  const gmdic = await OkviAuth.findOne({ role: 0 });
+  if (!gmdic) {
+    return next(new AppError('No GMDIC found for approval assignment', 500));
+  }
+
+  if (claimApplication) {
+    // Update existing draft
+    claimApplication = await ClaimApplication.findByIdAndUpdate(
+      claimApplication._id,
+      {
+        formIId: form1._id,
+        formVId: formV._id,
+        formVIId: formVI._id,
+        declarationCertificateId: declarationCert._id,
+        auditCertificateId: auditCert._id,
+        bankDepositProofId: bankProof._id,
+        status: 'submitted',
+        submittedAt: new Date(),
+        currentApprover: gmdic._id
+      },
+      { new: true }
+    );
+  } else {
+    // Create new claim application
+    claimApplication = await ClaimApplication.create({
+      userId,
+      festivalId: festival._id,
+      openingStockId: openingStock._id,
+      closingStockId: closingStock._id,
+      formIId: form1._id,
+      formVId: formV._id,
+      formVIId: formVI._id,
+      declarationCertificateId: declarationCert._id,
+      auditCertificateId: auditCert._id,
+      bankDepositProofId: bankProof._id,
+      status: 'submitted',
+      submittedAt: new Date(),
+      currentApprover: gmdic._id
+    });
+  }
+
+  res.status(201).json({
+    status: 'success',
+    message: 'Claim application submitted successfully for approval',
+    data: claimApplication
+  });
+});
+
+// Upload sanction order document (after final approval)
+export const uploadSanctionOrder = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  const { claimId } = req.body;
+  const { file } = req;
+
+  if (!claimId || !file) {
+    return next(new AppError('Claim ID and sanction order file are required', 400));
+  }
+
+  const claimApplication = await ClaimApplication.findOne({
+    _id: claimId,
+    userId,
+    status: 'sanctioned'
+  });
+
+  if (!claimApplication) {
+    return next(new AppError('Claim not found or not in sanctioned status', 404));
+  }
+
+  // Update claim with sanction order file
+  const updatedClaim = await ClaimApplication.findByIdAndUpdate(
+    claimId,
+    {
+      sanctionOrderFile: file.path,
+      sanctionOrderUploadedAt: new Date(),
+      status: 'sanction_order_uploaded'
+    },
+    { new: true }
+  );
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Sanction order uploaded successfully',
+    data: updatedClaim
+  });
+});
+
+// Get user's claim applications
+export const getUserClaims = catchAsync(async (req, res) => {
+  const userId = req.user.id;
+  const { page = 1, limit = 10, status } = req.query;
+
+  const filter = { userId };
+  if (status) {
+    filter.status = status;
+  }
+
+  const skip = (page - 1) * limit;
+
+  const claims = await ClaimApplication.find(filter)
+    .populate('festivalId', 'name startDate endDate')
+    .populate('openingStockId')
+    .populate('closingStockId')
+    .populate('approvalHistory.approver', 'name role')
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(parseInt(limit));
+
+  const total = await ClaimApplication.countDocuments(filter);
+
+  res.status(200).json({
+    status: 'success',
+    results: claims.length,
+    total,
+    page: parseInt(page),
+    totalPages: Math.ceil(total / limit),
+    data: claims
+  });
+});
+
+// Get claim application details
+export const getClaimDetails = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  const { id } = req.params;
+
+  const claim = await ClaimApplication.findOne({ _id: id, userId })
+    .populate('festivalId', 'name startDate endDate')
+    .populate('openingStockId')
+    .populate('closingStockId')
+    .populate('formIId')
+    .populate('formVId')
+    .populate('formVIId')
+    .populate('declarationCertificateId')
+    .populate('auditCertificateId')
+    .populate('bankDepositProofId')
+    .populate('approvalHistory.approver', 'name email role')
+    .populate('currentApprover', 'name email role');
+
+  if (!claim) {
+    return next(new AppError('Claim not found', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: claim
+  });
 });

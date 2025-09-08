@@ -18,22 +18,6 @@ const formVISchema = new mongoose.Schema({
     validate: v => Array.isArray(v) && v.length > 0
   },
 
-   sub_admin_status: { 
-    type: Number,
-    enum: [0, 1, 2],    // 0 = Pending, 1 = Approved, 2 = Rejected
-    default: 0,
-  },
-  super_admin_status: { 
-    type: Number,
-    enum: [0, 1, 2],    // 0 = Pending, 1 = Approved, 2 = Rejected
-    default: 0,
-  },
-  addl_admin_status: {
-    type: Number,
-    enum: [0, 1, 2],    // 0 = Pending, 1 = Approved, 2 = Rejected
-    default: 0,
-  },
-
   createdAt: { type: Date, default: Date.now }
 });
 

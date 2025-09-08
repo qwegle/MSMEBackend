@@ -45,7 +45,7 @@
 
 import catchAsync from '../../utils/catchAsync.js';
 import AppError from '../../utils/AppError.js';
-import Holiday from '../../models/OKVI/holiday.js';
+import Holiday from '../../models/OKVI/holidayFestival.js';
 import OpeningStock from '../../models/OKVI/openingstock.js';
 import ClosingStock from '../../models/OKVI/closingstock.js';
 const isWithin7Days = (spellEndDate) => {
@@ -55,9 +55,9 @@ const isWithin7Days = (spellEndDate) => {
 };
 export const createClosingStock = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
-  const { festivalId, head, subhead } = req.body;
-  if (!festivalId || !head || !Array.isArray(subhead) || subhead.length === 0) {
-    return next(new AppError('festivalId, head, and non-empty subhead array are required', 400));
+  const { festivalId, head, subHeads } = req.body;
+  if (!festivalId || !head || !Array.isArray(subHeads) || subHeads.length === 0) {
+    return next(new AppError('festivalId, head, and non-empty subHeads array are required', 400));
   }
   const holiday = await Holiday.findById(festivalId);
   if (!holiday) {
@@ -79,7 +79,54 @@ export const createClosingStock = catchAsync(async (req, res, next) => {
     festivalId,
     openingStockId: opening._id,
     head,
-    subHeads: subhead
+    subHeads
   });
   res.status(201).json({ status: 'success', data: closing });
+});
+
+export const getClosingStocks = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  const stocks = await ClosingStock.find({ userId }).populate('festivalId', 'name startDate endDate');
+  res.status(200).json({
+    status: 'success',
+    results: stocks.length,
+    data: stocks
+  });
+});
+
+export const updateClosingStock = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+  
+  const stock = await ClosingStock.findOne({ _id: id, userId });
+  if (!stock) {
+    return next(new AppError('Closing stock not found', 404));
+  }
+
+  const updatedStock = await ClosingStock.findByIdAndUpdate(id, req.body, {
+    new: true,
+    runValidators: true
+  });
+
+  res.status(200).json({
+    status: 'success',
+    data: updatedStock
+  });
+});
+
+export const deleteClosingStock = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+  
+  const stock = await ClosingStock.findOne({ _id: id, userId });
+  if (!stock) {
+    return next(new AppError('Closing stock not found', 404));
+  }
+
+  await ClosingStock.findByIdAndDelete(id);
+
+  res.status(204).json({
+    status: 'success',
+    data: null
+  });
 });

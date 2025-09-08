@@ -23,6 +23,7 @@ const uploadMemory = multer({
   limits: { fileSize: 2 * 1024 * 1024 },
 });
 export const singlePdfUpload = uploadMemory.single('pdf');
+export const upload = uploadMemory;
 export const supplyOrderUpload = uploadMemory.fields([
   { name: 'proof_of_supply', maxCount: 1 },
   { name: 'invoice_submission', maxCount: 1 },
