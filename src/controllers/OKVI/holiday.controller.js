@@ -30,7 +30,26 @@ export const createHoliday = catchAsync(async (req, res, next) => {
 });
 export const getHolidays = catchAsync(async (req, res) => {
   const holidays = await Holiday.find().sort({ startDate: 1 });
-  res.status(200).json({ status: 'success', data: holidays });
+  const today = new Date();
+
+  const holidaysWithStatus = holidays.map(holiday => {
+    const start = new Date(holiday.startDate);
+    const end = new Date(holiday.endDate);
+
+    let status = 0; // pending by default
+    if (today >= start && today <= end) {
+      status = 1; // active
+    } else if (today > end) {
+      status = 2; // over
+    }
+
+    return {
+      ...holiday.toObject(),
+      status
+    };
+  });
+
+  res.status(200).json({ status: 'success', data: holidaysWithStatus });
 });
 export const updateHoliday = catchAsync(async (req, res, next) => {
   const { id, name, startDate, endDate, type } = req.body;
