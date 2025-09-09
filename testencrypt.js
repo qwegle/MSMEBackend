@@ -10,7 +10,7 @@ const jsonData = {
 };
 
 // Example encrypted response from backend (IV + ciphertext in hex)
-const jsonResponse = "81b2bed91eaa1c6d7fd25585479cdfe8deee319db625c971401354eeff689c0549b08bb1765773dc66feab8829b4a48f03643dd38114bd17a3cc05104b87281f084c327c9b7a55d5e4b6fbc9450bda0a801e1ed7e1d1ff1563625c6fa25bdb947146c8185b3ae4e8f7dd742b92176c03283d2f3a2e52f21a624446f8b0e8f9f0";
+const jsonResponse = "8b9d209eaca796221768b6de1edf4f723911d2a83230822459d444b108a154ce63beaee2f491557959a3d7b31a00d4022eac8b2343f148359e4417a4532078538eda487e4578db95683072594ecb4fc0"
 
 // Encrypt function (random IV + prepend IV + hex output)
 function encryptData(data) {

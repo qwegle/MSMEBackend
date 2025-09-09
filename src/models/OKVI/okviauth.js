@@ -18,12 +18,12 @@ const okviAuthSchema = new mongoose.Schema({
 });
 
 // Hash password before saving
-okviAuthSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
+// okviAuthSchema.pre('save', async function(next) {
+//   if (!this.isModified('password')) return next();
   
-  this.password = await bcrypt.hash(this.password, 12);
-  next();
-});
+//   this.password = await bcrypt.hash(this.password, 12);
+//   next();
+// });
 
 // Update passwordChangedAt when password is modified
 okviAuthSchema.pre('save', function(next) {
