@@ -67,3 +67,65 @@ export const deleteHoliday = catchAsync(async (req, res, next) => {
   }
   res.status(204).json({ status: 'success', data: null });
 });
+
+// Base list of Odia festivals/holidays (static names only)
+const odiaBaseList = [
+  "New Year's Day",
+  "Guru Gobind Singh Jayanti",
+  "Subhas Chandra Bose Jayanti",
+  "Republic Day",
+  "Vasant Panchami",
+  "Guru Ravidas Jayanti",
+  "Maha Shivaratri",
+  "Panchayati Raj Divas",
+  "Holi (Dola Purnima)",
+  "Gudi Padwa",
+  "Id-ul-Fitr",
+  "Odisha Day (Utkal Divas)",
+  "Babu Jagjivan Ram Jayanti",
+  "Ram Navami",
+  "Mahavir Jayanti",
+  "Dr. Ambedkar Jayanti",
+  "Maha Vishuba Sankranti",
+  "Good Friday",
+  "Maharshi Parasuram Jayanti",
+  "Basava Jayanti",
+  "May Day",
+  "Buddha Purnima",
+  "Sabitri Amavasya",
+  "Id-ul-Zuha (Bakrid)",
+  "Raja Sankranti",
+  "Pahili Raja",
+  "Ratha Yatra",
+  "Karkidaka Vavu Bali",
+  "Muharram",
+  "Jhulan Purnima",
+  "Independence Day",
+  "Janmashtami",
+  "Ganesh Chaturthi",
+  "Nuakhai",
+  "Eid-e-Milad (Birthday of Prophet Muhammad)",
+  "Mahalaya Amavasya",
+  "Maha Saptami",
+  "Maha Ashtami",
+  "Maha Navami",
+  "Vijaya Dashami (Dussehra) / Gandhi Jayanti",
+  "Kumar Purnima",
+  "Lakshmi Puja",
+  "Diwali",
+  "Kartika Purnima / Rahas Purnima",
+  "Christmas Day"
+];
+
+export const getOdiaHolidayDropdown = catchAsync(async (req, res) => {
+  const currentYear = new Date().getFullYear();
+  
+  const labels = odiaBaseList.map(name => name /*+ ` ${currentYear}` */);
+
+  res.status(200).json({
+    status: 'success',
+    year: currentYear,
+    total: labels.length,
+    data: labels
+  });
+});
