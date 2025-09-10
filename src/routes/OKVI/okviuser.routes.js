@@ -9,7 +9,7 @@ router.post('/sendotp', sendOtp);
 router.post('/verifyotp', verifyOtp);
 router.post('/registerUserDetails', registerOkviUserdetails);
 router.post('/logout', authenticateOkviToken, logoutOkvi);
-router.post('/dashboard', authenticateOkviToken, getUserDashboard);
+router.get('/dashboard', authenticateOkviToken, getUserDashboard);
 
 
 export default router;
