@@ -8,7 +8,9 @@ import catchAsync from '../../utils/catchAsync.js';
 import AppError from '../../utils/AppError.js';
 import sendEmail from '../../utils/sendEmail.js';
 import { blacklistToken } from '../../utils/tokenBlacklist.js';
-
+import ClaimApplication from '../../models/OKVI/claimApplication.js';
+import Holiday from '../../models/OKVI/holidayFestival.js';
+import mongoose from 'mongoose';
 const { hash, compare } = bcrypt;
 
 export const registerOkviUser = catchAsync(async (req, res, next) => {
@@ -24,8 +26,8 @@ export const registerOkviUser = catchAsync(async (req, res, next) => {
   const newUser = await OkviAuth.create({
     name,
     email,
-    password, // Password will be hashed by the schema pre-save middleware
-    role: role || 3 // Default to regular user role
+    password,
+    role: role || 3
   });
   res.status(201).json({
     status: 'success',
@@ -70,7 +72,7 @@ export const registerOkviUserdetails = catchAsync(async (req, res, next) => {
     name,
     email,
     password: hashedPassword,
-    role: 2,
+    role: 3,
     isEmailVerified: true
   });
 
@@ -104,11 +106,9 @@ export const registerOkviUserdetails = catchAsync(async (req, res, next) => {
 export const sendOtp = catchAsync(async (req, res, next) => {
   const { email } = req.body;
   if (!email) return next(new AppError('Email is required', 400));
-
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   const otpExpires = Date.now() + 10 * 60 * 1000;
   const hashedOtp = createHash('sha256').update(otp).digest('hex');
-
   const existing = await OkviOtpVerification.findOne({ email });
   if (existing) {
     existing.otp = hashedOtp;
@@ -151,22 +151,17 @@ export const sendOtp = catchAsync(async (req, res, next) => {
 export const verifyOtp = catchAsync(async (req, res, next) => {
   const { email, otp } = req.body;
   if (!email || !otp) return next(new AppError('Email and OTP are required', 400));
-
   const hashedOtp = createHash('sha256').update(otp).digest('hex');
-
   const entry = await OkviOtpVerification.findOne({
     email,
     otp: hashedOtp,
     otpExpires: { $gt: Date.now() }
   });
-
   if (!entry) return next(new AppError('Invalid or expired OTP', 400));
-
   entry.isVerified = true;
   entry.otp = undefined;
   entry.otpExpires = undefined;
   await entry.save();
-
   res.status(200).json({
     status: 'success',
     message: 'Email verified successfully'
@@ -212,3 +207,80 @@ export const logoutOkvi = (req, res, next) => {
     message: 'Logout successful'
   });
 };
+
+
+export const getUserDashboard = catchAsync(async (req, res) => {
+  const userId = req.user.id;
+  const pendingCount = await ClaimApplication.countDocuments({
+    userId,
+    status: { $in: ['submitted', 'gmdic_review', 'di_review', 'addl_director_review'] }
+  });
+  const approvedCount = await ClaimApplication.countDocuments({
+    userId,
+    status: { $in: ['gmdic_approved', 'di_approved', 'addl_director_approved', 'sanctioned'] }
+  });
+  const rejectedCount = await ClaimApplication.countDocuments({
+    userId,
+    status: { $in: ['gmdic_rejected', 'di_rejected', 'addl_director_rejected'] }
+  });
+  const totalCount = await ClaimApplication.countDocuments({ userId });
+  const recentClaims = await ClaimApplication.find({ userId })
+    .populate('festivalId', 'name')
+    .sort({ updatedAt: -1 })
+    .limit(10)
+    .select('status festivalId updatedAt finalSanctionAmount');
+  const sanctionAgg = await ClaimApplication.aggregate([
+    {
+      $match: {
+        userId: new mongoose.Types.ObjectId(userId),
+        status: { $in: ['gmdic_approved', 'di_approved', 'addl_director_approved', 'sanctioned'] }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalSanctioned: { $sum: { $ifNull: ['$finalSanctionAmount', 0] } }
+      }
+    }
+  ]);
+  const sanctionAmount = (sanctionAgg[0] && sanctionAgg[0].totalSanctioned) || 0;
+  const today = new Date();
+  const currentFestival = await Holiday.findOne({
+    startDate: { $lte: today },
+    endDate: { $gte: today }
+  }).select('-__v');
+  const authUser = await OkviAuth.findById(userId).select('-password -__v').lean();
+  const userDetails = await UserOKVI.findOne({ user: userId }).lean();
+  const holidays = await Holiday.find().sort({ startDate: 1 }).lean();
+  const holidaysWithStatus = holidays.map(holiday => {
+    const start = new Date(holiday.startDate);
+    const end = new Date(holiday.endDate);
+
+    let status = 0; 
+    if (today >= start && today <= end) status = 1;
+    else if (today > end) status = 2;
+
+    return { ...holiday, status };
+  });
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      statistics: {
+        pending: pendingCount,
+        approved: approvedCount,
+        rejected: rejectedCount,
+        total: totalCount
+      },
+      recentClaims,
+      userRole: ROLE_NAMES[req.user.user_role] || `role_${req.user.user_role}`,
+      currentFestival: currentFestival || null,
+      sanctionAmount,
+      user: {
+        auth: authUser,
+        details: userDetails || null
+      },
+      holidays: holidaysWithStatus
+    }
+  });
+});

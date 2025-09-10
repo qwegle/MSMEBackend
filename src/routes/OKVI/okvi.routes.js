@@ -10,10 +10,9 @@ import claimDocuments from './claimDocuments.routes.js';
 import sanctionCalculator from './sanctionCalculator.routes.js';
 const router = Router();
 
-// Auth routes (login, register, etc.)
 router.use('/auth', user);
 router.use('/holidays', holidays);
-router.use('/user', user); // Keep for backward compatibility
+router.use('/user', user);
 router.use('/opening-stock', openingStock);
 router.use('/closing-stock', closingStock);
 router.use('/head-types', headType);

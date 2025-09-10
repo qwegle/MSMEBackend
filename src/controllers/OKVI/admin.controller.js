@@ -5,7 +5,7 @@ import catchAsync from '../../utils/catchAsync.js';
 import AppError from '../../utils/AppError.js';
 import mongoose from 'mongoose';
 import { sendEmail } from '../../utils/emailService.js';
-
+import Holiday from '../../models/OKVI/holidayFestival.js';
 // Role constants
 const ROLES = {
   GMDIC: 0,
@@ -214,8 +214,6 @@ export const approveClaim = catchAsync(async (req, res, next) => {
         return next(new AppError('Claim is not in correct status for Addl. Director approval', 400));
       }
       newStatus = 'sanctioned';
-      
-      // Auto-calculate sanction amount if not provided
       let finalSanctionAmount = sanctionAmount;
       let calculationDetails = null;
       
@@ -418,63 +416,98 @@ export const rejectClaim = catchAsync(async (req, res, next) => {
   });
 });
 
-// Get dashboard statistics for admin
 export const getAdminDashboard = catchAsync(async (req, res) => {
   const userRole = req.user.user_role;
-  
-  // Get counts based on role
   let pendingCount = 0;
   let approvedCount = 0;
   let rejectedCount = 0;
   let totalCount = 0;
-
   switch (userRole) {
     case ROLES.GMDIC:
-      pendingCount = await ClaimApplication.countDocuments({ 
-        status: { $in: ['submitted', 'gmdic_review'] } 
+      pendingCount = await ClaimApplication.countDocuments({
+        status: { $in: ['submitted', 'gmdic_review'] }
       });
-      approvedCount = await ClaimApplication.countDocuments({ 
-        status: { $in: ['gmdic_approved', 'di_approved', 'addl_director_approved', 'sanctioned'] } 
+      approvedCount = await ClaimApplication.countDocuments({
+        status: { $in: ['gmdic_approved', 'di_approved', 'addl_director_approved', 'sanctioned'] }
       });
-      rejectedCount = await ClaimApplication.countDocuments({ 
-        status: 'gmdic_rejected' 
+      rejectedCount = await ClaimApplication.countDocuments({
+        status: 'gmdic_rejected'
       });
       break;
-      
+
     case ROLES.DI:
-      pendingCount = await ClaimApplication.countDocuments({ 
-        status: { $in: ['gmdic_approved', 'di_review'] } 
+      pendingCount = await ClaimApplication.countDocuments({
+        status: { $in: ['gmdic_approved', 'di_review'] }
       });
-      approvedCount = await ClaimApplication.countDocuments({ 
-        status: { $in: ['di_approved', 'addl_director_approved', 'sanctioned'] } 
+      approvedCount = await ClaimApplication.countDocuments({
+        status: { $in: ['di_approved', 'addl_director_approved', 'sanctioned'] }
       });
-      rejectedCount = await ClaimApplication.countDocuments({ 
-        status: 'di_rejected' 
+      rejectedCount = await ClaimApplication.countDocuments({
+        status: 'di_rejected'
       });
       break;
-      
+
     case ROLES.ADDL_DIRECTOR:
-      pendingCount = await ClaimApplication.countDocuments({ 
-        status: { $in: ['di_approved', 'addl_director_review'] } 
+      pendingCount = await ClaimApplication.countDocuments({
+        status: { $in: ['di_approved', 'addl_director_review'] }
       });
-      approvedCount = await ClaimApplication.countDocuments({ 
-        status: { $in: ['addl_director_approved', 'sanctioned'] } 
+      approvedCount = await ClaimApplication.countDocuments({
+        status: { $in: ['addl_director_approved', 'sanctioned'] }
       });
-      rejectedCount = await ClaimApplication.countDocuments({ 
-        status: 'addl_director_rejected' 
+      rejectedCount = await ClaimApplication.countDocuments({
+        status: 'addl_director_rejected'
       });
       break;
   }
 
   totalCount = await ClaimApplication.countDocuments({});
-
-  // Get recent activities
   const recentClaims = await ClaimApplication.find({})
-    .populate('userId', 'name')
+    .populate('userId', 'name email')
     .populate('festivalId', 'name')
     .sort({ updatedAt: -1 })
     .limit(10)
-    .select('status userId festivalId updatedAt');
+    .select('status userId festivalId updatedAt finalSanctionAmount');
+  const sanctionAgg = await ClaimApplication.aggregate([
+    {
+      $match: {
+        status: { $in: ['gmdic_approved', 'di_approved', 'addl_director_approved', 'sanctioned'] }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalSanctioned: { $sum: { $ifNull: ['$finalSanctionAmount', 0] } }
+      }
+    }
+  ]);
+  const sanctionAmount = (sanctionAgg[0] && sanctionAgg[0].totalSanctioned) || 0;
+  const today = new Date();
+  const currentFestival = await Holiday.findOne({
+    startDate: { $lte: today },
+    endDate: { $gte: today }
+  }).select('-__v');
+  let users = await OkviAuth.find().select('-password -__v').lean();
+  const userIds = users.map(u => u._id);
+  const details = await UserOKVI.find({ user: { $in: userIds } }).lean();
+  const detailsByUser = details.reduce((acc, d) => {
+    acc[String(d.user)] = d;
+    return acc;
+  }, {});
+  users = users.map(u => ({
+    ...u,
+    details: detailsByUser[String(u._id)] || null
+  }));
+  const holidays = await Holiday.find().sort({ startDate: 1 }).lean();
+  const holidaysWithStatus = holidays.map(holiday => {
+    const start = new Date(holiday.startDate);
+    const end = new Date(holiday.endDate);
+
+    let status = 0;
+    if (today >= start && today <= end) status = 1;
+    else if (today > end) status = 2;
+
+    return { ...holiday, status };
+  });
 
   res.status(200).json({
     status: 'success',
@@ -486,7 +519,11 @@ export const getAdminDashboard = catchAsync(async (req, res) => {
         total: totalCount
       },
       recentClaims,
-      userRole: ROLE_NAMES[userRole]
+      userRole: ROLE_NAMES[userRole] || `role_${userRole}`,
+      currentFestival: currentFestival || null,
+      sanctionAmount,
+      users,
+      holidays: holidaysWithStatus
     }
   });
 });
