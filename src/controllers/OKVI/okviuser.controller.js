@@ -170,15 +170,26 @@ export const verifyOtp = catchAsync(async (req, res, next) => {
 
 export const loginOkviUser = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
-  if (!email || !password)
+  if (!email || !password) {
     return next(new AppError('Email and password are required', 400));
+  }
 
-  const authUser = await OkviAuth.findOne({ email }).select('+password');
-  if (!authUser || !(await compare(password, authUser.password)))
+  const authUser = await OkviAuth.findOne({ email }).select('+password +sessionVersion');
+  if (!authUser || !(await compare(password, authUser.password))) {
     return next(new AppError('Invalid email or password', 401));
+  }
 
+  const updatedUser = await OkviAuth.findByIdAndUpdate(
+    authUser._id,
+    { $inc: { sessionVersion: 1 } },
+    { new: true }
+  );
   const token = jwt.sign(
-    { id: authUser._id, user_role: authUser.role },
+    {
+      id: updatedUser._id,
+      user_role: updatedUser.role,
+      sessionVersion: updatedUser.sessionVersion
+    },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRES_IN }
   );
@@ -188,6 +199,7 @@ export const loginOkviUser = catchAsync(async (req, res, next) => {
     token
   });
 });
+
 
 export const logoutOkvi = (req, res, next) => {
   const authHeader = req.headers.authorization;

@@ -40,25 +40,15 @@ const calculateSanctionAmount = async (claimId) => {
     if (!claim.formVId) {
       throw new AppError('Form V not found for sanction calculation', 404);
     }
-    
-    // Get the total rebate amount from Form V
     const totalRebateAmount = claim.formVId.totalRebateAmt;
-    
     if (!totalRebateAmount || totalRebateAmount <= 0) {
       throw new AppError('Invalid rebate amount in Form V', 400);
     }
-    
-    // Calculate sanction amount (95% of rebate amount minus processing fee)
     let calculatedAmount = (totalRebateAmount * SANCTION_CONFIG.SANCTION_CAP_PERCENTAGE) 
                           - SANCTION_CONFIG.PROCESSING_FEE_DEDUCTION;
-    
-    // Apply minimum and maximum limits
     calculatedAmount = Math.max(calculatedAmount, SANCTION_CONFIG.MIN_SANCTION_AMOUNT);
     calculatedAmount = Math.min(calculatedAmount, SANCTION_CONFIG.MAX_SANCTION_LIMIT);
-    
-    // Round to nearest rupee
     calculatedAmount = Math.round(calculatedAmount);
-    
     console.log(`Sanction calculation for claim ${claimId}:`, {
       totalRebateAmount,
       calculatedAmount,
@@ -79,7 +69,6 @@ const calculateSanctionAmount = async (claimId) => {
   }
 };
 
-// Get all pending claims for approval based on user role
 export const getPendingClaims = catchAsync(async (req, res, next) => {
   const userRole = req.user.user_role;
   const { page = 1, limit = 10, status } = req.query;
