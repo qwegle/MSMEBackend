@@ -173,17 +173,15 @@ export const loginOkviUser = catchAsync(async (req, res, next) => {
   if (!email || !password) {
     return next(new AppError('Email and password are required', 400));
   }
-
   const authUser = await OkviAuth.findOne({ email }).select('+password +sessionVersion');
   if (!authUser || !(await compare(password, authUser.password))) {
     return next(new AppError('Invalid email or password', 401));
   }
-
   const updatedUser = await OkviAuth.findByIdAndUpdate(
     authUser._id,
     { $inc: { sessionVersion: 1 } },
     { new: true }
-  );
+  ).lean();
   const token = jwt.sign(
     {
       id: updatedUser._id,
@@ -193,13 +191,13 @@ export const loginOkviUser = catchAsync(async (req, res, next) => {
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRES_IN }
   );
-
+  const { password: _, sessionVersion, __v, createdAt, updatedAt, ...safeUser } = updatedUser;
   res.status(200).json({
     status: 'success',
-    token
+    token,
+    user: safeUser
   });
 });
-
 
 export const logoutOkvi = (req, res, next) => {
   const authHeader = req.headers.authorization;
