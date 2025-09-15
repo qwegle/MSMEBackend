@@ -9,14 +9,14 @@
 // };
 
 // export const createClosingStock = catchAsync(async (req, res, next) => {
-//   const { festivalName, head, spellEndDate, subHeads } = req.body;
+//   const { festivalName, head, spellEndDate, subHeadDetails } = req.body;
 //   const userId = req.user.id;
 
 //   if (!isWithin7Days(spellEndDate)) {
 //     return next(new AppError('Closing stock entry window expired (7-day limit)', 400));
 //   }
 
-//   const calculatedSubHeads = subHeads.map(item => ({
+//   const calculatedsubHeadDetails = subHeadDetails.map(item => ({
 //     ...item,
 //     totalPrice: item.unitPrice * item.quantity
 //   }));
@@ -26,7 +26,7 @@
 //     head,
 //     spellEndDate,
 //     userId,
-//     subHeads: calculatedSubHeads
+//     subHeadDetails: calculatedsubHeadDetails
 //   });
 
 //   res.status(201).json({
@@ -55,9 +55,9 @@ const isWithin7Days = (spellEndDate) => {
 };
 export const createClosingStock = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
-  const { festivalId, head, subHeads } = req.body;
-  if (!festivalId || !head || !Array.isArray(subHeads) || subHeads.length === 0) {
-    return next(new AppError('festivalId, head, and non-empty subHeads array are required', 400));
+  const { festivalId, head, subHeadDetails } = req.body;
+  if (!festivalId || !head || !Array.isArray(subHeadDetails) || subHeadDetails.length === 0) {
+    return next(new AppError('festivalId, head, and non-empty subHeadDetails array are required', 400));
   }
   const holiday = await Holiday.findById(festivalId);
   if (!holiday) {
@@ -79,7 +79,7 @@ export const createClosingStock = catchAsync(async (req, res, next) => {
     festivalId,
     openingStockId: opening._id,
     head,
-    subHeads
+    subHeadDetails
   });
   res.status(201).json({ status: 'success', data: closing });
 });

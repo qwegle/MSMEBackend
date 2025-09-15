@@ -11,7 +11,7 @@ const okviAuthSchema = new mongoose.Schema({
   isEmailVerified: { type: Boolean, default: false, required: true },
   otp: { type: String, select: false },
   otpExpires: { type: Date, select: false },
-  sessionVersion: { type: Number, default: 0, select: false },
+  sessionVersion: { type: Number, default: 0 },
   passwordChangedAt: { type: Date, select: false }
 }, {
   timestamps: true

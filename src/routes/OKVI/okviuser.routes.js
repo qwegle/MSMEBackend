@@ -4,7 +4,7 @@ import { authenticateOkviToken } from '../../middlewares/okviAuth.middleware.js'
 
 const router = Router();
 router.post('/login', loginOkviUser);
-router.post('/registerUser', registerOkviUser);
+router.post('/registerAdmin', registerOkviUser);
 router.post('/sendotp', sendOtp);
 router.post('/verifyotp', verifyOtp);
 router.post('/registerUserDetails', registerOkviUserdetails);

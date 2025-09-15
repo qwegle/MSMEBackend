@@ -11,35 +11,33 @@ export async function authenticateOkviToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader?.split(' ')[1];
 
-    console.log("🔑 Auth Header:", authHeader);
-    console.log("🔑 Extracted Token:", token);
-    console.log("🔑 JWT_SECRET loaded:", JWT_SECRET ? "YES" : "NO");
+    console.log("Auth Header:", authHeader);
+    console.log("Extracted Token:", token);
+    console.log("JWT_SECRET loaded:", JWT_SECRET ? "YES" : "NO");
 
     if (!token) {
       return next(new AppError('Token required', 401));
     }
 
     if (isBlacklisted(token)) {
-      console.log("🚫 Token is blacklisted");
+      console.log("Token is blacklisted");
       return next(new AppError('Token is invalid (logged out)', 401));
     }
 
     verify(token, JWT_SECRET, async (err, decoded) => {
       if (err) {
-        console.error("❌ JWT Verify Error:", err.message);
+        console.error("JWT Verify Error:", err.message);
         return next(new AppError(`Invalid or expired token: ${err.message}`, 401));
-      }
-
-      console.log("✅ Decoded JWT Payload:", decoded);
-
+      }                                                                                                                                                                                                                                                                                                                                                          
+      console.log("Decoded JWT Payload:", decoded);
       const user = await OkviAuth.findById(decoded.id).select('+sessionVersion +passwordChangedAt');
       if (!user) {
-        console.warn("⚠️ No user found for token id:", decoded.id);
+        console.warn("No user found for token id:", decoded.id);
         return next(new AppError('User no longer exists', 401));
       }
 
       if (decoded.sessionVersion !== user.sessionVersion) {
-        console.warn("⚠️ Session mismatch:", {
+        console.warn("Session mismatch:", {
           decodedSession: decoded.sessionVersion,
           userSession: user.sessionVersion
         });

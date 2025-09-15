@@ -18,7 +18,7 @@ export const registerOkviUser = catchAsync(async (req, res, next) => {
   if (!name || !email || !password) {
     return next(new AppError('Name, email, and password are required', 400));
   }
-  if (role === 0 || role === 1) {
+  if (role === 0 || role === 1 || role === 2) {
     if (!dev_pass || dev_pass !== process.env.DEV_PASS) {
       return next(new AppError('Unauthorized to register as admin', 403));
     }
@@ -259,20 +259,33 @@ export const getUserDashboard = catchAsync(async (req, res) => {
     startDate: { $lte: today },
     endDate: { $gte: today }
   }).select('-__v');
+    const formatDate = date =>
+  new Date(date).toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  });
   const authUser = await OkviAuth.findById(userId).select('-password -__v').lean();
-  const userDetails = await UserOKVI.findOne({ user: userId }).lean();
   const holidays = await Holiday.find().sort({ startDate: 1 }).lean();
   const holidaysWithStatus = holidays.map(holiday => {
     const start = new Date(holiday.startDate);
     const end = new Date(holiday.endDate);
-
     let status = 0; 
     if (today >= start && today <= end) status = 1;
     else if (today > end) status = 2;
 
-    return { ...holiday, status };
+    return {
+      _id: holiday._id,
+      name: holiday.name,
+      year: holiday.year,
+      status,
+      startDate: formatDate(holiday.startDate),
+      endDate: formatDate(holiday.endDate)
+    };
   });
-
+  const nextUpcomingHoliday = holidaysWithStatus
+  .filter(h => h.status === 0)
+  .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))[0];
   res.status(200).json({
     status: 'success',
     data: {
@@ -283,12 +296,22 @@ export const getUserDashboard = catchAsync(async (req, res) => {
         total: totalCount
       },
       recentClaims,
-      userRole: ROLE_NAMES[req.user.user_role] || `role_${req.user.user_role}`,
+      userRole: req.user.user_role,
       currentFestival: currentFestival || null,
       sanctionAmount,
+      upcomingHoliday: nextUpcomingHoliday
+        ? {
+            _id: nextUpcomingHoliday._id,
+            name: nextUpcomingHoliday.name,
+            startDate: formatDate(nextUpcomingHoliday.startDate),
+            endDate: formatDate(nextUpcomingHoliday.endDate)
+          }
+        : null,
       user: {
-        auth: authUser,
-        details: userDetails || null
+        id: authUser._id,
+        name: authUser.name,
+        email: authUser.email,
+        role: authUser.role,
       },
       holidays: holidaysWithStatus
     }

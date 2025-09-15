@@ -1,6 +1,5 @@
 import ClaimApplication from '../../models/OKVI/claimApplication.js';
 import OkviAuth from '../../models/OKVI/okviauth.js';
-import FormV from '../../models/OKVI/formV.js';
 import catchAsync from '../../utils/catchAsync.js';
 import AppError from '../../utils/AppError.js';
 import mongoose from 'mongoose';
@@ -423,7 +422,6 @@ export const getAdminDashboard = catchAsync(async (req, res) => {
         status: 'gmdic_rejected'
       });
       break;
-
     case ROLES.DI:
       pendingCount = await ClaimApplication.countDocuments({
         status: { $in: ['gmdic_approved', 'di_review'] }
@@ -435,7 +433,6 @@ export const getAdminDashboard = catchAsync(async (req, res) => {
         status: 'di_rejected'
       });
       break;
-
     case ROLES.ADDL_DIRECTOR:
       pendingCount = await ClaimApplication.countDocuments({
         status: { $in: ['di_approved', 'addl_director_review'] }
@@ -448,7 +445,6 @@ export const getAdminDashboard = catchAsync(async (req, res) => {
       });
       break;
   }
-
   totalCount = await ClaimApplication.countDocuments({});
   const recentClaims = await ClaimApplication.find({})
     .populate('userId', 'name email')
@@ -471,21 +467,40 @@ export const getAdminDashboard = catchAsync(async (req, res) => {
   ]);
   const sanctionAmount = (sanctionAgg[0] && sanctionAgg[0].totalSanctioned) || 0;
   const today = new Date();
-  const currentFestival = await Holiday.findOne({
+  const formatDate = date =>
+    new Date(date).toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  const currentFestivalDoc = await Holiday.findOne({
     startDate: { $lte: today },
     endDate: { $gte: today }
   }).select('-__v');
-  let users = await OkviAuth.find().select('-password -__v').lean();
-  const userIds = users.map(u => u._id);
-  const details = await UserOKVI.find({ user: { $in: userIds } }).lean();
-  const detailsByUser = details.reduce((acc, d) => {
-    acc[String(d.user)] = d;
-    return acc;
-  }, {});
-  users = users.map(u => ({
-    ...u,
-    details: detailsByUser[String(u._id)] || null
-  }));
+  const currentFestival = currentFestivalDoc
+    ? {
+        _id: currentFestivalDoc._id,
+        name: currentFestivalDoc.name,
+        year: currentFestivalDoc.year,
+        startDate: formatDate(currentFestivalDoc.startDate),
+        endDate: formatDate(currentFestivalDoc.endDate)
+      }
+    : null;
+  const upcomingHolidayDoc = await Holiday.findOne({
+    startDate: { $gt: today }
+  })
+    .sort({ startDate: 1 })
+    .select('-__v');
+  const upcomingHoliday = upcomingHolidayDoc
+    ? {
+        _id: upcomingHolidayDoc._id,
+        name: upcomingHolidayDoc.name,
+        year: upcomingHolidayDoc.year,
+        startDate: formatDate(upcomingHolidayDoc.startDate),
+        endDate: formatDate(upcomingHolidayDoc.endDate)
+      }
+    : null;
+  let users = await OkviAuth.find().select('_id name email user_role').lean();
   const holidays = await Holiday.find().sort({ startDate: 1 }).lean();
   const holidaysWithStatus = holidays.map(holiday => {
     const start = new Date(holiday.startDate);
@@ -495,7 +510,14 @@ export const getAdminDashboard = catchAsync(async (req, res) => {
     if (today >= start && today <= end) status = 1;
     else if (today > end) status = 2;
 
-    return { ...holiday, status };
+    return {
+      _id: holiday._id,
+      name: holiday.name,
+      year: holiday.year,
+      status,
+      startDate: formatDate(holiday.startDate),
+      endDate: formatDate(holiday.endDate)
+    };
   });
 
   res.status(200).json({
@@ -508,11 +530,15 @@ export const getAdminDashboard = catchAsync(async (req, res) => {
         total: totalCount
       },
       recentClaims,
-      userRole: ROLE_NAMES[userRole] || `role_${userRole}`,
-      currentFestival: currentFestival || null,
+      userRole: req.user.user_role,
+      currentFestival,
+      upcomingHoliday, // ✅ added here
       sanctionAmount,
       users,
       holidays: holidaysWithStatus
     }
   });
 });
+
+
+

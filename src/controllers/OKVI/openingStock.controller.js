@@ -128,6 +128,17 @@ export const createOpeningStock = catchAsync(async (req, res, next) => {
   }
   const holiday = await Holiday.findById(festivalId);
   if (!holiday) return next(new AppError('Invalid festivalId', 404));
+  const today = new Date();
+  const start = new Date(holiday.startDate);
+  const end = new Date(holiday.endDate);
+  let status = 0;
+  if (today >= start && today <= end) status = 1;
+  else if (today > end) status = 2;
+  if (status !== 1) {
+    console.log(status);
+    return next(new AppError('Opening stock can only be created during an active festival', 400));
+  }
+  
   const exists = await OpeningStock.findOne({ user: userId, festivalId });
   if (exists) {
     return next(new AppError('Opening stock already submitted for this festival', 400));

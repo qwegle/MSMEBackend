@@ -12,7 +12,7 @@ const router = Router();
 
 router.use('/auth', user);
 router.use('/holidays', holidays);
-router.use('/user', user);
+// router.use('/user', user);
 router.use('/opening-stock', openingStock);
 router.use('/closing-stock', closingStock);
 router.use('/head-types', headType);
