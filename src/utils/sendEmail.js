@@ -9,6 +9,7 @@ const sendEmail = async ({ to, subject, html }) => {
       pass: process.env.EMAIL_PASS,
     },
   });
+  console.log(transporter);
 
   await transporter.sendMail({
     from: process.env.EMAIL_USER,
