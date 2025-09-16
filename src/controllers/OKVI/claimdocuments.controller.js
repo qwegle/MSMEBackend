@@ -46,18 +46,16 @@ export const createForm1 = catchAsync(async (req, res, next) => {
       )
     );
   }
-
   const requiredKeys = [
-    'headType',
-    'subCenterName',
-    'subCenterAddress',
-    'frombillNo',
-    'billDate',
-    'quantity',
-    'rate'
+  'headType',
+  'subCenterName',
+  'subCenterAddress',
+  'frombillNo',
+  'tobillNo',
+  'billDate',
+  'retailSalesAmount',
+  'rebatePaidAmount'
   ];
-
-  // Calculate amounts for each sale
   const processedSales = [];
   for (const sale of retailSales) {
     if (!requiredKeys.every((k) => sale[k] != null)) {
@@ -71,12 +69,10 @@ export const createForm1 = catchAsync(async (req, res, next) => {
     if (isNaN(new Date(sale.billDate).getTime())) {
       return next(new AppError('Each sale must have a valid billDate', 400));
     }
-
     const qty = Number(sale.quantity);
     const rate = Number(sale.rate);
     const amount = qty * rate;
     const rebate = Math.round(amount * 0.10);
-
     processedSales.push({
       headType: sale.headType,
       subCenterName: sale.subCenterName,
@@ -122,89 +118,106 @@ export const createForm1 = catchAsync(async (req, res, next) => {
 export const createFormV = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
   const { festivalName } = req.body;
-  if (!festivalName) {
-    return next(new AppError('festivalName is required', 400));
-  }
+  if (!festivalName) return next(new AppError('festivalName is required', 400));
+
   const festival = await getFestival(festivalName);
   const { openingStock } = await getStocks(userId, festival._id);
+  if (!openingStock) return next(new AppError('Opening stock not found', 404));
+
   const form1 = await Form1.findOne({ openingStockId: openingStock._id });
   if (!form1) return next(new AppError('Form1 not found', 404));
-  const totalSaleAmt = form1.retailSales.reduce(
-    (sum, sale) => sum + (sale.retailSalesAmount || 0),
-    0
-  );
-  const totalRebateAmt = form1.retailSales.reduce(
-    (sum, sale) => sum + (sale.rebatePaidAmount || 0),
-    0
-  );
+
+  const retailSales = Array.isArray(form1.retailSales) ? form1.retailSales : [];
+
+  if (retailSales.length === 0) {
+    return next(new AppError('No retail sales found on Form1 to build Form V', 400));
+  }
+
+  // Prevent duplicate creation
+  const existing = await FormV.findOne({ formIId: form1._id });
+  if (existing) {
+    return res.status(200).json({ status: 'success', data: existing, message: 'FormV already exists' });
+  }
+
+  const totalSaleAmt = retailSales.reduce((sum, sale) => sum + Number(sale.retailSalesAmount || 0), 0);
+  const totalRebateAmt = retailSales.reduce((sum, sale) => sum + Number(sale.rebatePaidAmount || 0), 0);
+
   const formV = await FormV.create({
     formIId: form1._id,
     totalSaleAmt,
     totalRebateAmt,
+    createdBy: userId,
     createdAt: new Date()
   });
+
+  const subheads = retailSales.map(sale => ({
+    headType: sale.headType,
+    subCenterName: sale.subCenterName,
+    subCenterAddress: sale.subCenterAddress || null,
+    frombillNo: sale.frombillNo,
+    tobillNo: sale.tobillNo || null,
+    billDate: sale.billDate,
+    retailSalesAmount: sale.retailSalesAmount,
+    rebatePaidAmount: sale.rebatePaidAmount,
+    remarks: sale.remarks || null
+  }));
+
   res.status(201).json({
     status: 'success',
     data: {
       formV,
-      subheads: form1.retailSales.map(sale => ({
-        headType: sale.headType,
-        subCenterName: sale.subCenterName,
-        subCenterAddress: sale.subCenterAddress,
-        frombillNo: sale.frombillNo,
-        billDate: sale.billDate,
-        retailSalesAmount: sale.retailSalesAmount,
-        rebatePaidAmount: sale.rebatePaidAmount,
-        remarks: sale.remarks || null
-      }))
+      subheads
     }
   });
 });
-
-
 export const createFormVI = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
   const { festivalName } = req.body;
-  if (!festivalName) {
-    return next(new AppError('festivalName is required', 400));
-  }
+  if (!festivalName) return next(new AppError('festivalName is required', 400));
   const festival = await getFestival(festivalName);
   const { openingStock } = await getStocks(userId, festival._id);
+  if (!openingStock) return next(new AppError('Opening stock not found', 404));
   const form1 = await Form1.findOne({ openingStockId: openingStock._id });
-  if (!form1) {
-    return next(new AppError('Form I (retail sales) not found', 404));
+  if (!form1) return next(new AppError('Form I (retail sales) not found', 404));
+  const retailSales = Array.isArray(form1.retailSales) ? form1.retailSales : [];
+  if (retailSales.length === 0) {
+    return next(new AppError('No retail sales found to build Form VI', 400));
   }
-  const byCenter = form1.retailSales.reduce((acc, sale) => {
-    const key = sale.subCenterName;
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(sale);
+  const existing = await FormVI.findOne({ formIId: form1._id });
+  if (existing) {
+    return res.status(200).json({ status: 'success', data: existing, message: 'FormVI already exists' });
+  }
+  const byCenter = retailSales.reduce((acc, sale) => {
+    const key = sale.subCenterName || 'UNKNOWN';
+    if (!acc[key]) acc[key] = { entries: [], subCenterAddress: sale.subCenterAddress || null };
+    acc[key].entries.push(sale);
     return acc;
   }, {});
-  const centerBreakup = Object.entries(byCenter).map(([subCenterName, entries]) => {
-    const totalSaleAmt = entries.reduce(
-      (sum, e) => sum + (e.retailSalesAmount || 0),
-      0
-    );
-    const totalRebateAmt = entries.reduce(
-      (sum, e) => sum + (e.rebatePaidAmount || 0),
-      0
-    );
-    const retailSales = entries.map(e => ({
+  const centerBreakup = Object.entries(byCenter).map(([subCenterName, { entries, subCenterAddress }]) => {
+    const totalSaleAmt = entries.reduce((sum, e) => sum + Number(e.retailSalesAmount || 0), 0);
+    const totalRebateAmt = entries.reduce((sum, e) => sum + Number(e.rebatePaidAmount || 0), 0);
+    const retailSalesArr = entries.map(e => ({
       headType: e.headType,
       frombillNo: e.frombillNo,
+      tobillNo: e.tobillNo || null,
       billDate: e.billDate,
       retailSalesAmount: e.retailSalesAmount,
       rebatePaidAmount: e.rebatePaidAmount,
       remarks: e.remarks || null
     }));
-    return { subCenterName, totalSaleAmt, totalRebateAmt, retailSales };
+    return {
+      subCenterName,
+      subCenterAddress,
+      totalSaleAmt,
+      totalRebateAmt,
+      retailSales: retailSalesArr
+    };
   });
-  if (centerBreakup.length === 0) {
-    return next(new AppError('No retail sales found to build Form VI', 400));
-  }
   const formVI = await FormVI.create({
     formIId: form1._id,
-    centerBreakup
+    centerBreakup,
+    createdBy: userId,
+    createdAt: new Date()
   });
   res.status(201).json({ status: 'success', data: formVI });
 });

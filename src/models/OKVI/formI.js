@@ -1,14 +1,15 @@
 import mongoose from 'mongoose';
 
 const retailSaleDetailsSchema = new mongoose.Schema({
-  headType:         { type: String, required: true },   
-  subCenterName:    { type: String, required: true },
-  subCenterAddress: { type: String, required: true },
-  frombillNo:       { type: String, required: true },
-  billDate:         { type: Date,   required: true },
-  retailSalesAmount:{ type: Number, required: true },
-  rebatePaidAmount: { type: Number, required: true },
-  remarks:          { type: String },
+  headType:           { type: String, required: true },   
+  subCenterName:      { type: String, required: true },
+  subCenterAddress:   { type: String, required: true },
+  frombillNo:         { type: String, required: true },
+  tobillNo:            { type: String, required: true },
+  billDate:           { type: Date,   required: true },
+  retailSalesAmount:  { type: Number, required: true },
+  rebatePaidAmount:   { type: Number, required: true },
+  remarks:            { type: String },
 }, { _id: false });
 
 const form1Schema = new mongoose.Schema({
