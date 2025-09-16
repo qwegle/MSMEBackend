@@ -37,6 +37,7 @@ const getFestival = async(festivalName) => {
 export const createForm1 = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
   const { festivalName, retailSales } = req.body;
+
   if (!festivalName || !Array.isArray(retailSales) || retailSales.length === 0) {
     return next(
       new AppError(
@@ -45,17 +46,19 @@ export const createForm1 = catchAsync(async (req, res, next) => {
       )
     );
   }
+
   const requiredKeys = [
     'headType',
     'subCenterName',
     'subCenterAddress',
-    'billNo',
+    'frombillNo',
     'billDate',
-    'item',
     'quantity',
-    'rate',
-    'totalAmount',
+    'rate'
   ];
+
+  // Calculate amounts for each sale
+  const processedSales = [];
   for (const sale of retailSales) {
     if (!requiredKeys.every((k) => sale[k] != null)) {
       return next(
@@ -68,26 +71,53 @@ export const createForm1 = catchAsync(async (req, res, next) => {
     if (isNaN(new Date(sale.billDate).getTime())) {
       return next(new AppError('Each sale must have a valid billDate', 400));
     }
+
+    const qty = Number(sale.quantity);
+    const rate = Number(sale.rate);
+    const amount = qty * rate;
+    const rebate = Math.round(amount * 0.10);
+
+    processedSales.push({
+      headType: sale.headType,
+      subCenterName: sale.subCenterName,
+      subCenterAddress: sale.subCenterAddress,
+      frombillNo: sale.frombillNo,
+      billDate: new Date(sale.billDate),
+      retailSalesAmount: amount,
+      rebatePaidAmount: rebate,
+      remarks: sale.remarks || ''
+    });
   }
+
   const festival = await getFestival(festivalName);
   const { openingStock, closingStock } = await getStocks(userId, festival._id);
-  const totalSaleAmt = retailSales.reduce((sum, r) => sum + r.totalAmount, 0);
-  const totalRebateAmt = Math.round(totalSaleAmt * 0.10);
+
+  const totalSaleAmt = processedSales.reduce(
+    (sum, r) => sum + r.retailSalesAmount,
+    0
+  );
+  const totalRebateAmt = processedSales.reduce(
+    (sum, r) => sum + r.rebatePaidAmount,
+    0
+  );
+
   const form1 = await Form1.create({
-    openingStockId:     openingStock._id,
-    closingStockId:     closingStock._id,
-    institutionName:    req.user.name,
+    openingStockId: openingStock._id,
+    closingStockId: closingStock._id,
+    institutionName: req.user.name,
     institutionAddress: req.user.address || '',
-    festival:            festivalName,
-    month:               new Date().toLocaleString('default', { month: 'long' }),
-    fromDate:             openingStock.createdAt,
-    toDate:               closingStock.createdAt,
-    retailSales,
+    festival: festivalName,
+    month: new Date().toLocaleString('default', { month: 'long' }),
+    fromDate: openingStock.createdAt,
+    toDate: closingStock.createdAt,
+    retailSales: processedSales,
     totalSaleAmt,
     totalRebateAmt
   });
+
   res.status(201).json({ status: 'success', data: form1 });
 });
+
 
 export const createFormV = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
@@ -100,11 +130,11 @@ export const createFormV = catchAsync(async (req, res, next) => {
   const form1 = await Form1.findOne({ openingStockId: openingStock._id });
   if (!form1) return next(new AppError('Form1 not found', 404));
   const totalSaleAmt = form1.retailSales.reduce(
-    (sum, sale) => sum + sale.totalAmount,
+    (sum, sale) => sum + (sale.retailSalesAmount || 0),
     0
   );
   const totalRebateAmt = form1.retailSales.reduce(
-    (sum, sale) => sum + (sale.rebateAmount || 0),
+    (sum, sale) => sum + (sale.rebatePaidAmount || 0),
     0
   );
   const formV = await FormV.create({
@@ -123,16 +153,14 @@ export const createFormV = catchAsync(async (req, res, next) => {
         subCenterAddress: sale.subCenterAddress,
         frombillNo: sale.frombillNo,
         billDate: sale.billDate,
-        item: sale.item,
-        quantity: sale.quantity,
-        rate: sale.rate,
-        totalAmount: sale.totalAmount,
-        rebateAmount: sale.rebateAmount || 0,
+        retailSalesAmount: sale.retailSalesAmount,
+        rebatePaidAmount: sale.rebatePaidAmount,
         remarks: sale.remarks || null
       }))
     }
   });
 });
+
 
 export const createFormVI = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
@@ -148,22 +176,25 @@ export const createFormVI = catchAsync(async (req, res, next) => {
   }
   const byCenter = form1.retailSales.reduce((acc, sale) => {
     const key = sale.subCenterName;
-    acc[key] = acc[key] || [];
+    if (!acc[key]) acc[key] = [];
     acc[key].push(sale);
     return acc;
   }, {});
   const centerBreakup = Object.entries(byCenter).map(([subCenterName, entries]) => {
-    const totalSaleAmt   = entries.reduce((sum, e) => sum + e.totalAmount, 0);
-    const totalRebateAmt = entries.reduce((sum, e) => sum + (e.rebateAmount || 0), 0);
+    const totalSaleAmt = entries.reduce(
+      (sum, e) => sum + (e.retailSalesAmount || 0),
+      0
+    );
+    const totalRebateAmt = entries.reduce(
+      (sum, e) => sum + (e.rebatePaidAmount || 0),
+      0
+    );
     const retailSales = entries.map(e => ({
       headType: e.headType,
       frombillNo: e.frombillNo,
       billDate: e.billDate,
-      item: e.item,
-      quantity: e.quantity,
-      rate: e.rate,
-      totalAmount: e.totalAmount,
-      rebateAmount: e.rebateAmount || 0,
+      retailSalesAmount: e.retailSalesAmount,
+      rebatePaidAmount: e.rebatePaidAmount,
       remarks: e.remarks || null
     }));
     return { subCenterName, totalSaleAmt, totalRebateAmt, retailSales };
@@ -173,7 +204,7 @@ export const createFormVI = catchAsync(async (req, res, next) => {
   }
   const formVI = await FormVI.create({
     formIId: form1._id,
-    centerBreakup,
+    centerBreakup
   });
   res.status(201).json({ status: 'success', data: formVI });
 });

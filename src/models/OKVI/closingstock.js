@@ -13,7 +13,6 @@ const closingStockSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'OkviAuth', required: true },
   openingStockId: {type: mongoose.Schema.Types.ObjectId, ref: 'OpeningStock', required: true },
   head: { type: String, required: true },
-  // spellEndDate: { type: Date, required: true },
   subHeads: [subHeadSchema]
 }, {
   timestamps: true 

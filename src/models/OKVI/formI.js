@@ -5,12 +5,9 @@ const retailSaleDetailsSchema = new mongoose.Schema({
   subCenterName:    { type: String, required: true },
   subCenterAddress: { type: String, required: true },
   frombillNo:       { type: String, required: true },
-
   billDate:         { type: Date,   required: true },
-  item:             { type: String, required: true },  
-  quantity:         { type: Number, required: true },
-  rate:             { type: Number, required: true },
-  totalAmount:      { type: Number, required: true },
+  retailSalesAmount:{ type: Number, required: true },
+  rebatePaidAmount: { type: Number, required: true },
   remarks:          { type: String },
 }, { _id: false });
 

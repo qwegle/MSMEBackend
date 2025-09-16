@@ -26,7 +26,7 @@ const approvalHistorySchema = new Schema({
   approverRole: {
     type: Number,
     required: true,
-    enum: [0, 1, 2] // 0: GMDIC, 1: DI, 2: Addl. Director
+    enum: [0, 1, 2] 
   },
   action: {
     type: String,
@@ -66,7 +66,6 @@ const claimApplicationSchema = new Schema({
   closingStockId: {
     type: Schema.Types.ObjectId,
     ref: 'ClosingStock'
-    // Not required initially - will be added when closing stock is created
   },
   formIId: {
     type: Schema.Types.ObjectId,
@@ -105,7 +104,7 @@ const claimApplicationSchema = new Schema({
     min: 0
   },
   sanctionOrderFile: {
-    type: String // File path for sanction order uploaded by user
+    type: String
   },
   sanctionOrderUploadedAt: {
     type: Date
@@ -127,14 +126,9 @@ const claimApplicationSchema = new Schema({
     trim: true
   }
 }, { timestamps: true });
-
-// Indexes for efficient queries
 claimApplicationSchema.index({ userId: 1, festivalId: 1 });
 claimApplicationSchema.index({ status: 1 });
 claimApplicationSchema.index({ currentApprover: 1 });
 claimApplicationSchema.index({ submittedAt: 1 });
-
-// Static methods
 claimApplicationSchema.statics.CLAIM_STATUS = CLAIM_STATUS;
-
 export default model('ClaimApplication', claimApplicationSchema);
