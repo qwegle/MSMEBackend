@@ -221,24 +221,30 @@ export const logoutOkvi = (req, res, next) => {
 
 export const getUserDashboard = catchAsync(async (req, res) => {
   const userId = req.user.id;
+
   const pendingCount = await ClaimApplication.countDocuments({
     userId,
     status: { $in: ['submitted', 'gmdic_review', 'di_review', 'addl_director_review'] }
   });
+
   const approvedCount = await ClaimApplication.countDocuments({
     userId,
     status: { $in: ['gmdic_approved', 'di_approved', 'addl_director_approved', 'sanctioned'] }
   });
+
   const rejectedCount = await ClaimApplication.countDocuments({
     userId,
     status: { $in: ['gmdic_rejected', 'di_rejected', 'addl_director_rejected'] }
   });
+
   const totalCount = await ClaimApplication.countDocuments({ userId });
+
   const recentClaims = await ClaimApplication.find({ userId })
     .populate('festivalId', 'name')
     .sort({ updatedAt: -1 })
     .limit(10)
     .select('status festivalId updatedAt finalSanctionAmount');
+
   const sanctionAgg = await ClaimApplication.aggregate([
     {
       $match: {
@@ -254,19 +260,20 @@ export const getUserDashboard = catchAsync(async (req, res) => {
     }
   ]);
   const sanctionAmount = (sanctionAgg[0] && sanctionAgg[0].totalSanctioned) || 0;
+
   const today = new Date();
-  const currentFestival = await Holiday.findOne({
-    startDate: { $lte: today },
-    endDate: { $gte: today }
-  }).select('-__v');
-    const formatDate = date =>
-  new Date(date).toLocaleDateString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric'
-  });
+
+  const formatDate = date =>
+    new Date(date).toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+
   const authUser = await OkviAuth.findById(userId).select('-password -__v').lean();
+
   const holidays = await Holiday.find().sort({ startDate: 1 }).lean();
+
   const holidaysWithStatus = holidays.map(holiday => {
     const start = new Date(holiday.startDate);
     const end = new Date(holiday.endDate);
@@ -283,9 +290,15 @@ export const getUserDashboard = catchAsync(async (req, res) => {
       endDate: formatDate(holiday.endDate)
     };
   });
+
+  // Identify current festival (status=1)
+  const currentFestival = holidaysWithStatus.find(h => h.status === 1) || null;
+
+  // Identify next upcoming holiday (status=0 and nearest startDate)
   const nextUpcomingHoliday = holidaysWithStatus
-  .filter(h => h.status === 0)
-  .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))[0];
+    .filter(h => h.status === 0)
+    .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))[0] || null;
+
   res.status(200).json({
     status: 'success',
     data: {
@@ -297,16 +310,9 @@ export const getUserDashboard = catchAsync(async (req, res) => {
       },
       recentClaims,
       userRole: req.user.user_role,
-      currentFestival: currentFestival || null,
+      currentFestival,       // now includes status field
       sanctionAmount,
-      upcomingHoliday: nextUpcomingHoliday
-        ? {
-            _id: nextUpcomingHoliday._id,
-            name: nextUpcomingHoliday.name,
-            startDate: formatDate(nextUpcomingHoliday.startDate),
-            endDate: formatDate(nextUpcomingHoliday.endDate)
-          }
-        : null,
+      upcomingHoliday: nextUpcomingHoliday, // now includes status field
       user: {
         id: authUser._id,
         name: authUser.name,

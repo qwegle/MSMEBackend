@@ -409,7 +409,6 @@ export const getAdminDashboard = catchAsync(async (req, res) => {
   let pendingCount = 0;
   let approvedCount = 0;
   let rejectedCount = 0;
-  let totalCount = 0;
   switch (userRole) {
     case ROLES.GMDIC:
       pendingCount = await ClaimApplication.countDocuments({
@@ -445,13 +444,16 @@ export const getAdminDashboard = catchAsync(async (req, res) => {
       });
       break;
   }
-  totalCount = await ClaimApplication.countDocuments({});
+
+  const totalCount = await ClaimApplication.countDocuments({});
+
   const recentClaims = await ClaimApplication.find({})
     .populate('userId', 'name email')
     .populate('festivalId', 'name')
     .sort({ updatedAt: -1 })
     .limit(10)
     .select('status userId festivalId updatedAt finalSanctionAmount');
+
   const sanctionAgg = await ClaimApplication.aggregate([
     {
       $match: {
@@ -466,6 +468,7 @@ export const getAdminDashboard = catchAsync(async (req, res) => {
     }
   ]);
   const sanctionAmount = (sanctionAgg[0] && sanctionAgg[0].totalSanctioned) || 0;
+
   const today = new Date();
   const formatDate = date =>
     new Date(date).toLocaleDateString('en-IN', {
@@ -473,34 +476,8 @@ export const getAdminDashboard = catchAsync(async (req, res) => {
       month: 'short',
       year: 'numeric'
     });
-  const currentFestivalDoc = await Holiday.findOne({
-    startDate: { $lte: today },
-    endDate: { $gte: today }
-  }).select('-__v');
-  const currentFestival = currentFestivalDoc
-    ? {
-        _id: currentFestivalDoc._id,
-        name: currentFestivalDoc.name,
-        year: currentFestivalDoc.year,
-        startDate: formatDate(currentFestivalDoc.startDate),
-        endDate: formatDate(currentFestivalDoc.endDate)
-      }
-    : null;
-  const upcomingHolidayDoc = await Holiday.findOne({
-    startDate: { $gt: today }
-  })
-    .sort({ startDate: 1 })
-    .select('-__v');
-  const upcomingHoliday = upcomingHolidayDoc
-    ? {
-        _id: upcomingHolidayDoc._id,
-        name: upcomingHolidayDoc.name,
-        year: upcomingHolidayDoc.year,
-        startDate: formatDate(upcomingHolidayDoc.startDate),
-        endDate: formatDate(upcomingHolidayDoc.endDate)
-      }
-    : null;
-  let users = await OkviAuth.find().select('_id name email user_role').lean();
+
+  // Build holidays with status
   const holidays = await Holiday.find().sort({ startDate: 1 }).lean();
   const holidaysWithStatus = holidays.map(holiday => {
     const start = new Date(holiday.startDate);
@@ -520,6 +497,14 @@ export const getAdminDashboard = catchAsync(async (req, res) => {
     };
   });
 
+  // Derive current and upcoming from holidaysWithStatus
+  const currentFestival = holidaysWithStatus.find(h => h.status === 1) || null;
+  const upcomingHoliday = holidaysWithStatus
+    .filter(h => h.status === 0)
+    .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))[0] || null;
+
+  const users = await OkviAuth.find().select('_id name email user_role').lean();
+
   res.status(200).json({
     status: 'success',
     data: {
@@ -530,15 +515,11 @@ export const getAdminDashboard = catchAsync(async (req, res) => {
         total: totalCount
       },
       recentClaims,
-      userRole: req.user.user_role,
-      currentFestival,
-      upcomingHoliday, // ✅ added here
       sanctionAmount,
+      currentFestival,      // now includes status
+      upcomingHoliday,      // now includes status
       users,
       holidays: holidaysWithStatus
     }
   });
 });
-
-
-
