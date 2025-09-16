@@ -4,7 +4,8 @@ const retailSaleDetailsSchema = new mongoose.Schema({
   headType:         { type: String, required: true },   
   subCenterName:    { type: String, required: true },
   subCenterAddress: { type: String, required: true },
-  billNo:           { type: String, required: true },
+  frombillNo:       { type: String, required: true },
+
   billDate:         { type: Date,   required: true },
   item:             { type: String, required: true },  
   quantity:         { type: Number, required: true },
@@ -22,12 +23,14 @@ const form1Schema = new mongoose.Schema({
   month:            { type: String, required: true },
   fromDate:         { type: Date,   required: true },
   toDate:           { type: Date,   required: true },
-
   retailSales: {
     type: [retailSaleDetailsSchema],
     validate: v => Array.isArray(v) && v.length > 0,
   },
-  createdAt: { type: Date, default: Date.now },
+  totalSaleAmt:     { type: Number, required: true },
+  totalRebateAmt:   { type: Number, required: true },
+  createdAt:        { type: Date, default: Date.now },
 });
+
 const Form1 = mongoose.model('Form1', form1Schema);
 export default Form1;
