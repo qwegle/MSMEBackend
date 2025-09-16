@@ -1,22 +1,28 @@
 import { createTransport } from 'nodemailer';
 
 const sendEmail = async ({ to, subject, html }) => {
-  console.log(process.env.EMAIL_PASS);
   const transporter = createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // Use SSL
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
   });
-  console.log(transporter);
 
-  await transporter.sendMail({
-    from: process.env.EMAIL_USER,
-    to,
-    subject,
-    html,
-  });
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to,
+      subject,
+      html,
+    });
+    console.log('Email sent successfully');
+  } catch (err) {
+    console.error('Error sending email:', err);
+    throw err;
+  }
 };
 
 export default sendEmail;
