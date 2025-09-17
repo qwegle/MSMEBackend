@@ -10,9 +10,9 @@ import { authenticateOkviToken } from '../../middlewares/okviAuth.middleware.js'
 const router = Router();
 
 router.post('/create', authenticateOkviToken, createOpeningStock);
-router.get('/', authenticateOkviToken, getOpeningStocks);
-router.put('/:id', authenticateOkviToken, updateOpeningStock);
-router.delete('/:id', authenticateOkviToken, deleteOpeningStock);
+router.get('/getOpeningStocks', authenticateOkviToken, getOpeningStocks);
+router.put('/updateOpeningStock/:id', authenticateOkviToken, updateOpeningStock);
+router.delete('/deleteOpeningStock/:id', authenticateOkviToken, deleteOpeningStock);
 
 // router.post('/filter',authenticateToken, filterOpeningStock);
 
