@@ -83,7 +83,7 @@ export const createClosingStock = catchAsync(async (req, res, next) => {
     festivalId,
     openingStockId: opening._id,
     head,
-    subHeadDetails
+    subHeads: subHeadDetails 
   });
 
   res.status(201).json({ status: 'success', data: closing });
