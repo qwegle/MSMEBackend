@@ -29,20 +29,21 @@ import {
   deleteAuditCertificate,
   getBankProofs,
   getBankProofById,
-  deleteBankProof
+  deleteBankProof,
+  getClaimDocumentHeader
 } from '../../controllers/OKVI/claimdocuments.controller.js';
 import { authenticateOkviToken } from '../../middlewares/okviAuth.middleware.js';
-import { upload } from '../../middlewares/fileUploadHandler.js';
+import { upload, uploadToCloud } from '../../middlewares/fileUploadHandler.js';
 
 const router = Router();
 router.post('/form-i', authenticateOkviToken, createForm1);
 router.post('/form-v', authenticateOkviToken, createFormV);
 router.post('/form-vi', authenticateOkviToken, createFormVI);
 router.post('/declaration-certificate', authenticateOkviToken, createDeclarationCertificate);
-router.post('/upload-audit-certificate', authenticateOkviToken, upload.single('auditFile'), uploadAuditCertificate);
-router.post('/upload-bank-deposit-proof', authenticateOkviToken, upload.single('bankProofFile'), uploadBankDepositProof);
+router.post('/upload-audit-certificate', authenticateOkviToken, upload.single('auditFile'), uploadToCloud,  uploadAuditCertificate);
+router.post('/upload-bank-deposit-proof', authenticateOkviToken, upload.single('bankProofFile'),uploadToCloud, uploadBankDepositProof);
 router.post('/final-submit', authenticateOkviToken, finalSubmitClaim);
-router.post('/upload-sanction-order', authenticateOkviToken, upload.single('sanctionOrderFile'), uploadSanctionOrder);
+router.post('/upload-sanction-order', authenticateOkviToken, upload.single('sanctionOrderFile'),uploadToCloud, uploadSanctionOrder);
 router.get('/claims', authenticateOkviToken, getClaims); 
 router.get('/my-claims', authenticateOkviToken, getUserClaims);
 router.get('/claims/:id', authenticateOkviToken, getClaimDetails);
@@ -65,5 +66,7 @@ router.delete('/audit-certificate/:id', authenticateOkviToken, deleteAuditCertif
 router.get('/bank-proofs', authenticateOkviToken, getBankProofs);
 router.get('/bank-proof/:id', authenticateOkviToken, getBankProofById);
 router.delete('/bank-proof/:id', authenticateOkviToken, deleteBankProof);
+
+router.get('/getClaimHeader', authenticateOkviToken,getClaimDocumentHeader);// only user
 
 export default router;

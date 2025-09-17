@@ -157,28 +157,23 @@ export const getOpeningStocks = catchAsync(async (req, res, next) => {
   const stocks = await OpeningStock.find({ user: userId })
     .populate('festivalId', 'name startDate endDate')
     .sort({ createdAt: -1 });
-  
   res.status(200).json({
     status: 'success',
     results: stocks.length,
     data: stocks
   });
 });
-
 export const updateOpeningStock = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const userId = req.user.id;
-  
   const stock = await OpeningStock.findOne({ _id: id, user: userId });
   if (!stock) {
     return next(new AppError('Opening stock not found', 404));
   }
-
   const updatedStock = await OpeningStock.findByIdAndUpdate(id, req.body, {
     new: true,
     runValidators: true
   });
-
   res.status(200).json({
     status: 'success',
     data: updatedStock

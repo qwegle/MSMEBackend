@@ -12,7 +12,7 @@ const declarationCertificateSchema = new mongoose.Schema({
   formVId: {type: mongoose.Schema.Types.ObjectId, ref: 'FormV', required: true },
   formVIId: {type: mongoose.Schema.Types.ObjectId, ref: 'FormVI', required: true },
   khadiInstitutionName: { type: String, required: true },
-  address: { type: String, required: true },
+  address: { type: String },
   month: { type: String, required: true },
   spellStartDate: { type: Date, required: true },
   spellEndDate: { type: Date, required: true },

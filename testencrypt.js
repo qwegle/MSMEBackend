@@ -10,8 +10,7 @@ const jsonData = {
 };
 
 // Example encrypted response from backend (IV + ciphertext in hex)
-const jsonResponse = "49e27c32d654d34aea2ad1f6c8f2eaaea40f7c268af4d5b2d0bb8f24fae77d69bcf75369cbfe2315979a18442d27db91d124edfcdcd6afd513e305549948cc01169f36701ecd9665cebe5621a279d9bf4e4ba97442c9281fdbba49f682d0b64571fa1d0532767ecb44cbdabcb4ed01ee00ac6f4e319fae0456157178d96b99d8";
-
+const jsonResponse = "6cac4e21013d47e9f18364e8848822aafa36b581791b9f054a00cea396cbc194199fcaf65f61d9b372887356ed5cdfc8702b51a6cb5fb6c562b101e293e7b9fdea364121b4251b426042af0177924264732b617cac1f75a35c0d3dfaa78f023b";
 function encryptData(data) {
   const jsonString = JSON.stringify(data);
   const iv = CryptoJS.lib.WordArray.random(16); // 128-bit IV

@@ -1,17 +1,20 @@
 import { createTransport } from 'nodemailer';
 
 const sendEmail = async ({ to, subject, html }) => {
+  const useSSL = process.env.USE_SSL_MAIL === 'true';
+
   const transporter = createTransport({
-    host: 'smtp.sendgrid.net',
-    port: 587,
+    host: 'smtp.gmail.com',
+    port: useSSL ? 465 : 587,
+    secure: useSSL, // true for 465 (SSL), false for 587 (STARTTLS)
     auth: {
-      user: 'apikey', // literally the string 'apikey'
-      pass: process.env.SENDGRID_API_KEY,
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
     },
   });
 
   await transporter.sendMail({
-    from: process.env.EMAIL_USER, // this must be a verified sender in SendGrid
+    from: process.env.EMAIL_USER,
     to,
     subject,
     html,

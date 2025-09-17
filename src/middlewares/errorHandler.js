@@ -1,5 +1,6 @@
 import AppError from '../utils/AppError.js';
 import { sendEncryptedResponse } from '../utils/encryption.js';
+
 const handleCastErrorDB = err => {
   const message = `Invalid ${err.path}: ${err.value}`;
   return new AppError(message, 400);
@@ -26,18 +27,24 @@ const handleJWTExpiredError = () =>
 
 const errorHandler = (err, req, res, next) => {
   let error = { ...err, message: err.message };
+
   if (err.name === 'CastError') error = handleCastErrorDB(err);
   if (err.name === 'ValidationError') error = handleValidationErrorDB(err);
   if (err.code === 11000) error = handleDuplicateFieldsDB(err);
   if (err.name === 'JsonWebTokenError') error = handleJWTError();
   if (err.name === 'TokenExpiredError') error = handleJWTExpiredError();
-  return sendEncryptedResponse(
-    res,
-    error.statusCode || 500,
-    {
-      status: error.status || 'error',
-      message: error.message || 'Internal Server Error',
-    }
-  );
+
+  const responsePayload = {
+    status: error.status || 'error',
+    message: error.message || 'Internal Server Error',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }) // include stack in dev
+  };
+
+  if (process.env.NODE_ENV === 'development') {
+    return res.status(error.statusCode || 500).json(responsePayload);
+  } else {
+    return sendEncryptedResponse(res, error.statusCode || 500, responsePayload);
+  }
 };
+
 export default errorHandler;

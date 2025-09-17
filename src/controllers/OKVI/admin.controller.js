@@ -157,7 +157,7 @@ export const getClaimById = catchAsync(async (req, res, next) => {
 
 // Approve claim (GMDIC -> DI -> Addl. Director workflow)
 export const approveClaim = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
+  const { id } = req.body;
   const { comments, sanctionAmount } = req.body;
   const userRole = req.user.user_role;
   const userId = req.user.id;
@@ -308,7 +308,7 @@ export const approveClaim = catchAsync(async (req, res, next) => {
 
 // Reject claim
 export const rejectClaim = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
+  const { id } = req.body;
   const { comments } = req.body;
   const userRole = req.user.user_role;
   const userId = req.user.id;

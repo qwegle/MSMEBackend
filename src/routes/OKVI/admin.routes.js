@@ -20,9 +20,9 @@ router.get('/claims/pending', authenticateOkviToken, authorizeOkviRoles(0, 1, 2)
 router.get('/claims/:id', authenticateOkviToken, authorizeOkviRoles(0, 1, 2), getClaimById);
 
 // Approve claim (accessible to all admin roles)
-router.post('/claims/:id/approve', authenticateOkviToken, authorizeOkviRoles(0, 1, 2), approveClaim);
+router.post('/claims/approve', authenticateOkviToken, authorizeOkviRoles(0, 1, 2), approveClaim);
 
 // Reject claim (accessible to all admin roles)
-router.post('/claims/:id/reject', authenticateOkviToken, authorizeOkviRoles(0, 1, 2), rejectClaim);
+router.post('/claims/reject', authenticateOkviToken, authorizeOkviRoles(0, 1, 2), rejectClaim);
 
 export default router;

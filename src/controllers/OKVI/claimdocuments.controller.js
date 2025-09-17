@@ -11,6 +11,7 @@ import ClosingStock from '../../models/OKVI/closingstock.js';
 import Holiday from '../../models/OKVI/holidayFestival.js';
 import ClaimApplication from '../../models/OKVI/claimApplication.js';
 import OkviAuth from '../../models/OKVI/okviauth.js';
+import UserOKVI from '../../models/OKVI/okviuserdetails.js';
 
 const isAdminRole = (role) => {
   const r = role ?? null;
@@ -46,6 +47,55 @@ const getFormIIdsForOpeningStocks = async (openingStockIds) => {
   const forms = await Form1.find({ openingStockId: { $in: openingStockIds } }, '_id');
   return forms.map((f) => f._id);
 };
+
+export const getClaimDocumentHeader = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  const userDetails = await UserOKVI.findOne({ user: userId });
+  if (!userDetails) {
+    return next(new AppError('User details not found', 404));
+  }
+  const { institutionInfo } = userDetails;
+  const openingStock = await OpeningStock.findOne({ user: userId })
+    .populate('festivalId')
+    .sort({ createdAt: -1 });
+  if (!openingStock) {
+    return next(new AppError('Opening stock not found', 404));
+  }
+  const festival = openingStock.festivalId;
+  if (!festival) {
+    return next(new AppError('Festival not found for opening stock', 404));
+  }
+  const formatToIST = (date) =>
+    new Date(date).toLocaleString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric'
+    });
+  const header = {
+    institutionName: institutionInfo.name,
+    address: institutionInfo.address || '',
+    festivalName: festival.name,
+    startDate: formatToIST(festival.startDate),
+    endDate: formatToIST(festival.endDate),
+    month: openingStock.createdAt
+      ? new Date(openingStock.createdAt).toLocaleString('en-IN', {
+          timeZone: 'Asia/Kolkata',
+          month: 'long',
+          year: 'numeric'
+        })
+      : new Date().toLocaleString('en-IN', {
+          timeZone: 'Asia/Kolkata',
+          month: 'long',
+          year: 'numeric'
+        })
+  };
+  res.status(200).json({
+    status: 'success',
+    data: header
+  });
+});
+
 
 // --------------------- Form I / Form V / Form VI / Certificates / Proofs - Create / Uploads ---------------------
 export const createForm1 = catchAsync(async (req, res, next) => {
@@ -114,83 +164,146 @@ export const createForm1 = catchAsync(async (req, res, next) => {
 
 export const createFormV = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
-  const { festivalName } = req.body;
-  if (!festivalName) return next(new AppError('festivalName is required', 400));
+  const { festivalName, method } = req.body;
 
+  if (!festivalName) {
+    return next(new AppError('festivalName is required', 400));
+  }
+  if (!['get', 'post'].includes(method)) {
+    return next(new AppError('Invalid method. Allowed: get | post', 400));
+  }
+
+  // get festival + opening stock
   const festival = await getFestival(festivalName);
   const { openingStock } = await getStocks(userId, festival._id);
   if (!openingStock) return next(new AppError('Opening stock not found', 404));
 
+  // get Form1
   const form1 = await Form1.findOne({ openingStockId: openingStock._id });
   if (!form1) return next(new AppError('Form1 not found', 404));
 
   const retailSales = Array.isArray(form1.retailSales) ? form1.retailSales : [];
-
   if (retailSales.length === 0) {
     return next(new AppError('No retail sales found on Form1 to build Form V', 400));
   }
 
-  // Prevent duplicate creation
+  // check existing Form V
   const existing = await FormV.findOne({ formIId: form1._id });
-  if (existing) {
-    return res.status(200).json({ status: 'success', data: existing, message: 'FormV already exists' });
+
+  // if method === "get"
+  if (method === 'get') {
+    if (existing) {
+      return res.status(200).json({
+        status: 'success',
+        data: existing,
+        message: 'FormV already exists'
+      });
+    }
+
+    const subheads = retailSales.map((sale) => ({
+      headType: sale.headType,
+      subCenterName: sale.subCenterName,
+      subCenterAddress: sale.subCenterAddress || null,
+      frombillNo: sale.frombillNo,
+      tobillNo: sale.tobillNo || null,
+      billDate: sale.billDate,
+      retailSalesAmount: sale.retailSalesAmount,
+      rebatePaidAmount: sale.rebatePaidAmount,
+      remarks: sale.remarks || null
+    }));
+
+    return res.status(200).json({
+      status: 'success',
+      data: { subheads },
+      message: 'FormV does not exist, returning subhead preview only'
+    });
   }
 
-  const totalSaleAmt = retailSales.reduce((sum, sale) => sum + Number(sale.retailSalesAmount || 0), 0);
-  const totalRebateAmt = retailSales.reduce((sum, sale) => sum + Number(sale.rebatePaidAmount || 0), 0);
-
-  const formV = await FormV.create({
-    formIId: form1._id,
-    totalSaleAmt,
-    totalRebateAmt,
-    createdBy: userId,
-    createdAt: new Date()
-  });
-
-  const subheads = retailSales.map((sale) => ({
-    headType: sale.headType,
-    subCenterName: sale.subCenterName,
-    subCenterAddress: sale.subCenterAddress || null,
-    frombillNo: sale.frombillNo,
-    tobillNo: sale.tobillNo || null,
-    billDate: sale.billDate,
-    retailSalesAmount: sale.retailSalesAmount,
-    rebatePaidAmount: sale.rebatePaidAmount,
-    remarks: sale.remarks || null
-  }));
-
-  res.status(201).json({
-    status: 'success',
-    data: {
-      formV,
-      subheads
+  // if method === "post"
+  if (method === 'post') {
+    if (existing) {
+      return res.status(200).json({
+        status: 'success',
+        data: existing,
+        message: 'FormV already exists'
+      });
     }
-  });
+
+    const totalSaleAmt = retailSales.reduce(
+      (sum, sale) => sum + Number(sale.retailSalesAmount || 0),
+      0
+    );
+    const totalRebateAmt = retailSales.reduce(
+      (sum, sale) => sum + Number(sale.rebatePaidAmount || 0),
+      0
+    );
+
+    const formV = await FormV.create({
+      formIId: form1._id,
+      totalSaleAmt,
+      totalRebateAmt,
+      createdBy: userId,
+      createdAt: new Date()
+    });
+
+    const subheads = retailSales.map((sale) => ({
+      headType: sale.headType,
+      subCenterName: sale.subCenterName,
+      subCenterAddress: sale.subCenterAddress || null,
+      frombillNo: sale.frombillNo,
+      tobillNo: sale.tobillNo || null,
+      billDate: sale.billDate,
+      retailSalesAmount: sale.retailSalesAmount,
+      rebatePaidAmount: sale.rebatePaidAmount,
+      remarks: sale.remarks || null
+    }));
+
+    return res.status(201).json({
+      status: 'success',
+      data: { formV, subheads },
+      message: 'FormV created successfully'
+    });
+  }
 });
 
 export const createFormVI = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
-  const { festivalName } = req.body;
-  if (!festivalName) return next(new AppError('festivalName is required', 400));
+  const { festivalName, method } = req.body;
+
+  if (!festivalName) {
+    return next(new AppError('festivalName is required', 400));
+  }
+  if (!['get', 'post'].includes(method)) {
+    return next(new AppError('Invalid method. Allowed: get | post', 400));
+  }
+
   const festival = await getFestival(festivalName);
   const { openingStock } = await getStocks(userId, festival._id);
-  if (!openingStock) return next(new AppError('Opening stock not found', 404));
+  if (!openingStock) {
+    return next(new AppError('Opening stock not found', 404));
+  }
+
   const form1 = await Form1.findOne({ openingStockId: openingStock._id });
-  if (!form1) return next(new AppError('Form I (retail sales) not found', 404));
+  if (!form1) {
+    return next(new AppError('Form I (retail sales) not found', 404));
+  }
+
   const retailSales = Array.isArray(form1.retailSales) ? form1.retailSales : [];
   if (retailSales.length === 0) {
     return next(new AppError('No retail sales found to build Form VI', 400));
   }
+
+  // check if already exists
   const existing = await FormVI.findOne({ formIId: form1._id });
-  if (existing) {
-    return res.status(200).json({ status: 'success', data: existing, message: 'FormVI already exists' });
-  }
+
+  // helper: build breakup by center
   const byCenter = retailSales.reduce((acc, sale) => {
     const key = sale.subCenterName || 'UNKNOWN';
     if (!acc[key]) acc[key] = { entries: [], subCenterAddress: sale.subCenterAddress || null };
     acc[key].entries.push(sale);
     return acc;
   }, {});
+
   const centerBreakup = Object.entries(byCenter).map(([subCenterName, { entries, subCenterAddress }]) => {
     const totalSaleAmt = entries.reduce((sum, e) => sum + Number(e.retailSalesAmount || 0), 0);
     const totalRebateAmt = entries.reduce((sum, e) => sum + Number(e.rebatePaidAmount || 0), 0);
@@ -211,13 +324,45 @@ export const createFormVI = catchAsync(async (req, res, next) => {
       retailSales: retailSalesArr
     };
   });
-  const formVI = await FormVI.create({
-    formIId: form1._id,
-    centerBreakup,
-    createdBy: userId,
-    createdAt: new Date()
-  });
-  res.status(201).json({ status: 'success', data: formVI });
+
+  // method === "get"
+  if (method === 'get') {
+    if (existing) {
+      return res.status(200).json({
+        status: 'success',
+        data: existing,
+        message: 'FormVI already exists'
+      });
+    }
+    return res.status(200).json({
+      status: 'success',
+      data: { centerBreakup },
+      message: 'FormVI does not exist, returning breakup preview only'
+    });
+  }
+
+  // method === "post"
+  if (method === 'post') {
+    if (existing) {
+      return res.status(200).json({
+        status: 'success',
+        data: existing,
+        message: 'FormVI already exists'
+      });
+    }
+    const formVI = await FormVI.create({
+      formIId: form1._id,
+      centerBreakup,
+      createdBy: userId,
+      createdAt: new Date()
+    });
+
+    return res.status(201).json({
+      status: 'success',
+      data: formVI,
+      message: 'FormVI created successfully'
+    });
+  }
 });
 
 export const createDeclarationCertificate = catchAsync(async (req, res, next) => {
@@ -293,7 +438,7 @@ export const uploadAuditCertificate = catchAsync(async (req, res, next) => {
       : new Date().toLocaleString('default', { month: 'long' }),
     fromDate: openingStock.createdAt,
     toDate: closingStock.createdAt,
-    auditCertificateFile: file.path
+    auditCertificateFile: req.file.url
   });
   res.status(201).json({ status: 'success', data: auditCertificate });
 });
@@ -337,7 +482,7 @@ export const uploadBankDepositProof = catchAsync(async (req, res, next) => {
       : new Date().toLocaleString('default', { month: 'long' }),
     fromDate: openingStock.createdAt,
     toDate: closingStock.createdAt,
-    depositProofFile: file.path
+    depositProofFile: req.file.url
   });
   res.status(201).json({ status: 'success', data: proof });
 });
@@ -434,7 +579,7 @@ export const uploadSanctionOrder = catchAsync(async (req, res, next) => {
   const updatedClaim = await ClaimApplication.findByIdAndUpdate(
     claimId,
     {
-      sanctionOrderFile: file.path,
+      sanctionOrderFile: req.file.url,
       sanctionOrderUploadedAt: new Date(),
       status: 'sanction_order_uploaded'
     },
@@ -444,26 +589,21 @@ export const uploadSanctionOrder = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: 'success', message: 'Sanction order uploaded successfully', data: updatedClaim });
 });
 
-// --------------------- Claim listing / details / delete (role-aware) ---------------------
 export const getClaims = catchAsync(async (req, res) => {
   const requesterId = req.user.id;
   const userRole = req.user.role ?? req.user.user_role ?? null;
-
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 10;
   const status = req.query.status;
   const queryUserId = req.query.userId;
   const skip = (page - 1) * limit;
-
   const filter = {};
   if (status) filter.status = status;
-
   if (isAdminRole(userRole)) {
     if (queryUserId) filter.userId = queryUserId;
   } else {
     filter.userId = requesterId;
   }
-
   const claims = await ClaimApplication.find(filter)
     .populate('festivalId', 'name startDate endDate')
     .populate('openingStockId')
@@ -472,7 +612,6 @@ export const getClaims = catchAsync(async (req, res) => {
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit);
-
   const total = await ClaimApplication.countDocuments(filter);
 
   res.status(200).json({
@@ -486,19 +625,16 @@ export const getClaims = catchAsync(async (req, res) => {
 });
 
 export const getUserClaims = getClaims;
-
 export const getClaimDetails = catchAsync(async (req, res, next) => {
   const requesterId = req.user.id;
   const userRole = req.user.role ?? req.user.user_role ?? null;
   const { id } = req.params;
-
   let findFilter;
   if (isAdminRole(userRole)) {
     findFilter = { _id: id };
   } else {
     findFilter = { _id: id, userId: requesterId };
   }
-
   const claim = await ClaimApplication.findOne(findFilter)
     .populate('festivalId', 'name startDate endDate')
     .populate('openingStockId')
@@ -511,9 +647,7 @@ export const getClaimDetails = catchAsync(async (req, res, next) => {
     .populate('bankDepositProofId')
     .populate('approvalHistory.approver', 'name email role')
     .populate('currentApprover', 'name email role');
-
   if (!claim) return next(new AppError('Claim not found or access denied', 404));
-
   res.status(200).json({ status: 'success', data: claim });
 });
 
@@ -708,7 +842,6 @@ export const deleteFormVI = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: 'success', message: 'Form VI deleted', data: deleted });
 });
 
-/* ---------- DECLARATION CERTIFICATE ---------- */
 export const getDeclarationCertificates = catchAsync(async (req, res) => {
   const requesterId = req.user.id;
   const userRole = req.user.role ?? req.user.user_role ?? null;
@@ -723,10 +856,15 @@ export const getDeclarationCertificates = catchAsync(async (req, res) => {
   }
 
   const docs = await DeclarationCertificate.find(filter)
-    .populate('formIId formVId formVIId openingStockId closingStockId')
+    .populate('formIId', '_id')
+    .populate('formVId', '_id')
+    .populate('formVIId', '_id')
+    .populate('openingStockId', '_id')
+    .populate('closingStockId', '_id')
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit);
+
 
   const total = await DeclarationCertificate.countDocuments(filter);
   res.status(200).json({ status: 'success', results: docs.length, total, page, totalPages: Math.ceil(total / limit), data: docs });
@@ -765,7 +903,6 @@ export const deleteDeclarationCertificate = catchAsync(async (req, res, next) =>
   res.status(200).json({ status: 'success', message: 'Declaration Certificate deleted', data: deleted });
 });
 
-/* ---------- AUDIT CERTIFICATE ---------- */
 export const getAuditCertificates = catchAsync(async (req, res) => {
   const requesterId = req.user.id;
   const userRole = req.user.role ?? req.user.user_role ?? null;
@@ -778,8 +915,17 @@ export const getAuditCertificates = catchAsync(async (req, res) => {
     const openingStockIds = await getOpeningStockIdsForUser(requesterId);
     filter.openingStockId = { $in: openingStockIds };
   }
+  const docs = await AuditCertificate.find(filter)
+  .populate('formIId', '_id')
+  .populate('formVId', '_id')
+  .populate('formVIId', '_id')
+  .populate('openingStockId', '_id')
+  .populate('closingStockId', '_id')
+  .populate('dcId', '_id')
+  .sort({ createdAt: -1 })
+  .skip(skip)
+  .limit(limit);
 
-  const docs = await AuditCertificate.find(filter).populate('formIId formVId formVIId openingStockId closingStockId dcId').sort({ createdAt: -1 }).skip(skip).limit(limit);
   const total = await AuditCertificate.countDocuments(filter);
   res.status(200).json({ status: 'success', results: docs.length, total, page, totalPages: Math.ceil(total / limit), data: docs });
 });
@@ -817,7 +963,6 @@ export const deleteAuditCertificate = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: 'success', message: 'Audit Certificate deleted', data: deleted });
 });
 
-/* ---------- BANK DEPOSIT PROOF ---------- */
 export const getBankProofs = catchAsync(async (req, res) => {
   const requesterId = req.user.id;
   const userRole = req.user.role ?? req.user.user_role ?? null;
