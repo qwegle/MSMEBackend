@@ -48,11 +48,14 @@ import AppError from '../../utils/AppError.js';
 import Holiday from '../../models/OKVI/holidayFestival.js';
 import OpeningStock from '../../models/OKVI/openingstock.js';
 import ClosingStock from '../../models/OKVI/closingstock.js';
-const isWithin7Days = (spellEndDate) => {
+const isWithinAllowedWindow = (spellEndDate) => {
   const now = new Date();
-  const diffInMs = now - new Date(spellEndDate);
+  const end = new Date(spellEndDate);
+  if (now <= end) return true;
+  const diffInMs = now - end;
   return diffInMs >= 0 && diffInMs <= 7 * 24 * 60 * 60 * 1000;
-};
+  };
+
 export const createClosingStock = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
   const { festivalId, head, subHeadDetails } = req.body;
@@ -63,8 +66,9 @@ export const createClosingStock = catchAsync(async (req, res, next) => {
   if (!holiday) {
     return next(new AppError('Invalid festivalId', 404));
   }
-  if (!isWithin7Days(holiday.endDate)) {
-    return next(new AppError('Closing stock entry window expired (must submit within 7 days of spell end date)', 400));
+
+  if (!isWithinAllowedWindow(holiday.endDate)) {
+    return next(new AppError('Closing stock entry window expired (allowed only before or within 7 days after spell end date)', 400));
   }
   const opening = await OpeningStock.findOne({ user: userId, festivalId });
   if (!opening) {
@@ -81,6 +85,7 @@ export const createClosingStock = catchAsync(async (req, res, next) => {
     head,
     subHeadDetails
   });
+
   res.status(201).json({ status: 'success', data: closing });
 });
 
