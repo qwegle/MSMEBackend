@@ -157,9 +157,9 @@ export const getClaimById = catchAsync(async (req, res, next) => {
 
 // Approve claim (GMDIC -> DI -> Addl. Director workflow)
 export const approveClaim = catchAsync(async (req, res, next) => {
-  const { id } = req.body;
-  const { comments, sanctionAmount } = req.body;
-  const userRole = req.user.user_role;
+  const { id, comments } = req.body;
+  let { sanctionAmount } = req.body; // allow reassignment for Addl. Director
+  const userRole = req.user.user_role; // 0 = GMDIC, 1 = DI, 2 = Addl. Director
   const userId = req.user.id;
 
   if (!mongoose.isValidObjectId(id)) {
@@ -167,56 +167,68 @@ export const approveClaim = catchAsync(async (req, res, next) => {
   }
 
   const claim = await ClaimApplication.findById(id).populate('userId', 'name email');
-
   if (!claim) {
     return next(new AppError('Claim not found', 404));
   }
 
   let newStatus;
   let nextApprover = null;
+  let calculationDetails = null;
 
-  // Determine next status and approver based on current role
   switch (userRole) {
-    case ROLES.GMDIC:
+    case 0: // GMDIC
       if (!['submitted', 'gmdic_review'].includes(claim.status)) {
-        return next(new AppError('Claim is not in correct status for GMDIC approval', 400));
+        return next(
+          new AppError(
+            `Claim is in status "${claim.status}", expected submitted or gmdic_review`,
+            400
+          )
+        );
       }
       newStatus = 'gmdic_approved';
-      // Find next DI approver
-      const diApprover = await OkviAuth.findOne({ role: ROLES.DI });
+      const diApprover = await OkviAuth.findOne({ role: 1 }); // DI
       nextApprover = diApprover?._id;
       break;
 
-    case ROLES.DI:
+    case 1: // DI
       if (!['gmdic_approved', 'di_review'].includes(claim.status)) {
-        return next(new AppError('Claim is not in correct status for DI approval', 400));
+        return next(
+          new AppError(
+            `Claim is in status "${claim.status}", expected gmdic_approved or di_review`,
+            400
+          )
+        );
       }
       newStatus = 'di_approved';
-      // Find next Addl. Director approver
-      const addlDirector = await OkviAuth.findOne({ role: ROLES.ADDL_DIRECTOR });
+      const addlDirector = await OkviAuth.findOne({ role: 2 }); // Addl. Director
       nextApprover = addlDirector?._id;
       break;
 
-    case ROLES.ADDL_DIRECTOR:
+    case 2: // Addl. Director
       if (!['di_approved', 'addl_director_review'].includes(claim.status)) {
-        return next(new AppError('Claim is not in correct status for Addl. Director approval', 400));
+        return next(
+          new AppError(
+            `Claim is in status "${claim.status}", expected di_approved or addl_director_review`,
+            400
+          )
+        );
       }
       newStatus = 'sanctioned';
       let finalSanctionAmount = sanctionAmount;
-      let calculationDetails = null;
-      
+
       if (!finalSanctionAmount) {
         const calculation = await calculateSanctionAmount(id);
         finalSanctionAmount = calculation.calculatedAmount;
         calculationDetails = calculation;
-        
         console.log('Auto-calculated sanction amount:', finalSanctionAmount);
       }
-      
+
       if (!finalSanctionAmount || finalSanctionAmount <= 0) {
-        return next(new AppError('Invalid sanction amount calculated or provided', 400));
+        return next(
+          new AppError('Invalid sanction amount calculated or provided', 400)
+        );
       }
-      
+
       sanctionAmount = finalSanctionAmount;
       break;
 
@@ -224,24 +236,24 @@ export const approveClaim = catchAsync(async (req, res, next) => {
       return next(new AppError('Unauthorized to approve claims', 403));
   }
 
-  // Add approval to history
+  // Approval entry
   const approvalEntry = {
     approver: userId,
     approverRole: userRole,
     action: 'approved',
     comments: comments || '',
-    sanctionAmount: userRole === ROLES.ADDL_DIRECTOR ? sanctionAmount : undefined,
+    sanctionAmount: userRole === 2 ? sanctionAmount : undefined,
     actionDate: new Date()
   };
 
-  // Update claim
+  // Update data
   const updateData = {
     status: newStatus,
     currentApprover: nextApprover,
     $push: { approvalHistory: approvalEntry }
   };
 
-  if (userRole === ROLES.ADDL_DIRECTOR) {
+  if (userRole === 2) {
     updateData.finalSanctionAmount = sanctionAmount;
   }
 
@@ -251,39 +263,50 @@ export const approveClaim = catchAsync(async (req, res, next) => {
     { new: true }
   ).populate('userId', 'name email');
 
-  // Send email notification
+  // Email notification
   try {
     let emailSubject, emailMessage;
-    
+
     if (newStatus === 'sanctioned') {
       emailSubject = 'Claim Application Approved - Sanction Amount Sanctioned';
       emailMessage = `
         Dear ${claim.userId.name},
-        
+
         Your claim application has been approved by all authorities.
-        
+
         Sanction Amount: ₹${sanctionAmount}
-        ${calculationDetails ? `
+        ${
+          calculationDetails
+            ? `
         Calculation Details:
         - Base Rebate Amount: ₹${calculationDetails.baseRebateAmount}
-        - Applied Percentage: ${(calculationDetails.appliedPercentage * 100)}%
-        - Processing Fee Deducted: ₹${calculationDetails.processingFeeDeducted}
-        ` : ''}
-        
+        - Applied Percentage: ${
+          calculationDetails.appliedPercentage * 100
+        }%
+        - Processing Fee Deducted: ₹${
+          calculationDetails.processingFeeDeducted
+        }
+        `
+            : ''
+        }
+
         Please upload the sanction order document to complete the process.
-        
+
         Best regards,
         OKVI Admin Team
       `;
     } else {
-      emailSubject = `Claim Application Approved by ${ROLE_NAMES[userRole]}`;
+      const roleName =
+        userRole === 0 ? 'GMDIC' : userRole === 1 ? 'DI' : 'Addl. Director';
+
+      emailSubject = `Claim Application Approved by ${roleName}`;
       emailMessage = `
         Dear ${claim.userId.name},
-        
-        Your claim application has been approved by ${ROLE_NAMES[userRole]} and forwarded to the next authority for review.
-        
+
+        Your claim application has been approved by ${roleName} and forwarded to the next authority for review.
+
         Comments: ${comments || 'No comments'}
-        
+
         Best regards,
         OKVI Admin Team
       `;
@@ -300,11 +323,12 @@ export const approveClaim = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: 'success',
-    message: `Claim approved by ${ROLE_NAMES[userRole]}`,
+    message: `Claim approved by role ${userRole}`,
     data: updatedClaim,
     ...(calculationDetails && { calculationDetails })
   });
 });
+
 
 // Reject claim
 export const rejectClaim = catchAsync(async (req, res, next) => {
