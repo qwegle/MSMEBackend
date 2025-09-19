@@ -677,24 +677,54 @@ export const getFormIs = catchAsync(async (req, res) => {
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 10;
   const skip = (page - 1) * limit;
-
   const filter = {};
   if (!isAdminRole(userRole)) {
     const openingStockIds = await getOpeningStockIdsForUser(requesterId);
     filter.openingStockId = { $in: openingStockIds };
   }
-
   const docs = await Form1.find(filter)
-    .populate('openingStockId')
-    .populate('closingStockId')
+    .populate('openingStockId closingStockId')
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit);
-
   const total = await Form1.countDocuments(filter);
+  const transformed = docs.map(doc => ({
+    openingStockId: doc.openingStockId?._id ?? doc.openingStockId,
+    closingStockId: doc.closingStockId?._id ?? doc.closingStockId,
+    institutionName: doc.institutionName,
+    institutionAddress: doc.institutionAddress,
+    festival: doc.festival,
+    month: doc.month,
+    fromDate: doc.fromDate,
+    toDate: doc.toDate,
+    formData: doc.retailSales?.map(sale => ({
+      form1_id: doc._id,
+      headType: sale.headType,
+      subCenterName: sale.subCenterName,
+      subCenterAddress: sale.subCenterAddress,
+      frombillNo: sale.frombillNo,
+      tobillNo: sale.tobillNo,
+      billDate: sale.billDate,
+      retailSalesAmount: sale.retailSalesAmount,
+      rebatePaidAmount: sale.rebatePaidAmount,
+      remarks: sale.remarks
+    })),
+    totalSaleAmt: doc.totalSaleAmt,
+    totalRebateAmt: doc.totalRebateAmt,
+    createdAt: doc.createdAt,
+    __v: doc.__v
+  }));
 
-  res.status(200).json({ status: 'success', results: docs.length, total, page, totalPages: Math.ceil(total / limit), data: docs });
+  res.status(200).json({
+    status: 'success',
+    results: transformed.length,
+    total,
+    page,
+    totalPages: Math.ceil(total / limit),
+    data: transformed
+  });
 });
+
 
 export const getFormIById = catchAsync(async (req, res, next) => {
   const requesterId = req.user.id;
@@ -729,27 +759,68 @@ export const deleteFormI = catchAsync(async (req, res, next) => {
 
   res.status(200).json({ status: 'success', message: 'Form I deleted', data: deleted });
 });
-
-/* ---------- FORM V ---------- */
 export const getFormVs = catchAsync(async (req, res) => {
   const requesterId = req.user.id;
   const userRole = req.user.role ?? req.user.user_role ?? null;
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 10;
   const skip = (page - 1) * limit;
-
   const filter = {};
   if (!isAdminRole(userRole)) {
     const openingStockIds = await getOpeningStockIdsForUser(requesterId);
     const formIIds = await getFormIIdsForOpeningStocks(openingStockIds);
     filter.formIId = { $in: formIIds };
   }
-
-  const docs = await FormV.find(filter).populate('formIId').sort({ createdAt: -1 }).skip(skip).limit(limit);
+  const docs = await FormV.find(filter)
+    .populate('formIId')
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
   const total = await FormV.countDocuments(filter);
-
-  res.status(200).json({ status: 'success', results: docs.length, total, page, totalPages: Math.ceil(total / limit), data: docs });
+  const transformed = docs.map(doc => {
+    const formI = doc.formIId;
+    return {
+      openingStockId: formI?.openingStockId,
+      closingStockId: formI?.closingStockId,
+      institutionName: formI?.institutionName,
+      institutionAddress: formI?.institutionAddress,
+      festival: formI?.festival,
+      month: formI?.month,
+      fromDate: formI?.fromDate,
+      toDate: formI?.toDate,
+      formData: formI?.retailSales?.map(sale => ({
+        form1_id: formI?._id,
+        formV_id: doc._id,
+        headType: sale.headType,
+        subCenterName: sale.subCenterName,
+        subCenterAddress: sale.subCenterAddress,
+        frombillNo: sale.frombillNo,
+        tobillNo: sale.tobillNo,
+        billDate: sale.billDate,
+        retailSalesAmount: sale.retailSalesAmount,
+        rebatePaidAmount: sale.rebatePaidAmount,
+        remarks: sale.remarks
+      })),
+      totalSaleAmt: formI?.totalSaleAmt,
+      totalRebateAmt: formI?.totalRebateAmt,
+      createdAt: formI?.createdAt,
+      __v: formI?.__v,
+      totalSaleAmtAll: doc.totalSaleAmt,
+      totalRebateAmtAll: doc.totalRebateAmt,
+      createdAtFormV: doc.createdAt,
+      __vFormV: doc.__v
+    };
+  });
+  res.status(200).json({
+    status: 'success',
+    results: transformed.length,
+    total,
+    page,
+    totalPages: Math.ceil(total / limit),
+    data: transformed.length === 1 ? transformed[0] : transformed
+  });
 });
+
 
 export const getFormVById = catchAsync(async (req, res, next) => {
   const requesterId = req.user.id;
@@ -800,12 +871,50 @@ export const getFormVIs = catchAsync(async (req, res) => {
     const formIIds = await getFormIIdsForOpeningStocks(openingStockIds);
     filter.formIId = { $in: formIIds };
   }
-
-  const docs = await FormVI.find(filter).populate('formIId').sort({ createdAt: -1 }).skip(skip).limit(limit);
+  const docs = await FormVI.find(filter)
+    .populate('formIId')
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
   const total = await FormVI.countDocuments(filter);
+  const transformed = docs.map(doc => {
+    const formI = doc.formIId;
 
-  res.status(200).json({ status: 'success', results: docs.length, total, page, totalPages: Math.ceil(total / limit), data: docs });
+    return {
+      openingStockId: formI?.openingStockId,
+      closingStockId: formI?.closingStockId,
+      institutionName: formI?.institutionName,
+      institutionAddress: formI?.institutionAddress,
+      festival: formI?.festival,
+      month: formI?.month,
+      fromDate: formI?.fromDate,
+      toDate: formI?.toDate,
+      formData: doc.centerBreakup?.map(center => ({
+        form1_id: formI?._id,
+        formVI_id: doc._id,
+        subCenterName: center.subCenterName,
+        totalSaleAmt: center.totalSaleAmt,
+        totalRebateAmt: center.totalRebateAmt
+      })),
+      totalSaleAmt: formI?.totalSaleAmt,
+      totalRebateAmt: formI?.totalRebateAmt,
+      createdAt: formI?.createdAt,
+      __v: formI?.__v,
+      createdAtFormVI: doc.createdAt,
+      __vFormVI: doc.__v
+    };
+  });
+
+  res.status(200).json({
+    status: 'success',
+    results: transformed.length,
+    total,
+    page,
+    totalPages: Math.ceil(total / limit),
+    data: transformed
+  });
 });
+
 
 export const getFormVIById = catchAsync(async (req, res, next) => {
   const requesterId = req.user.id;
