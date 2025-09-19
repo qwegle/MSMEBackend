@@ -865,10 +865,43 @@ export const getDeclarationCertificates = catchAsync(async (req, res) => {
     .skip(skip)
     .limit(limit);
 
+  const formattedDocs = docs.map(doc => {
+    const combinedText = doc.declarations.map(d => d.text).join(' ');
+    const allAgreed = doc.declarations.every(d => d.agreed === true);
+
+    return {
+      _id: doc._id,
+      openingStockId: doc.openingStockId,
+      closingStockId: doc.closingStockId,
+      formIId: doc.formIId,
+      formVId: doc.formVId,
+      formVIId: doc.formVIId,
+      khadiInstitutionName: doc.khadiInstitutionName,
+      address: doc.address,
+      month: doc.month,
+      spellStartDate: doc.spellStartDate,
+      spellEndDate: doc.spellEndDate,
+      status: doc.status,
+      declaration: {
+        text: combinedText,
+        agreed: allAgreed
+      },
+      createdAt: doc.createdAt
+    };
+  });
 
   const total = await DeclarationCertificate.countDocuments(filter);
-  res.status(200).json({ status: 'success', results: docs.length, total, page, totalPages: Math.ceil(total / limit), data: docs });
+
+  res.status(200).json({
+    status: 'success',
+    results: formattedDocs.length,
+    total,
+    page,
+    totalPages: Math.ceil(total / limit),
+    data: formattedDocs
+  });
 });
+
 
 export const getDeclarationCertificateById = catchAsync(async (req, res, next) => {
   const requesterId = req.user.id;
@@ -976,7 +1009,16 @@ export const getBankProofs = catchAsync(async (req, res) => {
     filter.openingStockId = { $in: openingStockIds };
   }
 
-  const docs = await BankDepositProof.find(filter).populate('formIId formVId formVIId openingStockId closingStockId dcId acId').sort({ createdAt: -1 }).skip(skip).limit(limit);
+  const docs = await BankDepositProof.find(filter) .populate('formIId', '_id')
+  .populate('formVId', '_id')
+  .populate('formVIId', '_id')
+  .populate('openingStockId', '_id')
+  .populate('closingStockId', '_id')
+  .populate('dcId', '_id')
+  .populate('acId', '_id')
+  .sort({ createdAt: -1 })
+  .skip(skip)
+  .limit(limit);
   const total = await BankDepositProof.countDocuments(filter);
   res.status(200).json({ status: 'success', results: docs.length, total, page, totalPages: Math.ceil(total / limit), data: docs });
 });
