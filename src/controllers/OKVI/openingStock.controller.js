@@ -154,15 +154,36 @@ export const createOpeningStock = catchAsync(async (req, res, next) => {
 
 export const getOpeningStocks = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
+
   const stocks = await OpeningStock.find({ user: userId })
     .populate('festivalId', 'name startDate endDate')
     .sort({ createdAt: -1 });
+
+  // Transform data
+  const transformed = stocks.flatMap(stock =>
+    stock.subHeadDetails.map(sub => ({
+      openstock_id: stock._id,
+      user: stock.user,
+      festival_id: stock.festivalId?._id,
+      festival_name: stock.festivalId?.name,
+      head: stock.head,
+      subHeadName: sub.subHeadName,
+      unitType: sub.unitType,
+      unitPrice: sub.unitPrice,
+      quantity: sub.quantity,
+      totalPrice: sub.totalPrice,
+      subhead_id: sub._id,
+      createdAt: stock.createdAt
+    }))
+  );
+
   res.status(200).json({
     status: 'success',
-    results: stocks.length,
-    data: stocks
+    results: transformed.length,
+    data: transformed
   });
 });
+
 export const updateOpeningStock = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const userId = req.user.id;
