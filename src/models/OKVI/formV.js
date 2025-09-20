@@ -10,7 +10,7 @@ const formVSchema = new mongoose.Schema({
   // These two fields are _only_ written by your server logic:
   totalSaleAmt:   { type: Number, required: true },  
   totalRebateAmt: { type: Number, required: true },  
-
+  approval_status:  { type: Number, required: true, default: 0},
   createdAt: { type: Date, default: Date.now },
 });
 

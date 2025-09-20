@@ -15,12 +15,13 @@ const retailSaleDetailsSchema = new mongoose.Schema({
 const form1Schema = new mongoose.Schema({
   openingStockId:   { type: mongoose.Schema.Types.ObjectId, ref: 'OpeningStock', required: true },
   closingStockId:   { type: mongoose.Schema.Types.ObjectId, ref: 'ClosingStock', required: true },
-  institutionName:  { type: String, required: true },
-  institutionAddress:{ type: String, required: true },
+  institutionName:  { type: String },
+  institutionAddress:{ type: String },
   festival:         { type: String, required: true },
   month:            { type: String, required: true },
   fromDate:         { type: Date,   required: true },
   toDate:           { type: Date,   required: true },
+  approval_status:  { type: Number, required: true, default: 0},
   retailSales: {
     type: [retailSaleDetailsSchema],
     validate: v => Array.isArray(v) && v.length > 0,

@@ -47,6 +47,49 @@ const getFormIIdsForOpeningStocks = async (openingStockIds) => {
   const forms = await Form1.find({ openingStockId: { $in: openingStockIds } }, '_id');
   return forms.map((f) => f._id);
 };
+const modelMap = {
+  form1: Form1,
+  formv: FormV,
+  formvi: FormVI,
+  declaration: DeclarationCertificate,
+  audit: AuditCertificate,
+  bank: BankDepositProof
+};
+
+export const getFilteredData = catchAsync(async (req, res, next) => {
+  const { type, festival } = req.body;
+  if (!type || !festival) {
+    return next(new AppError('type and festival are required', 400));
+  }
+  const Model = modelMap[type.toLowerCase()];
+  if (!Model) {
+    return next(new AppError('Invalid type provided', 400));
+  }
+  let result = null;
+  if (['form1', 'audit', 'bank'].includes(type.toLowerCase())) {
+    result = await Model.findOne({ festival });
+  }
+
+  if (type.toLowerCase() === 'declaration') {
+    result = await Model.findOne({ month: festival });
+  }
+  if (['formv', 'formvi'].includes(type.toLowerCase())) {
+    const doc = await Model.findOne().populate({
+      path: 'formIId',
+      select: 'festival'
+    });
+
+    if (doc && doc.formIId?.festival === festival) {
+      result = doc;
+    }
+  }
+  return res.status(200).json({
+    status: 'success',
+    appliedFilters: { type, festival },
+    data: result || null,
+    message: result ? 'Form found' : 'No form found for given filters'
+  });
+});
 
 export const getClaimDocumentHeader = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
@@ -105,6 +148,16 @@ export const createForm1 = catchAsync(async (req, res, next) => {
   if (!festivalName || !Array.isArray(retailSales) || retailSales.length === 0) {
     return next(new AppError('festivalName (string) and at least one retailSale entry are required', 400));
   }
+
+  // ✅ fetch institution info from UserOKVI
+  const userDetails = await UserOKVI.findOne({ user: userId });
+  if (!userDetails) {
+    return next(new AppError('User institution details not found', 404));
+  }
+  if (!userDetails.institutionInfo?.name || !userDetails.institutionInfo?.address) {
+    return next(new AppError('Institution name and address are required in user details', 400));
+  }
+
   const requiredKeys = [
     'headType',
     'subCenterName',
@@ -115,23 +168,32 @@ export const createForm1 = catchAsync(async (req, res, next) => {
     'retailSalesAmount',
     'rebatePaidAmount'
   ];
+
   const processedSales = [];
   for (const sale of retailSales) {
-    if (!requiredKeys.every((k) => sale[k] != null)) {
+    // check required fields
+    if (!requiredKeys.every((k) => sale[k] != null && sale[k] !== '')) {
       return next(new AppError(`Each retailSale must include: ${requiredKeys.join(', ')}`, 400));
     }
+
+    // validate date
     if (isNaN(new Date(sale.billDate).getTime())) {
       return next(new AppError('Each sale must have a valid billDate', 400));
     }
-    const qty = Number(sale.quantity);
-    const rate = Number(sale.rate);
-    const amount = qty * rate;
-    const rebate = Math.round(amount * 0.10);
+
+    // validate numbers
+    const amount = Number(sale.retailSalesAmount);
+    const rebate = Number(sale.rebatePaidAmount);
+    if (isNaN(amount) || isNaN(rebate)) {
+      return next(new AppError('retailSalesAmount and rebatePaidAmount must be valid numbers', 400));
+    }
+
     processedSales.push({
       headType: sale.headType,
       subCenterName: sale.subCenterName,
       subCenterAddress: sale.subCenterAddress,
       frombillNo: sale.frombillNo,
+      tobillNo: sale.tobillNo,
       billDate: new Date(sale.billDate),
       retailSalesAmount: amount,
       rebatePaidAmount: rebate,
@@ -142,14 +204,15 @@ export const createForm1 = catchAsync(async (req, res, next) => {
   const festival = await getFestival(festivalName);
   const { openingStock, closingStock } = await getStocks(userId, festival._id);
 
+  // ✅ compute totals
   const totalSaleAmt = processedSales.reduce((sum, r) => sum + r.retailSalesAmount, 0);
   const totalRebateAmt = processedSales.reduce((sum, r) => sum + r.rebatePaidAmount, 0);
 
   const form1 = await Form1.create({
     openingStockId: openingStock._id,
     closingStockId: closingStock._id,
-    institutionName: req.user.name,
-    institutionAddress: req.user.address || '',
+    institutionName: userDetails.institutionInfo.name,
+    institutionAddress: userDetails.institutionInfo.address,
     festival: festivalName,
     month: new Date(openingStock.createdAt).toLocaleString('default', { month: 'long' }),
     fromDate: openingStock.createdAt,
@@ -161,6 +224,7 @@ export const createForm1 = catchAsync(async (req, res, next) => {
 
   res.status(201).json({ status: 'success', data: form1 });
 });
+
 
 export const createFormV = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
@@ -298,6 +362,8 @@ export const createFormV = catchAsync(async (req, res, next) => {
     });
   }
 });
+
+
 
 
 export const createFormVI = catchAsync(async (req, res, next) => {

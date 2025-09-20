@@ -12,7 +12,7 @@ const formVISchema = new mongoose.Schema({
     ref: 'Form1',
     required: true
   },
-
+  approval_status:  { type: Number, required: true, default: 0},
   centerBreakup: {
     type: [centerBreakupSchema],
     validate: v => Array.isArray(v) && v.length > 0

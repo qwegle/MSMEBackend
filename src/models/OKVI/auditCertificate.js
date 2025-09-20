@@ -14,6 +14,7 @@ const auditCertificateSchema = new mongoose.Schema({
   fromDate: { type: Date, required: true },
   toDate: { type: Date, required: true },
   status: {type: Number, required: true,default: 0,enum: [0, 1, 2]}, // 0 - Pending, 1 - Approved, 2 - Rejected
+  approval_status:  { type: Number, required: true, default: 0}, //  0 - Pending, 1 - Approved, -1 - Rejected
   auditCertificateFile: { type: String, required: true },
   createdAt: { type: Date, default: Date.now }
 });
