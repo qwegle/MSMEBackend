@@ -359,18 +359,32 @@ export const createFormVI = catchAsync(async (req, res, next) => {
     };
   });
 
+  // overall totals (across all centers)
+  const overallSaleAmt = retailSales.reduce((sum, s) => sum + Number(s.retailSalesAmount || 0), 0);
+  const overallRebateAmt = retailSales.reduce((sum, s) => sum + Number(s.rebatePaidAmount || 0), 0);
+
   // method === "get"
   if (method === 'get') {
     if (existing) {
       return res.status(200).json({
         status: 'success',
-        data: existing,
+        data: {
+          ...existing.toObject(),
+          formvi_retails: retailSales,  // full list
+          totalSaleAmt: overallSaleAmt,
+          totalRebateAmt: overallRebateAmt
+        },
         message: 'FormVI already exists'
       });
     }
     return res.status(200).json({
       status: 'success',
-      data: { centerBreakup },
+      data: {
+        centerBreakup,
+        formvi_retails: retailSales,
+        totalSaleAmt: overallSaleAmt,
+        totalRebateAmt: overallRebateAmt
+      },
       message: 'FormVI does not exist, returning breakup preview only'
     });
   }
@@ -380,10 +394,16 @@ export const createFormVI = catchAsync(async (req, res, next) => {
     if (existing) {
       return res.status(200).json({
         status: 'success',
-        data: existing,
+        data: {
+          ...existing.toObject(),
+          formvi_retails: retailSales,
+          totalSaleAmt: existing.centerBreakup.reduce((sum, c) => sum + c.totalSaleAmt, 0),
+          totalRebateAmt: existing.centerBreakup.reduce((sum, c) => sum + c.totalRebateAmt, 0)
+        },
         message: 'FormVI already exists'
       });
     }
+
     const formVI = await FormVI.create({
       formIId: form1._id,
       centerBreakup,
@@ -393,11 +413,18 @@ export const createFormVI = catchAsync(async (req, res, next) => {
 
     return res.status(201).json({
       status: 'success',
-      data: formVI,
+      data: {
+        formVI,
+        centerBreakup,
+        formvi_retails: retailSales,
+        totalSaleAmt: overallSaleAmt,
+        totalRebateAmt: overallRebateAmt
+      },
       message: 'FormVI created successfully'
     });
   }
 });
+
 
 export const createDeclarationCertificate = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
