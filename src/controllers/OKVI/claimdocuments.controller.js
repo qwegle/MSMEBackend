@@ -195,7 +195,18 @@ export const createFormV = catchAsync(async (req, res, next) => {
     if (existing) {
       return res.status(200).json({
         status: 'success',
-        data: existing,
+        data: {
+          ...existing.toObject(),
+          formv_retails: retailSales,
+          totalSaleAmt: retailSales.reduce(
+            (sum, sale) => sum + Number(sale.retailSalesAmount || 0),
+            0
+          ),
+          totalRebateAmt: retailSales.reduce(
+            (sum, sale) => sum + Number(sale.rebatePaidAmount || 0),
+            0
+          )
+        },
         message: 'FormV already exists'
       });
     }
@@ -214,7 +225,18 @@ export const createFormV = catchAsync(async (req, res, next) => {
 
     return res.status(200).json({
       status: 'success',
-      data: { subheads },
+      data: {
+        subheads,
+        formv_retails: retailSales,
+        totalSaleAmt: retailSales.reduce(
+          (sum, sale) => sum + Number(sale.retailSalesAmount || 0),
+          0
+        ),
+        totalRebateAmt: retailSales.reduce(
+          (sum, sale) => sum + Number(sale.rebatePaidAmount || 0),
+          0
+        )
+      },
       message: 'FormV does not exist, returning subhead preview only'
     });
   }
@@ -224,7 +246,12 @@ export const createFormV = catchAsync(async (req, res, next) => {
     if (existing) {
       return res.status(200).json({
         status: 'success',
-        data: existing,
+        data: {
+          ...existing.toObject(),
+          formv_retails: retailSales,
+          totalSaleAmt: existing.totalSaleAmt,
+          totalRebateAmt: existing.totalRebateAmt
+        },
         message: 'FormV already exists'
       });
     }
@@ -260,11 +287,18 @@ export const createFormV = catchAsync(async (req, res, next) => {
 
     return res.status(201).json({
       status: 'success',
-      data: { formV, subheads },
+      data: {
+        formV,
+        subheads,
+        formv_retails: retailSales,
+        totalSaleAmt,
+        totalRebateAmt
+      },
       message: 'FormV created successfully'
     });
   }
 });
+
 
 export const createFormVI = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
