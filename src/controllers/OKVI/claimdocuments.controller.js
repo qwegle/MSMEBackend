@@ -677,43 +677,51 @@ export const getFormIs = catchAsync(async (req, res) => {
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 10;
   const skip = (page - 1) * limit;
+
   const filter = {};
   if (!isAdminRole(userRole)) {
     const openingStockIds = await getOpeningStockIdsForUser(requesterId);
     filter.openingStockId = { $in: openingStockIds };
   }
+
   const docs = await Form1.find(filter)
-    .populate('openingStockId closingStockId')
+    .populate('openingStockId', '_id')
+    .populate('closingStockId', '_id')
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit);
+
   const total = await Form1.countDocuments(filter);
-  const transformed = docs.map(doc => ({
-    openingStockId: doc.openingStockId?._id ?? doc.openingStockId,
-    closingStockId: doc.closingStockId?._id ?? doc.closingStockId,
-    institutionName: doc.institutionName,
-    institutionAddress: doc.institutionAddress,
-    festival: doc.festival,
-    month: doc.month,
-    fromDate: doc.fromDate,
-    toDate: doc.toDate,
-    formData: doc.retailSales?.map(sale => ({
-      form1_id: doc._id,
-      headType: sale.headType,
-      subCenterName: sale.subCenterName,
-      subCenterAddress: sale.subCenterAddress,
-      frombillNo: sale.frombillNo,
-      tobillNo: sale.tobillNo,
-      billDate: sale.billDate,
-      retailSalesAmount: sale.retailSalesAmount,
-      rebatePaidAmount: sale.rebatePaidAmount,
-      remarks: sale.remarks
-    })),
-    totalSaleAmt: doc.totalSaleAmt,
-    totalRebateAmt: doc.totalRebateAmt,
-    createdAt: doc.createdAt,
-    __v: doc.__v
-  }));
+
+  // Flatten response
+  const transformed = docs.flatMap(doc =>
+    doc.retailSales.map(sale => ({
+      _id: doc._id,
+      openingStockId: { _id: doc.openingStockId?._id },
+      closingStockId: { _id: doc.closingStockId?._id },
+      institutionName: doc.institutionName,
+      institutionAddress: doc.institutionAddress,
+      festival: doc.festival,
+      month: doc.month,
+      fromDate: doc.fromDate,
+      toDate: doc.toDate,
+      retailSales: {
+        headType: sale.headType,
+        subCenterName: sale.subCenterName,
+        subCenterAddress: sale.subCenterAddress,
+        frombillNo: sale.frombillNo,
+        tobillNo: sale.tobillNo,
+        billDate: sale.billDate,
+        retailSalesAmount: sale.retailSalesAmount,
+        rebatePaidAmount: sale.rebatePaidAmount,
+        remarks: sale.remarks
+      },
+      totalSaleAmt: doc.totalSaleAmt,
+      totalRebateAmt: doc.totalRebateAmt,
+      createdAt: doc.createdAt,
+      __v: doc.__v
+    }))
+  );
 
   res.status(200).json({
     status: 'success',
@@ -724,6 +732,7 @@ export const getFormIs = catchAsync(async (req, res) => {
     data: transformed
   });
 });
+
 
 
 export const getFormIById = catchAsync(async (req, res, next) => {
@@ -759,27 +768,33 @@ export const deleteFormI = catchAsync(async (req, res, next) => {
 
   res.status(200).json({ status: 'success', message: 'Form I deleted', data: deleted });
 });
+
 export const getFormVs = catchAsync(async (req, res) => {
   const requesterId = req.user.id;
   const userRole = req.user.role ?? req.user.user_role ?? null;
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 10;
   const skip = (page - 1) * limit;
+
   const filter = {};
   if (!isAdminRole(userRole)) {
     const openingStockIds = await getOpeningStockIdsForUser(requesterId);
     const formIIds = await getFormIIdsForOpeningStocks(openingStockIds);
     filter.formIId = { $in: formIIds };
   }
+
   const docs = await FormV.find(filter)
     .populate('formIId')
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit);
+
   const total = await FormV.countDocuments(filter);
-  const transformed = docs.map(doc => {
+
+  const transformed = docs.flatMap(doc => {
     const formI = doc.formIId;
-    return {
+
+    return formI?.retailSales?.map(sale => ({
       openingStockId: formI?.openingStockId,
       closingStockId: formI?.closingStockId,
       institutionName: formI?.institutionName,
@@ -788,7 +803,7 @@ export const getFormVs = catchAsync(async (req, res) => {
       month: formI?.month,
       fromDate: formI?.fromDate,
       toDate: formI?.toDate,
-      formData: formI?.retailSales?.map(sale => ({
+      formData: {
         form1_id: formI?._id,
         formV_id: doc._id,
         headType: sale.headType,
@@ -800,7 +815,7 @@ export const getFormVs = catchAsync(async (req, res) => {
         retailSalesAmount: sale.retailSalesAmount,
         rebatePaidAmount: sale.rebatePaidAmount,
         remarks: sale.remarks
-      })),
+      },
       totalSaleAmt: formI?.totalSaleAmt,
       totalRebateAmt: formI?.totalRebateAmt,
       createdAt: formI?.createdAt,
@@ -809,19 +824,18 @@ export const getFormVs = catchAsync(async (req, res) => {
       totalRebateAmtAll: doc.totalRebateAmt,
       createdAtFormV: doc.createdAt,
       __vFormV: doc.__v
-    };
+    }));
   });
+
   res.status(200).json({
     status: 'success',
     results: transformed.length,
     total,
     page,
     totalPages: Math.ceil(total / limit),
-    data: transformed.length === 1 ? transformed[0] : transformed
+    data: transformed
   });
 });
-
-
 export const getFormVById = catchAsync(async (req, res, next) => {
   const requesterId = req.user.id;
   const userRole = req.user.role ?? req.user.user_role ?? null;
@@ -857,14 +871,12 @@ export const deleteFormV = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: 'success', message: 'Form V deleted', data: deleted });
 });
 
-/* ---------- FORM VI ---------- */
 export const getFormVIs = catchAsync(async (req, res) => {
   const requesterId = req.user.id;
   const userRole = req.user.role ?? req.user.user_role ?? null;
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 10;
   const skip = (page - 1) * limit;
-
   const filter = {};
   if (!isAdminRole(userRole)) {
     const openingStockIds = await getOpeningStockIdsForUser(requesterId);
@@ -877,10 +889,9 @@ export const getFormVIs = catchAsync(async (req, res) => {
     .skip(skip)
     .limit(limit);
   const total = await FormVI.countDocuments(filter);
-  const transformed = docs.map(doc => {
+  const transformed = docs.flatMap(doc => {
     const formI = doc.formIId;
-
-    return {
+    return doc.centerBreakup.map(center => ({
       openingStockId: formI?.openingStockId,
       closingStockId: formI?.closingStockId,
       institutionName: formI?.institutionName,
@@ -889,20 +900,20 @@ export const getFormVIs = catchAsync(async (req, res) => {
       month: formI?.month,
       fromDate: formI?.fromDate,
       toDate: formI?.toDate,
-      formData: doc.centerBreakup?.map(center => ({
+      formData: {
         form1_id: formI?._id,
         formVI_id: doc._id,
         subCenterName: center.subCenterName,
         totalSaleAmt: center.totalSaleAmt,
         totalRebateAmt: center.totalRebateAmt
-      })),
+      },
       totalSaleAmt: formI?.totalSaleAmt,
       totalRebateAmt: formI?.totalRebateAmt,
       createdAt: formI?.createdAt,
       __v: formI?.__v,
       createdAtFormVI: doc.createdAt,
       __vFormVI: doc.__v
-    };
+    }));
   });
 
   res.status(200).json({
@@ -914,7 +925,6 @@ export const getFormVIs = catchAsync(async (req, res) => {
     data: transformed
   });
 });
-
 
 export const getFormVIById = catchAsync(async (req, res, next) => {
   const requesterId = req.user.id;
