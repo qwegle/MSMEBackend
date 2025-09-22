@@ -124,11 +124,22 @@ const claimApplicationSchema = new Schema({
   disbursementReference: {
     type: String,
     trim: true
-  }
+  },
+ approval_status: {
+    type: Number,
+    default: 0,
+    required: true
+ },
+ approval_level: {
+  type: Number,
+  default: 0,
+  required: true
+ }
 }, { timestamps: true });
 claimApplicationSchema.index({ userId: 1, festivalId: 1 });
 claimApplicationSchema.index({ status: 1 });
 claimApplicationSchema.index({ currentApprover: 1 });
 claimApplicationSchema.index({ submittedAt: 1 });
+
 claimApplicationSchema.statics.CLAIM_STATUS = CLAIM_STATUS;
 export default model('ClaimApplication', claimApplicationSchema);
