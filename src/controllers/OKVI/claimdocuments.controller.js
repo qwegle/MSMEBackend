@@ -37,7 +37,6 @@ const getFestival = async (festivalName) => {
   return festival;
 };
 
-// Helpers used by admin/user-scoped listing
 const getOpeningStockIdsForUser = async (userId) => {
   const stocks = await OpeningStock.find({ user: userId }, '_id');
   return stocks.map((s) => s._id);
@@ -56,7 +55,6 @@ const modelMap = {
   bank: BankDepositProof
 };
 
-// controllers/OKVI/filter.controller.js
 export const getFilteredData = catchAsync(async (req, res, next, isAdmin = false) => {
   const { type, festival, action, claimId, form, approval_status } = req.body;
   const typeLower = type ? type.toLowerCase() : '';
@@ -68,24 +66,69 @@ export const getFilteredData = catchAsync(async (req, res, next, isAdmin = false
     if (action) return next(new AppError('Users are not allowed to use "action"', 403));
     if (!type || !festival) return next(new AppError('type and festival are required', 400));
 
-    const Model = modelMap[typeLower];
-    if (!Model) return next(new AppError('Invalid type provided', 400));
+    // Resolve festival from Holiday collection
+    const holiday = await Holiday.findOne({ name: festival }).lean();
+    if (!holiday) {
+      return next(new AppError('Festival not found', 404));
+    }
 
+    // --- Case 1: Get ALL forms for user + festival ---
+    if (typeLower === 'all') {
+      const claim = await ClaimApplication.findOne({
+        userId: req.user.id,
+        festivalId: holiday._id
+      }).lean();
+
+      if (!claim) {
+        return res.status(200).json({ status: 'success', message: 'No claim/forms found' });
+      }
+
+      const forms = {
+        form1: await Form1.findById(claim.formIId).lean(),
+        formV: await FormV.findById(claim.formVId).lean(),
+        formVI: await FormVI.findById(claim.formVIId).lean(),
+        declaration: await DeclarationCertificate.findById(claim.declarationCertificateId).lean(),
+        audit: await AuditCertificate.findById(claim.auditCertificateId).lean(),
+        bank: await BankDepositProof.findById(claim.bankDepositProofId).lean()
+      };
+
+      return res.status(200).json({
+        status: 'success',
+        festival: holiday.name,
+        festivalId: holiday._id,
+        claimId: claim._id,
+        forms
+      });
+    }
+
+    // --- Case 2: Single form fetch ---
     let result = null;
-    if (['form1', 'audit', 'bank'].includes(typeLower)) {
-      result = await Model.findOne({ festival }).lean();
+
+    if (typeLower === 'form1') {
+      result = await Form1.findOne({ festival: holiday._id, userId: req.user._id }).lean();
     }
+
+    if (typeLower === 'audit') {
+      result = await AuditCertificate.findOne({ festival: holiday._id, userId: req.user._id }).lean();
+    }
+
+    if (typeLower === 'bank') {
+      result = await BankDepositProof.findOne({ festival: holiday._id, userId: req.user._id }).lean();
+    }
+
     if (typeLower === 'declaration') {
-      result = await DeclarationCertificate.findOne({ month: festival }).lean();
+      result = await DeclarationCertificate.findOne({ month: holiday._id, userId: req.user._id }).lean();
     }
+
     if (typeLower === 'formv') {
-      const formV = await FormV.findOne()
+      const formV = await FormV.findOne({ userId: req.user._id })
         .populate({ path: 'formIId', select: 'festival retailSales' })
         .lean();
-      if (formV && formV.formIId?.festival === festival) {
+
+      if (formV && String(formV.formIId?.festival) === String(holiday._id)) {
         result = {
           _id: formV._id,
-          festival: formV.formIId.festival,
+          festival: holiday.name,
           totalSaleAmt: formV.totalSaleAmt,
           totalRebateAmt: formV.totalRebateAmt,
           approval_status: formV.approval_status || 0,
@@ -95,14 +138,16 @@ export const getFilteredData = catchAsync(async (req, res, next, isAdmin = false
         };
       }
     }
+
     if (typeLower === 'formvi') {
-      const formVI = await FormVI.findOne()
+      const formVI = await FormVI.findOne({ userId: req.user._id })
         .populate({ path: 'formIId', select: 'festival' })
         .lean();
-      if (formVI && formVI.formIId?.festival === festival) {
+
+      if (formVI && String(formVI.formIId?.festival) === String(holiday._id)) {
         result = {
           _id: formVI._id,
-          festival: formVI.formIId.festival,
+          festival: holiday.name,
           approval_status: formVI.approval_status || 0,
           centerBreakup: formVI.centerBreakup || [],
           createdAt: formVI.createdAt,
@@ -110,6 +155,7 @@ export const getFilteredData = catchAsync(async (req, res, next, isAdmin = false
         };
       }
     }
+
     if (!result) return res.status(200).json({ status: 'success', message: 'No form found' });
     return res.status(200).json({ status: 'success', ...result, message: 'Form found' });
   }
@@ -118,47 +164,48 @@ export const getFilteredData = catchAsync(async (req, res, next, isAdmin = false
   if (userRole === 3) {
     return next(new AppError('Unauthorized: users cannot access admin actions', 403));
   }
-// Case 4: Get form(s) for a claim
-if (action === 'get') {
-  if (!claimId) return next(new AppError('claimId is required', 400));
 
-  const claim = await ClaimApplication.findOne({ _id: claimId, approval_level: userRole }).lean();
-  if (!claim) return next(new AppError('Claim not found or not authorized', 404));
+  // Case 1: Get form(s) for a claim
+  if (action === 'get') {
+    if (!claimId) return next(new AppError('claimId is required', 400));
 
-  // If specific formId is provided, return only that form
-  if (form) {
-    const formMap = {
-      [claim.formIId?.toString()]: Form1,
-      [claim.formVId?.toString()]: FormV,
-      [claim.formVIId?.toString()]: FormVI,
-      [claim.auditCertificateId?.toString()]: AuditCertificate,
-      [claim.bankDepositProofId?.toString()]: BankDepositProof,
-      [claim.declarationCertificateId?.toString()]: DeclarationCertificate
+    const claim = await ClaimApplication.findOne({ _id: claimId, approval_level: userRole }).lean();
+    if (!claim) return next(new AppError('Claim not found or not authorized', 404));
+
+    // If specific formId is provided, return only that form
+    if (form) {
+      const formMap = {
+        [claim.formIId?.toString()]: Form1,
+        [claim.formVId?.toString()]: FormV,
+        [claim.formVIId?.toString()]: FormVI,
+        [claim.auditCertificateId?.toString()]: AuditCertificate,
+        [claim.bankDepositProofId?.toString()]: BankDepositProof,
+        [claim.declarationCertificateId?.toString()]: DeclarationCertificate
+      };
+
+      const Model = formMap[form];
+      if (!Model) return next(new AppError('Form not linked to claim', 400));
+
+      const doc = await Model.findById(form).lean();
+      if (!doc) return next(new AppError('Form not found', 404));
+
+      return res.status(200).json({ status: 'success', form: doc });
+    }
+
+    // Otherwise return all forms linked to the claim
+    const forms = {
+      form1: await Form1.findById(claim.formIId).lean(),
+      formV: await FormV.findById(claim.formVId).lean(),
+      formVI: await FormVI.findById(claim.formVIId).lean(),
+      declaration: await DeclarationCertificate.findById(claim.declarationCertificateId).lean(),
+      audit: await AuditCertificate.findById(claim.auditCertificateId).lean(),
+      bank: await BankDepositProof.findById(claim.bankDepositProofId).lean()
     };
 
-    const Model = formMap[form];
-    if (!Model) return next(new AppError('Form not linked to claim', 400));
-
-    const doc = await Model.findById(form).lean();
-    if (!doc) return next(new AppError('Form not found', 404));
-
-    return res.status(200).json({ status: 'success', form: doc });
+    return res.status(200).json({ status: 'success', claimId, forms });
   }
 
-  // Otherwise return all forms linked to the claim
-  const forms = {
-    form1: await Form1.findById(claim.formIId).lean(),
-    formV: await FormV.findById(claim.formVId).lean(),
-    formVI: await FormVI.findById(claim.formVIId).lean(),
-    declaration: await DeclarationCertificate.findById(claim.declarationCertificateId).lean(),
-    audit: await AuditCertificate.findById(claim.auditCertificateId).lean(),
-    bank: await BankDepositProof.findById(claim.bankDepositProofId).lean()
-  };
-
-  return res.status(200).json({ status: 'success', claimId, forms });
-}
-
-  // Case 1: List claims
+  // Case 2: List claims
   if (action === 'listClaims') {
     const claims = await ClaimApplication.find({ approval_level: userRole }).lean();
 
@@ -178,7 +225,7 @@ if (action === 'get') {
     return res.status(200).json({ status: 'success', claims: claimsWithInstitution });
   }
 
-  // Case 2: Get claim details
+  // Case 3: Get claim details
   if (action === 'getClaimDetails') {
     if (!claimId) return next(new AppError('claimId is required', 400));
 
@@ -197,47 +244,44 @@ if (action === 'get') {
     return res.status(200).json({ status: 'success', claimId, forms });
   }
 
-  // Case 3: Update approval for a form
-  // Case 3: Update approval for a form
-if (action === 'update_status') {
-  if (!claimId || !form || approval_status === undefined) {
-    return next(new AppError('claimId, form (formId) and approval_status are required', 400));
+  // Case 4: Update approval for a form
+  if (action === 'update_status') {
+    if (!claimId || !form || approval_status === undefined) {
+      return next(new AppError('claimId, form (formId) and approval_status are required', 400));
+    }
+
+    const claim = await ClaimApplication.findOne({ _id: claimId, approval_level: userRole }).lean();
+    if (!claim) return next(new AppError('Claim not found or not authorized', 404));
+
+    const formMap = {
+      [claim.formIId?.toString()]: Form1,
+      [claim.formVId?.toString()]: FormV,
+      [claim.formVIId?.toString()]: FormVI,
+      [claim.auditCertificateId?.toString()]: AuditCertificate,
+      [claim.bankDepositProofId?.toString()]: BankDepositProof
+    };
+
+    const Model = formMap[form];
+    if (!Model) {
+      return next(new AppError('Invalid form type or form not linked to claim', 400));
+    }
+
+    const updatedForm = await Model.findOneAndUpdate(
+      { _id: form },
+      { approval_status },
+      { new: true }
+    ).lean();
+
+    if (!updatedForm) return next(new AppError('Form not found in collection', 404));
+
+    return res.status(200).json({
+      status: 'success',
+      updatedForm,
+      message: `Approval status updated for form ${form}`
+    });
   }
 
-  const claim = await ClaimApplication.findOne({ _id: claimId, approval_level: userRole }).lean();
-  if (!claim) return next(new AppError('Claim not found or not authorized', 404));
-
-  // Map claim’s form IDs to collections
-  const formMap = {
-    [claim.formIId?.toString()]: Form1,
-    [claim.formVId?.toString()]: FormV,
-    [claim.formVIId?.toString()]: FormVI,
-    [claim.auditCertificateId?.toString()]: AuditCertificate,
-    [claim.bankDepositProofId?.toString()]: BankDepositProof
-  };
-
-  const Model = formMap[form]; // form here is the formId you passed
-  if (!Model) {
-    return next(new AppError('Invalid form type or form not linked to claim', 400));
-  }
-
-  const updatedForm = await Model.findOneAndUpdate(
-    { _id: form },
-    { approval_status },
-    { new: true }
-  ).lean();
-
-  if (!updatedForm) return next(new AppError('Form not found in collection', 404));
-
-  return res.status(200).json({
-    status: 'success',
-    updatedForm,
-    message: `Approval status updated for form ${form}`
-  });
-}
-
-
-  // Case 4: Send to next approver
+  // Case 5: Send to next approver
   if (action === 'send_to_next_approver') {
     if (!claimId) return next(new AppError('claimId is required', 400));
 
@@ -274,12 +318,6 @@ if (action === 'update_status') {
 
   return next(new AppError('Invalid admin request', 400));
 });
-
-
-
-
-
-
 
 
 export const getClaimDocumentHeader = catchAsync(async (req, res, next) => {
