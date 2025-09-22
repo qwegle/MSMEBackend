@@ -75,7 +75,7 @@ export const getFilteredData = catchAsync(async (req, res, next, isAdmin = false
     // --- Case 1: Get ALL forms for user + festival ---
     if (typeLower === 'all') {
       const claim = await ClaimApplication.findOne({
-        userId: req.user.id,
+        userId: req.user.id || req.user._id,
         festivalId: holiday._id
       }).lean();
 
@@ -83,10 +83,37 @@ export const getFilteredData = catchAsync(async (req, res, next, isAdmin = false
         return res.status(200).json({ status: 'success', message: 'No claim/forms found' });
       }
 
+      // --- Form V (recalculate from Form I.retailSales) ---
+      let formV = await FormV.findById(claim.formVId)
+        .populate({ path: 'formIId', select: 'retailSales festival' })
+        .lean();
+
+      let formVTotalSaleAmt = 0, formVTotalRebateAmt = 0;
+      if (formV && formV.formIId) {
+        formVTotalSaleAmt = formV.formIId.retailSales.reduce((sum, r) => sum + (r.retailSalesAmount || 0), 0);
+        formVTotalRebateAmt = formV.formIId.retailSales.reduce((sum, r) => sum + (r.rebatePaidAmount || 0), 0);
+        formV = {
+          ...formV,
+          totalSaleAmt: formVTotalSaleAmt,
+          totalRebateAmt: formVTotalRebateAmt,
+          retailDetails: formV.formIId.retailSales
+        };
+      }
+
+      // --- Form VI (recalculate from centerBreakup) ---
+      let formVI = await FormVI.findById(claim.formVIId).lean();
+      let formVITotalSaleAmt = 0, formVITotalRebateAmt = 0;
+      if (formVI) {
+        formVITotalSaleAmt = formVI.centerBreakup.reduce((sum, c) => sum + (c.totalSaleAmt || 0), 0);
+        formVITotalRebateAmt = formVI.centerBreakup.reduce((sum, c) => sum + (c.totalRebateAmt || 0), 0);
+        formVI = { ...formVI, totalSaleAmt: formVITotalSaleAmt, totalRebateAmt: formVITotalRebateAmt };
+      }
+
+      // --- Other forms ---
       const forms = {
         form1: await Form1.findById(claim.formIId).lean(),
-        formV: await FormV.findById(claim.formVId).lean(),
-        formVI: await FormVI.findById(claim.formVIId).lean(),
+        formV,
+        formVI,
         declaration: await DeclarationCertificate.findById(claim.declarationCertificateId).lean(),
         audit: await AuditCertificate.findById(claim.auditCertificateId).lean(),
         bank: await BankDepositProof.findById(claim.bankDepositProofId).lean()
@@ -97,6 +124,8 @@ export const getFilteredData = catchAsync(async (req, res, next, isAdmin = false
         festival: holiday.name,
         festivalId: holiday._id,
         claimId: claim._id,
+        overallTotalSaleAmt: formVTotalSaleAmt + formVITotalSaleAmt,
+        overallTotalRebateAmt: formVTotalRebateAmt + formVITotalRebateAmt,
         forms
       });
     }
@@ -121,35 +150,43 @@ export const getFilteredData = catchAsync(async (req, res, next, isAdmin = false
     }
 
     if (typeLower === 'formv') {
-      const formV = await FormV.findOne({ userId: req.user._id })
-        .populate({ path: 'formIId', select: 'festival retailSales' })
+      let formV = await FormV.findOne({ userId: req.user._id })
+        .populate({ path: 'formIId', select: 'retailSales festival' })
         .lean();
 
       if (formV && String(formV.formIId?.festival) === String(holiday._id)) {
+        const totalSaleAmt = formV.formIId.retailSales.reduce((sum, r) => sum + (r.retailSalesAmount || 0), 0);
+        const totalRebateAmt = formV.formIId.retailSales.reduce((sum, r) => sum + (r.rebatePaidAmount || 0), 0);
+
         result = {
           _id: formV._id,
           festival: holiday.name,
-          totalSaleAmt: formV.totalSaleAmt,
-          totalRebateAmt: formV.totalRebateAmt,
           approval_status: formV.approval_status || 0,
           createdAt: formV.createdAt,
           __v: formV.__v,
-          retailDetails: formV.formIId.retailSales || []
+          retailDetails: formV.formIId.retailSales,
+          totalSaleAmt,
+          totalRebateAmt
         };
       }
     }
 
     if (typeLower === 'formvi') {
-      const formVI = await FormVI.findOne({ userId: req.user._id })
+      let formVI = await FormVI.findOne({ userId: req.user._id })
         .populate({ path: 'formIId', select: 'festival' })
         .lean();
 
       if (formVI && String(formVI.formIId?.festival) === String(holiday._id)) {
+        const totalSaleAmt = formVI.centerBreakup.reduce((sum, c) => sum + (c.totalSaleAmt || 0), 0);
+        const totalRebateAmt = formVI.centerBreakup.reduce((sum, c) => sum + (c.totalRebateAmt || 0), 0);
+
         result = {
           _id: formVI._id,
           festival: holiday.name,
           approval_status: formVI.approval_status || 0,
           centerBreakup: formVI.centerBreakup || [],
+          totalSaleAmt,
+          totalRebateAmt,
           createdAt: formVI.createdAt,
           __v: formVI.__v
         };
@@ -193,10 +230,27 @@ export const getFilteredData = catchAsync(async (req, res, next, isAdmin = false
     }
 
     // Otherwise return all forms linked to the claim
+    let formV = await FormV.findById(claim.formVId)
+      .populate({ path: 'formIId', select: 'retailSales festival' })
+      .lean();
+
+    if (formV && formV.formIId) {
+      const totalSaleAmt = formV.formIId.retailSales.reduce((sum, r) => sum + (r.retailSalesAmount || 0), 0);
+      const totalRebateAmt = formV.formIId.retailSales.reduce((sum, r) => sum + (r.rebatePaidAmount || 0), 0);
+      formV = { ...formV, totalSaleAmt, totalRebateAmt, retailDetails: formV.formIId.retailSales };
+    }
+
+    let formVI = await FormVI.findById(claim.formVIId).lean();
+    if (formVI) {
+      const totalSaleAmt = formVI.centerBreakup.reduce((sum, c) => sum + (c.totalSaleAmt || 0), 0);
+      const totalRebateAmt = formVI.centerBreakup.reduce((sum, c) => sum + (c.totalRebateAmt || 0), 0);
+      formVI = { ...formVI, totalSaleAmt, totalRebateAmt };
+    }
+
     const forms = {
       form1: await Form1.findById(claim.formIId).lean(),
-      formV: await FormV.findById(claim.formVId).lean(),
-      formVI: await FormVI.findById(claim.formVIId).lean(),
+      formV,
+      formVI,
       declaration: await DeclarationCertificate.findById(claim.declarationCertificateId).lean(),
       audit: await AuditCertificate.findById(claim.auditCertificateId).lean(),
       bank: await BankDepositProof.findById(claim.bankDepositProofId).lean()
@@ -232,10 +286,27 @@ export const getFilteredData = catchAsync(async (req, res, next, isAdmin = false
     const claim = await ClaimApplication.findOne({ _id: claimId, approval_level: userRole }).lean();
     if (!claim) return next(new AppError('Claim not found or not authorized', 404));
 
+    let formV = await FormV.findById(claim.formVId)
+      .populate({ path: 'formIId', select: 'retailSales festival' })
+      .lean();
+
+    if (formV && formV.formIId) {
+      const totalSaleAmt = formV.formIId.retailSales.reduce((sum, r) => sum + (r.retailSalesAmount || 0), 0);
+      const totalRebateAmt = formV.formIId.retailSales.reduce((sum, r) => sum + (r.rebatePaidAmount || 0), 0);
+      formV = { ...formV, totalSaleAmt, totalRebateAmt, retailDetails: formV.formIId.retailSales };
+    }
+
+    let formVI = await FormVI.findById(claim.formVIId).lean();
+    if (formVI) {
+      const totalSaleAmt = formVI.centerBreakup.reduce((sum, c) => sum + (c.totalSaleAmt || 0), 0);
+      const totalRebateAmt = formVI.centerBreakup.reduce((sum, c) => sum + (c.totalRebateAmt || 0), 0);
+      formVI = { ...formVI, totalSaleAmt, totalRebateAmt };
+    }
+
     const forms = {
       form1: await Form1.findById(claim.formIId).lean(),
-      formV: await FormV.findById(claim.formVId).lean(),
-      formVI: await FormVI.findById(claim.formVIId).lean(),
+      formV,
+      formVI,
       declaration: await DeclarationCertificate.findById(claim.declarationCertificateId).lean(),
       audit: await AuditCertificate.findById(claim.auditCertificateId).lean(),
       bank: await BankDepositProof.findById(claim.bankDepositProofId).lean()
@@ -318,6 +389,7 @@ export const getFilteredData = catchAsync(async (req, res, next, isAdmin = false
 
   return next(new AppError('Invalid admin request', 400));
 });
+
 
 
 export const getClaimDocumentHeader = catchAsync(async (req, res, next) => {
