@@ -1330,7 +1330,7 @@ class _LoginOkviWidgetState extends State<LoginOkviWidget> {
                                                                     .transparent,
                                                             onTap: () async {
                                                               _model.apiRGetCaptchaRefresh =
-                                                                  await MsmeOsfcGroup
+                                                                  await OkviGroup
                                                                       .getCaptchaCall
                                                                       .call();
 
