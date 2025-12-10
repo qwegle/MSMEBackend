@@ -1,13 +1,11 @@
 # MSME APIs - Project Documentation
 
 ## Overview
-This is an MSME (Micro, Small, and Medium Enterprises) management system for Odisha, India. It consists of:
+This is an MSME (Micro, Small, and Medium Enterprises) management system for Odisha, India.
 - **Backend**: Node.js/Express API with MongoDB database
-- **Frontend**: Pre-built Flutter web application
 
 ## Project Structure
 ```
-├── frontend/           # Pre-built Flutter web app (static files)
 ├── src/
 │   ├── app.js         # Main Express application
 │   ├── config/        # Database and Cloudinary configuration
@@ -96,81 +94,21 @@ This is an MSME (Micro, Small, and Medium Enterprises) management system for Odi
 - `EMAIL_*`: Email service configuration
 
 ## Development Setup
-The app runs on port 5000 and serves both the API (`/api/*`) and the Flutter frontend.
+The API runs on port 5000. Root endpoint returns API status.
 
 ## Database
 This project uses MongoDB. Connection status is verified at startup.
 
+## CURRENT FOCUS: OKVI MODULE ONLY
+**DO NOT modify OSFC or OSIC modules - work on OKVI only!**
+
+### Key Design Choice
+OKVI uses plain JSON for API calls (no encryption), unlike OSFC which uses EncDecInterceptor
+
 ## Recent Changes (Dec 2024)
+- Removed Flutter frontend - now pure API backend
 - Added individual form approval tracking (approvedBy, approvedAt, rejectionReason, reviewedByRole)
 - Implemented Forgot Password API with OTP-based verification
 - Implemented Change Password API for authenticated users
 - Added individual form approval/rejection APIs for admins
-- Added getSubmittedClaimDocument API for "View Submitted Claim Document" page
-- Added getClaimSummary API for totals and form status summary
 - Updated approval flow to check all forms approved before moving to next level
-
-## CURRENT FOCUS: OKVI MODULE ONLY
-**DO NOT modify OSFC or OSIC modules - work on OKVI only!**
-
-### Flutter Frontend Location
-- Source code: `flutter_frontend/lib/`
-- OKVI pages: `flutter_frontend/lib/okvi/`
-- OKVI Admin: `flutter_frontend/lib/okvi_admin/`
-- OKVI Login: `flutter_frontend/lib/auth/login_okvi/`
-- OKVI Register: `flutter_frontend/lib/auth/register_okvi/`
-- API calls: `flutter_frontend/lib/backend/api_requests/api_calls.dart` (OkviGroup class)
-
-### Backend-Frontend Integration (COMPLETED)
-1. OKVI APIs are at: `/api/okvi/*` - All working
-2. Flutter OkviGroup base URL: Updated to Replit domain
-3. OKVI Captcha: Dedicated endpoint at `/api/okvi/auth/get-captcha` (no encryption)
-4. Login widget: Fixed to use OkviGroup.getCaptchaCall instead of OSFC captcha
-5. Email: Configured to use Gmail SMTP (USE_SMTP=true)
-
-### OKVI API Endpoints Summary
-**Auth (No encryption)**:
-- GET `/api/okvi/auth/get-captcha` - Returns captchaQuestion, captchaToken, captchaType
-- POST `/api/okvi/auth/login` - Email/password login, returns JWT token
-- POST `/api/okvi/auth/sendotp` - Send OTP for email verification
-- POST `/api/okvi/auth/verifyotp` - Verify OTP
-- POST `/api/okvi/auth/registerUserDetails` - Complete registration
-
-**Stock Management**:
-- POST `/api/okvi/opening-stock/create` - Create opening stock
-- GET `/api/okvi/opening-stock/getOpeningStocks` - Get opening stocks
-- POST `/api/okvi/closing-stock/create` - Create closing stock
-- GET `/api/okvi/closing-stock/getClosingStocks` - Get closing stocks
-
-**Claim Documents**:
-- POST `/api/okvi/claim-documents/form-i` - Submit Form I
-- POST `/api/okvi/claim-documents/form-v` - Submit Form V
-- POST `/api/okvi/claim-documents/form-vi` - Submit Form VI
-- POST `/api/okvi/claim-documents/declaration-certificate` - Submit declaration
-- POST `/api/okvi/claim-documents/upload-audit-certificate` - Upload audit cert
-- POST `/api/okvi/claim-documents/upload-bank-deposit-proof` - Upload bank proof
-- POST `/api/okvi/claim-documents/final-submit` - Final submit claim
-
-**Admin (Role 0, 1, 2)**:
-- GET `/api/okvi/admin/dashboard` - Admin dashboard with statistics
-- GET `/api/okvi/admin/claims/pending` - Get pending claims
-- POST `/api/okvi/admin/forms/approve` - Approve individual form
-- POST `/api/okvi/admin/forms/reject` - Reject individual form
-- POST `/api/okvi/admin/claims/approve-and-move` - Approve all and move to next level
-
-**Master Data (GMDIC only)**:
-- GET/POST/PUT/DELETE `/api/okvi/holidays/*` - Holiday management
-- GET/POST/PUT/DELETE `/api/okvi/head-types/*` - Head type management
-- GET/POST/PUT/DELETE `/api/okvi/unit-types/*` - Unit type management
-
-### Flutter Build Instructions
-To rebuild the Flutter web app:
-```bash
-cd flutter_frontend
-flutter pub get
-flutter build web --release
-cp -r build/web/* ../frontend/
-```
-
-### Key Design Choice
-OKVI uses plain JSON for API calls (no encryption), unlike OSFC which uses EncDecInterceptor

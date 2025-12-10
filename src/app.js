@@ -145,13 +145,13 @@ app.use((err, req, res, next) => {
 });
 app.use(errorHandler);
 
-app.use(express.static(join(__dirname, '../frontend')));
-
-app.get('/{*splat}', (req, res, next) => {
-  if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
-    return next();
-  }
-  res.sendFile(join(__dirname, '../frontend/index.html'));
+app.get('/', (req, res) => {
+  res.json({
+    name: 'MSME APIs',
+    version: '1.0.0',
+    modules: ['OKVI', 'OSFC', 'OSIC'],
+    status: 'running'
+  });
 });
 
 const PORT = 5000;
