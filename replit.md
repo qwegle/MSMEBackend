@@ -109,3 +109,20 @@ This project uses MongoDB. Connection status is verified at startup.
 - Added getSubmittedClaimDocument API for "View Submitted Claim Document" page
 - Added getClaimSummary API for totals and form status summary
 - Updated approval flow to check all forms approved before moving to next level
+
+## CURRENT FOCUS: OKVI MODULE ONLY
+**DO NOT modify OSFC or OSIC modules - work on OKVI only!**
+
+### Flutter Frontend Location
+- Source code: `flutter_frontend/lib/`
+- OKVI pages: `flutter_frontend/lib/okvi/`
+- OKVI Admin: `flutter_frontend/lib/okvi_admin/`
+- OKVI Login: `flutter_frontend/lib/auth/login_okvi/`
+- OKVI Register: `flutter_frontend/lib/auth/register_okvi/`
+- API calls: `flutter_frontend/lib/backend/api_requests/api_calls.dart` (OkviGroup class)
+
+### Backend-Frontend Integration Tasks
+1. OKVI APIs are at: `/api/okvi/*`
+2. Flutter OkviGroup base URL: Currently `https://msmebackend.onrender.com`
+3. Need to update to local Replit URL for development
+4. Captcha issue: OKVI login incorrectly calls OSFC captcha endpoint
