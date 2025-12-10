@@ -4653,7 +4653,7 @@ class ClaimDocumentsAuditCertificateCall {
 
     return ApiManager.instance.makeApiCall(
       callName: 'Claim Documents Audit Certificate',
-      apiUrl: '${baseUrl}api/okvi/claim-documents/upload-audit-certificate',
+      apiUrl: '${baseUrl}/api/okvi/claim-documents/upload-audit-certificate',
       callType: ApiCallType.POST,
       headers: {
         'Authorization': 'Bearer ${authToken}',
