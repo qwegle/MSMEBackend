@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import { registerOkviUser, sendOtp, verifyOtp, registerOkviUserdetails, loginOkviUser, logoutOkvi, getUserDashboard, forgotPasswordSendOtp, forgotPasswordVerifyOtp, resetPassword, changePassword } from '../../controllers/OKVI/okviuser.controller.js'; 
+import { registerOkviUser, sendOtp, verifyOtp, registerOkviUserdetails, loginOkviUser, logoutOkvi, getUserDashboard, forgotPasswordSendOtp, forgotPasswordVerifyOtp, resetPassword, changePassword, getCaptcha } from '../../controllers/OKVI/okviuser.controller.js'; 
 import { authenticateOkviToken } from '../../middlewares/okviAuth.middleware.js';
 
 const router = Router();
+router.get('/get-captcha', getCaptcha);
 router.post('/login', loginOkviUser);
 router.post('/registerAdmin', registerOkviUser);
 router.post('/sendotp', sendOtp);

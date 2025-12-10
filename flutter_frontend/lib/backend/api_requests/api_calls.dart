@@ -4118,10 +4118,11 @@ class OkviGroup {
   static String getBaseUrl({
     String? authToken = '',
   }) =>
-      'https://msmebackend.onrender.com';
+      'https://0b2d1b5d-3b9b-4e15-bba5-9de0e19a1b0d-00-r4zwniir4gzm.pike.replit.dev';
   static Map<String, String> headers = {
     'Authorization': 'Bearer [authToken]',
   };
+  static OkviGetCaptchaCall getCaptchaCall = OkviGetCaptchaCall();
   static OKVILoginCall oKVILoginCall = OKVILoginCall();
   static OKVIRegisterCall oKVIRegisterCall = OKVIRegisterCall();
   static EmailVerifysCall emailVerifysCall = EmailVerifysCall();
@@ -4178,6 +4179,26 @@ class OkviGroup {
   static TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall
       testCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall =
       TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCall();
+}
+
+class OkviGetCaptchaCall {
+  Future<ApiCallResponse> call() async {
+    final baseUrl = OkviGroup.getBaseUrl();
+
+    return ApiManager.instance.makeApiCall(
+      callName: 'OKVI Get Captcha',
+      apiUrl: '${baseUrl}/api/okvi/auth/get-captcha',
+      callType: ApiCallType.GET,
+      headers: {},
+      params: {},
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
 }
 
 class OKVILoginCall {
@@ -4416,7 +4437,7 @@ class OpenStockCreateCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Open Stock Create',
-      apiUrl: '${baseUrl}/api/OKVI/opening-stock/create',
+      apiUrl: '${baseUrl}/api/okvi/opening-stock/create',
       callType: ApiCallType.POST,
       headers: {
         'Authorization': 'Bearer ${authToken}',
@@ -4465,7 +4486,7 @@ class CloseStockCreateCall {
 }''';
     return ApiManager.instance.makeApiCall(
       callName: 'Close Stock Create',
-      apiUrl: '${baseUrl}/api/OKVI/closingstock/create',
+      apiUrl: '${baseUrl}/api/okvi/closing-stock/create',
       callType: ApiCallType.POST,
       headers: {
         'Authorization': 'Bearer ${authToken}',
@@ -5454,7 +5475,7 @@ class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCo
     return ApiManager.instance.makeApiCall(
       callName:
           'test Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy',
-      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      apiUrl: '${baseUrl}/api/okvi/claim-documents/upload-bank-deposit-proof',
       callType: ApiCallType.GET,
       headers: {
         'Authorization': 'Bearer ${authToken}',
@@ -5481,7 +5502,7 @@ class TestCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCopyCa
     return ApiManager.instance.makeApiCall(
       callName:
           'test Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy Copy',
-      apiUrl: '${baseUrl}/api/OKVI/claimdocuments/uploadBankDepositProof',
+      apiUrl: '${baseUrl}/api/okvi/claim-documents/upload-bank-deposit-proof',
       callType: ApiCallType.GET,
       headers: {
         'Authorization': 'Bearer ${authToken}',

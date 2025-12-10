@@ -69,10 +69,10 @@ class _LandingpageWidgetState extends State<LandingpageWidget> {
                           children: [
                             if (responsiveVisibility(
                               context: context,
-                              phone: false,
-                              tablet: false,
-                              tabletLandscape: false,
-                              desktop: false,
+                              phone: true,
+                              tablet: true,
+                              tabletLandscape: true,
+                              desktop: true,
                             ))
                               Flexible(
                                 child: Row(

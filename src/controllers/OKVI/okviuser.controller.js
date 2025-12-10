@@ -11,6 +11,7 @@ import { blacklistToken } from '../../utils/tokenBlacklist.js';
 import ClaimApplication from '../../models/OKVI/claimApplication.js';
 import Holiday from '../../models/OKVI/holidayFestival.js';
 import mongoose from 'mongoose';
+import { generateCaptcha, verifyCaptcha } from '../../utils/captcha.js';
 const { hash, compare } = bcrypt;
 
 export const registerOkviUser = catchAsync(async (req, res, next) => {
@@ -472,5 +473,15 @@ export const getUserDashboard = catchAsync(async (req, res) => {
       },
       holidays: holidaysWithStatus
     }
+  });
+});
+
+export const getCaptcha = catchAsync(async (req, res) => {
+  const captchaData = generateCaptcha();
+  res.status(200).json({
+    status: 'success',
+    captchaType: captchaData.captchaType,
+    captchaQuestion: captchaData.captchaQuestion,
+    captchaToken: captchaData.captchaToken
   });
 });

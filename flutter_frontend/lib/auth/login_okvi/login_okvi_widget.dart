@@ -37,7 +37,7 @@ class _LoginOkviWidgetState extends State<LoginOkviWidget> {
 
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      _model.apiRGetCaptcha = await MsmeOsfcGroup.getCaptchaCall.call();
+      _model.apiRGetCaptcha = await OkviGroup.getCaptchaCall.call();
 
       if ((_model.apiRGetCaptcha?.succeeded ?? true)) {
         FFAppState().captchaToken = getJsonField(
