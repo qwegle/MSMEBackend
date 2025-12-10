@@ -154,7 +154,7 @@ app.get('/{*splat}', (req, res, next) => {
   res.sendFile(join(__dirname, '../frontend/index.html'));
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = 5000;
 (async () => {
   try {
     await connectDB();

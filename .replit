@@ -30,9 +30,22 @@ waitForPort = 5000
 outputType = "webview"
 
 [[ports]]
+localPort = 3000
+externalPort = 3001
+
+[[ports]]
 localPort = 5000
 externalPort = 80
 
 [[ports]]
 localPort = 33231
 externalPort = 3000
+
+[userenv]
+
+[userenv.development]
+ALLOW_DB_FAILURE = "true"
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["node", "src/app.js"]
