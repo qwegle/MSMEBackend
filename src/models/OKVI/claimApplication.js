@@ -69,7 +69,7 @@ const claimApplicationSchema = new Schema({
   },
   formIId: {
     type: Schema.Types.ObjectId,
-    ref: 'FormI'
+    ref: 'Form1'
   },
   formVId: {
     type: Schema.Types.ObjectId,
