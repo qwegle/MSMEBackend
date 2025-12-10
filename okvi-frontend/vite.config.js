@@ -14,7 +14,14 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5000,
     strictPort: true,
-    allowedHosts: 'all',
+    allowedHosts: [
+      'localhost',
+      '127.0.0.1',
+      '.replit.dev',
+      '.pike.replit.dev',
+      '.repl.co',
+      '0b2d1b5d-3b9b-4e15-bba5-9de0e19a1b0d-00-r4zwniir4gzm.pike.replit.dev'
+    ],
     hmr: false,
     proxy: {
       '/api': {

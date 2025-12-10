@@ -1,0 +1,258 @@
+{
+  "info": {
+    "name": "OKVI API Collection",
+    "description": "Odisha Khadi and Village Industries - Online Rebate Management System API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/okvi",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Get Captcha",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/get-captcha",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "get-captcha"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set('token', jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"gmdic@okvi.gov.in\",\n  \"password\": \"Gmdic@123\",\n  \"captchaAnswer\": \"10\",\n  \"captchaToken\": \"PASTE_TOKEN_FROM_GET_CAPTCHA\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Send OTP (Registration)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newuser@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/sendotp",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "sendotp"]
+            }
+          }
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/verifyotp",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "verifyotp"]
+            }
+          }
+        },
+        {
+          "name": "Complete Registration",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"verificationToken\": \"token_from_verify_otp\",\n  \"email\": \"newuser@example.com\",\n  \"password\": \"SecurePass@123\",\n  \"institutionDetails\": {\n    \"name\": \"Khadi Institution\",\n    \"type\": \"Society\",\n    \"registrationNumber\": \"REG123456\",\n    \"address\": \"Bhubaneswar, Odisha\",\n    \"district\": \"Khordha\",\n    \"pincode\": \"751001\"\n  },\n  \"bankDetails\": {\n    \"bankName\": \"State Bank of India\",\n    \"branchName\": \"Main Branch\",\n    \"accountNumber\": \"1234567890\",\n    \"ifscCode\": \"SBIN0001234\"\n  },\n  \"secretaryDetails\": {\n    \"name\": \"Secretary Name\",\n    \"phone\": \"9876543210\",\n    \"email\": \"secretary@example.com\"\n  },\n  \"presidentDetails\": {\n    \"name\": \"President Name\",\n    \"phone\": \"9876543211\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/registerUserDetails",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "registerUserDetails"]
+            }
+          }
+        },
+        {
+          "name": "Forgot Password - Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@okvi.gov.in\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password/send-otp",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "forgot-password", "send-otp"]
+            }
+          }
+        },
+        {
+          "name": "Forgot Password - Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@okvi.gov.in\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password/verify-otp",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "forgot-password", "verify-otp"]
+            }
+          }
+        },
+        {
+          "name": "Forgot Password - Reset",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@okvi.gov.in\",\n  \"resetToken\": \"token_from_verify\",\n  \"newPassword\": \"NewSecure@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password/reset",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "forgot-password", "reset"]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"OldPass@123\",\n  \"newPassword\": \"NewPass@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "change-password"]
+            }
+          }
+        },
+        {
+          "name": "Get Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/dashboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "dashboard"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
