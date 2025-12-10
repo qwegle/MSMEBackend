@@ -18,6 +18,10 @@ author = "agent"
 task = "workflow.run"
 args = "OKVI Frontend"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "OKVI Backend"
+
 [[workflows.workflow]]
 name = "OKVI Frontend"
 author = "agent"
@@ -30,21 +34,29 @@ waitForPort = 5000
 [workflows.workflow.metadata]
 outputType = "webview"
 
-[[ports]]
-localPort = 3000
-externalPort = 3001
+[[workflows.workflow]]
+name = "OKVI Backend"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 3000
+
+[workflows.workflow.metadata]
+outputType = "console"
 
 [[ports]]
-localPort = 5000
-externalPort = 80
+localPort = 3000
+externalPort = 3000
 
 [[ports]]
 localPort = 5001
 externalPort = 3000
 
 [[ports]]
-localPort = 43611
-externalPort = 3002
+localPort = 40839
+externalPort = 80
 
 [userenv]
 

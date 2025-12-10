@@ -4,9 +4,11 @@
 @theme {
   --color-gov-blue: #003366;
   --color-gov-blue-dark: #002244;
+  --color-gov-blue-light: #0055a4;
   --color-gov-saffron: #FF9933;
   --color-gov-green: #138808;
   --color-gov-gold: #C5A02D;
+  --color-gov-cream: #FFF8F0;
   
   --font-family-odia: 'Noto Sans Oriya', sans-serif;
   --font-family-sans: 'Inter', sans-serif;
@@ -20,7 +22,7 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #f5f5f5;
+  background: linear-gradient(180deg, #e8f4fc 0%, #f0f4f8 50%, #f5f7fa 100%);
   min-height: 100vh;
 }
 
@@ -29,30 +31,176 @@ body {
 }
 
 .btn-primary {
-  @apply bg-gov-blue text-white px-6 py-2.5 rounded-lg hover:bg-gov-blue-dark transition-colors font-medium shadow-sm;
+  @apply bg-gradient-to-r from-gov-blue to-gov-blue-light text-white px-6 py-3 rounded-lg hover:from-gov-blue-dark hover:to-gov-blue transition-all font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5;
 }
 
 .btn-secondary {
-  @apply bg-white text-gov-blue border-2 border-gov-blue px-6 py-2 rounded-lg hover:bg-gray-50 transition-colors font-medium;
+  @apply bg-white text-gov-blue border-2 border-gov-blue px-6 py-2.5 rounded-lg hover:bg-gov-blue hover:text-white transition-all font-semibold;
 }
 
 .btn-saffron {
-  @apply bg-gov-saffron text-white px-6 py-2.5 rounded-lg hover:bg-orange-600 transition-colors font-medium shadow-sm;
+  @apply bg-gradient-to-r from-gov-saffron to-orange-500 text-white px-6 py-3 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all font-semibold shadow-lg;
 }
 
 .input-field {
-  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gov-blue focus:border-transparent outline-none transition-all bg-white;
+  @apply w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-gov-blue/30 focus:border-gov-blue outline-none transition-all bg-white text-gray-800 placeholder-gray-400;
+}
+
+.input-field:hover {
+  border-color: #94a3b8;
 }
 
 .card {
-  @apply bg-white rounded-lg shadow-md p-6;
+  @apply bg-white rounded-xl shadow-xl border border-gray-100;
 }
 
 .tricolor-top {
   background: linear-gradient(to right, #FF9933 33.33%, #FFFFFF 33.33%, #FFFFFF 66.66%, #138808 66.66%);
-  height: 4px;
+  height: 5px;
 }
 
 .gov-gradient {
-  background: linear-gradient(135deg, #003366 0%, #004488 100%);
+  background: linear-gradient(135deg, #003366 0%, #004d99 50%, #0066cc 100%);
+  box-shadow: 0 4px 20px rgba(0, 51, 102, 0.3);
+}
+
+.gov-header-pattern {
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(255, 153, 51, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(19, 136, 8, 0.1) 0%, transparent 50%),
+    linear-gradient(135deg, #003366 0%, #004d99 50%, #0066cc 100%);
+}
+
+.login-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 51, 102, 0.15),
+    0 0 0 1px rgba(0, 51, 102, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+.auth-container {
+  background: linear-gradient(135deg, #e8f4fc 0%, #f0f8ff 100%);
+  min-height: calc(100vh - 140px);
+}
+
+.step-indicator {
+  @apply w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300;
+}
+
+.step-indicator.active {
+  @apply bg-gov-blue text-white shadow-lg scale-110;
+}
+
+.step-indicator.completed {
+  @apply bg-gov-green text-white;
+}
+
+.step-indicator.pending {
+  @apply bg-gray-200 text-gray-500;
+}
+
+.step-connector {
+  @apply h-1 flex-1 mx-1 rounded-full transition-all duration-300;
+}
+
+.step-connector.completed {
+  @apply bg-gov-green;
+}
+
+.step-connector.pending {
+  @apply bg-gray-200;
+}
+
+.form-section {
+  @apply bg-white rounded-xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow;
+}
+
+.sidebar-link {
+  @apply flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gov-blue/5 hover:text-gov-blue transition-all font-medium;
+}
+
+.sidebar-link.active {
+  @apply bg-gov-blue text-white hover:bg-gov-blue-dark hover:text-white shadow-md;
+}
+
+.table-header {
+  @apply bg-gradient-to-r from-gov-blue to-gov-blue-light text-white;
+}
+
+.status-badge {
+  @apply px-3 py-1 rounded-full text-xs font-semibold;
+}
+
+.status-pending {
+  @apply bg-yellow-100 text-yellow-800 border border-yellow-200;
+}
+
+.status-approved {
+  @apply bg-green-100 text-green-800 border border-green-200;
+}
+
+.status-rejected {
+  @apply bg-red-100 text-red-800 border border-red-200;
+}
+
+.status-submitted {
+  @apply bg-blue-100 text-blue-800 border border-blue-200;
+}
+
+.dashboard-card {
+  @apply bg-white rounded-xl p-6 border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1;
+}
+
+.dashboard-stat {
+  @apply text-3xl font-bold text-gov-blue;
+}
+
+.footer-gradient {
+  background: linear-gradient(135deg, #003366 0%, #004d99 100%);
+}
+
+.tooltip {
+  @apply absolute z-50 px-3 py-2 text-sm bg-gray-900 text-white rounded-lg shadow-lg;
+}
+
+.loading-spinner {
+  @apply animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full;
+}
+
+.glass-effect {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.cm-photo-container {
+  @apply relative;
+}
+
+.cm-photo-container::before {
+  content: '';
+  @apply absolute inset-0 rounded-full;
+  background: linear-gradient(135deg, #FF9933 0%, #138808 100%);
+  padding: 3px;
+  z-index: -1;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out forwards;
 }

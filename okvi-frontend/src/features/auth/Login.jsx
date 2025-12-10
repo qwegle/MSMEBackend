@@ -68,18 +68,25 @@ const Login = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto">
-      <Card>
-        <div className="text-center mb-6">
-          <h1 className={`text-2xl font-bold text-gov-blue ${language === 'or' ? 'font-odia' : ''}`}>
-            {t('auth:loginTitle')}
-          </h1>
-          <p className={`text-gray-600 mt-2 ${language === 'or' ? 'font-odia' : ''}`}>
-            {t('auth:loginSubtitle')}
-          </p>
+    <div className="max-w-lg mx-auto animate-fade-in">
+      <Card variant="elevated" className="overflow-hidden">
+        <div className="bg-gradient-to-r from-gov-blue to-gov-blue-light p-6 -m-6 mb-6">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-white/20 rounded-full mx-auto mb-4 flex items-center justify-center backdrop-blur-sm">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <h1 className={`text-2xl font-bold text-white ${language === 'or' ? 'font-odia' : ''}`}>
+              {t('auth:loginTitle')}
+            </h1>
+            <p className={`text-white/80 mt-2 ${language === 'or' ? 'font-odia' : ''}`}>
+              {t('auth:loginSubtitle')}
+            </p>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 mt-8">
           <Input
             label={t('common:email')}
             type="email"
@@ -109,24 +116,24 @@ const Login = () => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-9 text-gray-500 hover:text-gray-700"
+              className="absolute right-4 top-10 text-gray-400 hover:text-gray-600 transition-colors"
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
 
           <div className="space-y-2">
-            <label className={`block text-sm font-medium text-gray-700 ${language === 'or' ? 'font-odia' : ''}`}>
+            <label className={`block text-sm font-semibold text-gray-700 ${language === 'or' ? 'font-odia' : ''}`}>
               {t('common:captcha')} <span className="text-red-500">*</span>
             </label>
             <div className="flex items-center gap-3">
-              <div className="flex-1 bg-gray-100 px-4 py-3 rounded-lg text-lg font-mono">
+              <div className="flex-1 bg-gradient-to-r from-gray-100 to-gray-50 px-5 py-3.5 rounded-xl text-lg font-mono border-2 border-gray-200 text-center tracking-wider">
                 {captcha.question || '...'}
               </div>
               <button
                 type="button"
                 onClick={fetchCaptcha}
-                className="p-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                className="p-3.5 bg-gray-100 hover:bg-gov-blue hover:text-white rounded-xl transition-all border-2 border-gray-200 hover:border-gov-blue"
               >
                 <RefreshCw size={20} />
               </button>
@@ -139,21 +146,21 @@ const Login = () => {
             />
           </div>
 
-          <Button type="submit" loading={loading} className="w-full">
+          <Button type="submit" loading={loading} className="w-full" size="lg">
             {t('common:login')}
           </Button>
         </form>
 
-        <div className="mt-6 text-center space-y-2">
+        <div className="mt-8 pt-6 border-t border-gray-100 text-center space-y-3">
           <Link 
             to="/forgot-password" 
-            className={`text-gov-blue hover:underline block ${language === 'or' ? 'font-odia' : ''}`}
+            className={`text-gov-blue hover:text-gov-blue-dark font-medium hover:underline block transition-colors ${language === 'or' ? 'font-odia' : ''}`}
           >
             {t('common:forgotPassword')}
           </Link>
           <p className={`text-gray-600 ${language === 'or' ? 'font-odia' : ''}`}>
             {t('auth:dontHaveAccount')}{' '}
-            <Link to="/register" className="text-gov-blue hover:underline font-medium">
+            <Link to="/register" className="text-gov-blue hover:text-gov-blue-dark font-semibold hover:underline transition-colors">
               {t('common:signUp')}
             </Link>
           </p>

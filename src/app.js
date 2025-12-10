@@ -154,7 +154,7 @@ app.get('/', (req, res) => {
   });
 });
 
-const PORT = 5000;
+const PORT = 3000;
 (async () => {
   try {
     await connectDB();
