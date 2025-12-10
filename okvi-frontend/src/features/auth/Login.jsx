@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
-import { RefreshCw, Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { RefreshCw, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Button, Input } from '../../components/ui';
 import { authApi } from '../../services/api';
@@ -68,31 +68,26 @@ const Login = () => {
   };
 
   return (
-    <section className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md animate-fade-in">
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
-          <div className="bg-gradient-to-br from-gov-blue via-gov-blue-light to-gov-blue pt-10 pb-8 px-8">
-            <div className="flex flex-col items-center justify-center gap-4">
-              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-xl">
+    <div className="flex items-center justify-center min-h-[calc(100vh-280px)]">
+      <div className="w-full max-w-lg">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div className="bg-gradient-to-r from-gov-blue to-gov-blue-dark px-10 py-10">
+            <div className="flex flex-col items-center">
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg mb-5">
                 <svg className="w-10 h-10 text-gov-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
-              <div className="text-center">
-                <h1 className={`text-3xl font-bold text-white ${language === 'or' ? 'font-odia' : ''}`}>
-                  {t('auth:loginTitle')}
-                </h1>
-                <p className={`text-white/80 mt-2 text-base ${language === 'or' ? 'font-odia' : ''}`}>
-                  {t('auth:loginSubtitle')}
-                </p>
-              </div>
-            </div>
-            <div className="mt-6 flex justify-center">
-              <div className="h-1 w-20 bg-gov-saffron rounded-full"></div>
+              <h1 className={`text-2xl font-bold text-white text-center ${language === 'or' ? 'font-odia' : ''}`}>
+                {t('auth:loginTitle')}
+              </h1>
+              <p className={`text-white/70 mt-2 text-center ${language === 'or' ? 'font-odia' : ''}`}>
+                {t('auth:loginSubtitle')}
+              </p>
             </div>
           </div>
 
-          <div className="p-8">
+          <div className="px-10 py-10">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <Input
                 label={t('common:email')}
@@ -134,15 +129,15 @@ const Login = () => {
                   {t('common:captcha')} <span className="text-red-500">*</span>
                 </label>
                 <div className="flex items-center gap-4">
-                  <div className="flex-1 bg-gradient-to-r from-gray-50 to-white px-6 py-4 rounded-xl text-xl font-mono border-2 border-gray-200 text-center tracking-widest font-bold text-gray-700">
+                  <div className="flex-1 bg-gray-100 px-6 py-4 rounded-lg text-xl font-mono text-center font-bold text-gray-800 border border-gray-200">
                     {captcha.question || '...'}
                   </div>
                   <button
                     type="button"
                     onClick={fetchCaptcha}
-                    className="p-4 bg-gray-50 hover:bg-gov-blue hover:text-white rounded-xl transition-all border-2 border-gray-200 hover:border-gov-blue"
+                    className="p-4 bg-gray-100 hover:bg-gov-blue hover:text-white rounded-lg transition-all border border-gray-200 hover:border-gov-blue"
                   >
-                    <RefreshCw size={22} />
+                    <RefreshCw size={20} />
                   </button>
                 </div>
                 <Input
@@ -153,23 +148,21 @@ const Login = () => {
                 />
               </div>
 
-              <div className="pt-2">
-                <Button type="submit" loading={loading} className="w-full" size="lg">
-                  {t('common:login')}
-                </Button>
-              </div>
+              <Button type="submit" loading={loading} className="w-full" size="lg">
+                {t('common:login')}
+              </Button>
             </form>
 
-            <div className="mt-8 pt-6 border-t border-gray-200 text-center space-y-4">
+            <div className="mt-8 pt-6 border-t border-gray-200 text-center">
               <Link 
                 to="/forgot-password" 
-                className={`text-gov-blue hover:text-gov-blue-dark font-medium hover:underline block transition-colors ${language === 'or' ? 'font-odia' : ''}`}
+                className={`text-gov-blue hover:underline font-medium ${language === 'or' ? 'font-odia' : ''}`}
               >
                 {t('common:forgotPassword')}
               </Link>
-              <p className={`text-gray-600 ${language === 'or' ? 'font-odia' : ''}`}>
+              <p className={`text-gray-600 mt-3 ${language === 'or' ? 'font-odia' : ''}`}>
                 {t('auth:dontHaveAccount')}{' '}
-                <Link to="/register" className="text-gov-blue hover:text-gov-blue-dark font-bold hover:underline transition-colors">
+                <Link to="/register" className="text-gov-blue hover:underline font-bold">
                   {t('common:signUp')}
                 </Link>
               </p>
@@ -177,7 +170,7 @@ const Login = () => {
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 

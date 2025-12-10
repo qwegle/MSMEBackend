@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import useLanguageStore from '../../store/languageStore';
-import { Globe, User } from 'lucide-react';
+import { Globe } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 
 const AuthLayout = () => {
@@ -9,60 +9,49 @@ const AuthLayout = () => {
   const { language, toggleLanguage } = useLanguageStore();
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg, #e8f4fc 0%, #f0f8ff 100%)' }}>
-      <div className="tricolor-top"></div>
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <div className="h-1.5 bg-gradient-to-r from-gov-saffron via-white to-gov-green"></div>
       
-      <header className="gov-header-pattern text-white py-5 shadow-xl">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between">
+      <header className="bg-gradient-to-r from-gov-blue to-gov-blue-dark text-white">
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-4">
+          <div className="flex items-center justify-between gap-6">
             <div className="flex items-center gap-5">
-              <div className="h-16 w-16 bg-white rounded-full flex items-center justify-center shadow-lg">
-                <img 
-                  src="/assets/odisha-emblem.png" 
-                  alt="Odisha Emblem" 
-                  className="h-12 w-auto"
-                  onError={(e) => {
-                    e.target.parentElement.innerHTML = '<span class="text-gov-blue font-bold text-xl">OD</span>';
-                  }}
-                />
+              <div className="h-14 w-14 bg-white rounded-lg flex items-center justify-center shadow-lg flex-shrink-0">
+                <span className="text-gov-blue font-bold text-xl">OD</span>
               </div>
               
-              <div className="flex flex-col">
-                <span className={`text-sm opacity-90 ${language === 'or' ? 'font-odia' : ''}`}>
+              <div>
+                <p className={`text-sm text-white/80 ${language === 'or' ? 'font-odia' : ''}`}>
                   {t('govt')}
-                </span>
-                <span className={`text-xl font-bold tracking-wide ${language === 'or' ? 'font-odia' : ''}`}>
+                </p>
+                <h1 className={`text-lg lg:text-xl font-bold ${language === 'or' ? 'font-odia' : ''}`}>
                   {t('appName')}
-                </span>
+                </h1>
               </div>
             </div>
 
-            <div className="hidden md:flex flex-col items-center">
-              <div className="relative">
-                <div className="absolute -inset-1 bg-gradient-to-r from-gov-saffron via-white to-gov-green rounded-full opacity-70"></div>
-                <div className="relative h-20 w-20 rounded-full border-3 border-white shadow-xl bg-white flex items-center justify-center overflow-hidden">
-                  <img 
-                    src="/assets/cm-placeholder.svg" 
-                    alt={t('cmName')}
-                    className="h-full w-full object-cover"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.parentElement.innerHTML = '<div class="flex items-center justify-center h-full w-full bg-gray-100"><svg class="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg></div>';
-                    }}
-                  />
-                </div>
+            <div className="hidden md:flex flex-col items-center bg-white/10 rounded-xl px-6 py-3 backdrop-blur-sm">
+              <div className="w-16 h-16 rounded-full bg-white shadow-lg overflow-hidden flex items-center justify-center">
+                <svg className="w-10 h-10 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                </svg>
               </div>
-              <span className={`text-sm font-semibold mt-2 ${language === 'or' ? 'font-odia' : ''}`}>
-                {t('cmName')}
-              </span>
+              <div className="text-center mt-2">
+                <p className={`text-sm font-semibold ${language === 'or' ? 'font-odia' : ''}`}>
+                  {t('cmName')}
+                </p>
+                <p className="text-xs text-white/70 uppercase tracking-wide">
+                  Hon'ble Chief Minister
+                </p>
+              </div>
             </div>
 
             <button
               onClick={toggleLanguage}
-              className="flex items-center gap-2 px-5 py-2.5 bg-white/15 hover:bg-white/25 rounded-xl transition-all border border-white/20 backdrop-blur-sm"
+              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium"
             >
-              <Globe size={18} />
-              <span className={`font-medium ${language === 'or' ? 'font-odia' : ''}`}>
+              <Globe size={16} />
+              <span className={language === 'or' ? 'font-odia' : ''}>
                 {language === 'en' ? 'ଓଡ଼ିଆ' : 'English'}
               </span>
             </button>
@@ -70,13 +59,13 @@ const AuthLayout = () => {
         </div>
       </header>
 
-      <main className="flex-1 container mx-auto px-4 py-10">
+      <main className="flex-1 py-10 px-6">
         <Outlet />
       </main>
 
-      <footer className="footer-gradient text-white py-5">
-        <div className="container mx-auto px-4 text-center">
-          <p className={`text-sm opacity-90 ${language === 'or' ? 'font-odia' : ''}`}>
+      <footer className="bg-gov-blue text-white py-4">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <p className={`text-sm text-white/80 ${language === 'or' ? 'font-odia' : ''}`}>
             © {new Date().getFullYear()} {t('department')}, {t('govt')}
           </p>
         </div>
@@ -86,21 +75,8 @@ const AuthLayout = () => {
         position="top-right" 
         toastOptions={{
           style: {
-            borderRadius: '12px',
-            padding: '16px',
-            boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
-          },
-          success: {
-            iconTheme: {
-              primary: '#138808',
-              secondary: '#fff',
-            },
-          },
-          error: {
-            iconTheme: {
-              primary: '#dc2626',
-              secondary: '#fff',
-            },
+            borderRadius: '10px',
+            padding: '14px 18px',
           },
         }}
       />
