@@ -71,18 +71,25 @@ const Login = () => {
     <section className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md animate-fade-in">
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
-          <div className="bg-gradient-to-br from-gov-blue via-gov-blue-light to-gov-blue p-8 text-center">
-            <div className="w-20 h-20 bg-white/20 rounded-full mx-auto mb-5 flex items-center justify-center backdrop-blur-sm border-2 border-white/30">
-              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
+          <div className="bg-gradient-to-br from-gov-blue via-gov-blue-light to-gov-blue pt-10 pb-8 px-8">
+            <div className="flex flex-col items-center justify-center gap-4">
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-xl">
+                <svg className="w-10 h-10 text-gov-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <div className="text-center">
+                <h1 className={`text-3xl font-bold text-white ${language === 'or' ? 'font-odia' : ''}`}>
+                  {t('auth:loginTitle')}
+                </h1>
+                <p className={`text-white/80 mt-2 text-base ${language === 'or' ? 'font-odia' : ''}`}>
+                  {t('auth:loginSubtitle')}
+                </p>
+              </div>
             </div>
-            <h1 className={`text-3xl font-bold text-white ${language === 'or' ? 'font-odia' : ''}`}>
-              {t('auth:loginTitle')}
-            </h1>
-            <p className={`text-white/80 mt-3 text-base ${language === 'or' ? 'font-odia' : ''}`}>
-              {t('auth:loginSubtitle')}
-            </p>
+            <div className="mt-6 flex justify-center">
+              <div className="h-1 w-20 bg-gov-saffron rounded-full"></div>
+            </div>
           </div>
 
           <div className="p-8">

@@ -51,15 +51,19 @@ localPort = 3000
 externalPort = 3000
 
 [[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
 localPort = 5001
 externalPort = 3000
 
 [[ports]]
-localPort = 40887
-externalPort = 80
+localPort = 33909
+externalPort = 3001
 
 [[ports]]
-localPort = 5000
+localPort = 40887
 externalPort = 80
 
 [userenv]
