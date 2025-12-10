@@ -6,12 +6,14 @@ const formVSchema = new mongoose.Schema({
     ref: 'Form1', 
     required: true 
   },
-
-  // These two fields are _only_ written by your server logic:
-  totalSaleAmt:   { type: Number, required: true },  
-  totalRebateAmt: { type: Number, required: true },  
+  totalSaleAmt:     { type: Number, required: true },  
+  totalRebateAmt:   { type: Number, required: true },  
   approval_status:  { type: Number, required: true, default: 0},
-  createdAt: { type: Date, default: Date.now },
+  approvedBy:       { type: mongoose.Schema.Types.ObjectId, ref: 'OkviAuth' },
+  approvedAt:       { type: Date },
+  rejectionReason:  { type: String },
+  reviewedByRole:   { type: Number, enum: [0, 1, 2] },
+  createdAt:        { type: Date, default: Date.now },
 });
 
 const FormV = mongoose.model('FormV', formVSchema);

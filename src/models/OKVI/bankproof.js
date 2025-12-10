@@ -13,8 +13,12 @@ const bankDepositProofSchema = new mongoose.Schema({
   festival: { type: String, required: true },
   month: { type: String, required: true },
   fromDate: { type: Date, required: true },
-  status: {type: Number, required: true,default: 0,enum: [0, 1, 2]}, // 0 - Pending, 1 - Approved, 2 - Rejected
+  status: {type: Number, required: true,default: 0,enum: [0, 1, 2]},
   approval_status:  { type: Number, required: true, default: 0},
+  approvedBy:       { type: mongoose.Schema.Types.ObjectId, ref: 'OkviAuth' },
+  approvedAt:       { type: Date },
+  rejectionReason:  { type: String },
+  reviewedByRole:   { type: Number, enum: [0, 1, 2] },
   toDate: { type: Date, required: true },
   depositProofFile: { type: String, required: true }, 
   createdAt: { type: Date, default: Date.now }

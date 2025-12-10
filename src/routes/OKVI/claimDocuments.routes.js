@@ -31,7 +31,9 @@ import {
   getBankProofById,
   deleteBankProof,
   getClaimDocumentHeader,
-  getFilteredData
+  getFilteredData,
+  getSubmittedClaimDocument,
+  getClaimSummary
 } from '../../controllers/OKVI/claimdocuments.controller.js';
 import { authenticateOkviToken } from '../../middlewares/okviAuth.middleware.js';
 import { upload, uploadToCloud } from '../../middlewares/fileUploadHandler.js';
@@ -68,6 +70,8 @@ router.get('/bank-proofs', authenticateOkviToken, getBankProofs);
 router.get('/bank-proof/:id', authenticateOkviToken, getBankProofById);
 router.delete('/bank-proof/:id', authenticateOkviToken, deleteBankProof);
 router.post('/getClaimData', authenticateOkviToken,getFilteredData);
-router.get('/getClaimHeader', authenticateOkviToken,getClaimDocumentHeader);// only user
+router.get('/getClaimHeader', authenticateOkviToken,getClaimDocumentHeader);
+router.post('/submitted-claim-document', authenticateOkviToken, getSubmittedClaimDocument);
+router.post('/claim-summary', authenticateOkviToken, getClaimSummary);
 
 export default router;

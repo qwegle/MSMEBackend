@@ -1491,3 +1491,257 @@ export const deleteBankProof = catchAsync(async (req, res, next) => {
   if (!deleted) return next(new AppError('Bank Deposit Proof not found or access denied to delete', 404));
   res.status(200).json({ status: 'success', message: 'Bank Deposit Proof deleted', data: deleted });
 });
+
+const ROLE_NAMES = {
+  0: 'GMDIC',
+  1: 'DI',
+  2: 'Addl. Director'
+};
+
+const getUserFormsStatus = async (claim) => {
+  const forms = [];
+
+  if (claim.formIId) {
+    const form = await Form1.findById(claim.formIId).populate('approvedBy', 'name email').lean();
+    forms.push({
+      name: 'Form I',
+      type: 'form1',
+      id: form?._id,
+      submitted: !!form,
+      approval_status: form?.approval_status || 0,
+      approvedBy: form?.approvedBy ? { name: form.approvedBy.name, role: ROLE_NAMES[form.reviewedByRole] } : null,
+      approvedAt: form?.approvedAt,
+      rejectionReason: form?.rejectionReason
+    });
+  }
+
+  if (claim.formVId) {
+    const form = await FormV.findById(claim.formVId).populate('approvedBy', 'name email').lean();
+    forms.push({
+      name: 'Form V',
+      type: 'formv',
+      id: form?._id,
+      submitted: !!form,
+      approval_status: form?.approval_status || 0,
+      approvedBy: form?.approvedBy ? { name: form.approvedBy.name, role: ROLE_NAMES[form.reviewedByRole] } : null,
+      approvedAt: form?.approvedAt,
+      rejectionReason: form?.rejectionReason,
+      totalSaleAmt: form?.totalSaleAmt,
+      totalRebateAmt: form?.totalRebateAmt
+    });
+  }
+
+  if (claim.formVIId) {
+    const form = await FormVI.findById(claim.formVIId).populate('approvedBy', 'name email').lean();
+    forms.push({
+      name: 'Form VI',
+      type: 'formvi',
+      id: form?._id,
+      submitted: !!form,
+      approval_status: form?.approval_status || 0,
+      approvedBy: form?.approvedBy ? { name: form.approvedBy.name, role: ROLE_NAMES[form.reviewedByRole] } : null,
+      approvedAt: form?.approvedAt,
+      rejectionReason: form?.rejectionReason
+    });
+  }
+
+  if (claim.declarationCertificateId) {
+    const form = await DeclarationCertificate.findById(claim.declarationCertificateId).populate('approvedBy', 'name email').lean();
+    forms.push({
+      name: 'Declaration Certificate',
+      type: 'declaration',
+      id: form?._id,
+      submitted: !!form,
+      approval_status: form?.approval_status || 0,
+      approvedBy: form?.approvedBy ? { name: form.approvedBy.name, role: ROLE_NAMES[form.reviewedByRole] } : null,
+      approvedAt: form?.approvedAt,
+      rejectionReason: form?.rejectionReason
+    });
+  }
+
+  if (claim.auditCertificateId) {
+    const form = await AuditCertificate.findById(claim.auditCertificateId).populate('approvedBy', 'name email').lean();
+    forms.push({
+      name: 'Audit Certificate',
+      type: 'audit',
+      id: form?._id,
+      submitted: !!form,
+      approval_status: form?.approval_status || 0,
+      approvedBy: form?.approvedBy ? { name: form.approvedBy.name, role: ROLE_NAMES[form.reviewedByRole] } : null,
+      approvedAt: form?.approvedAt,
+      rejectionReason: form?.rejectionReason
+    });
+  }
+
+  if (claim.bankDepositProofId) {
+    const form = await BankDepositProof.findById(claim.bankDepositProofId).populate('approvedBy', 'name email').lean();
+    forms.push({
+      name: 'Bank Deposit Proof',
+      type: 'bank',
+      id: form?._id,
+      submitted: !!form,
+      approval_status: form?.approval_status || 0,
+      approvedBy: form?.approvedBy ? { name: form.approvedBy.name, role: ROLE_NAMES[form.reviewedByRole] } : null,
+      approvedAt: form?.approvedAt,
+      rejectionReason: form?.rejectionReason
+    });
+  }
+
+  return forms;
+};
+
+export const getSubmittedClaimDocument = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  const { festivalName, claimId } = req.body;
+
+  let claim;
+
+  if (claimId) {
+    claim = await ClaimApplication.findOne({ _id: claimId, userId })
+      .populate('festivalId', 'name startDate endDate')
+      .populate('approvalHistory.approver', 'name email role')
+      .populate('currentApprover', 'name email role')
+      .lean();
+  } else if (festivalName) {
+    const festival = await Holiday.findOne({ name: festivalName });
+    if (!festival) {
+      return next(new AppError('Festival not found', 404));
+    }
+    claim = await ClaimApplication.findOne({ userId, festivalId: festival._id })
+      .populate('festivalId', 'name startDate endDate')
+      .populate('approvalHistory.approver', 'name email role')
+      .populate('currentApprover', 'name email role')
+      .lean();
+  } else {
+    return next(new AppError('festivalName or claimId is required', 400));
+  }
+
+  if (!claim) {
+    return res.status(200).json({
+      status: 'success',
+      message: 'No claim found',
+      data: null
+    });
+  }
+
+  const formStatuses = await getUserFormsStatus(claim);
+
+  let formV = null;
+  if (claim.formVId) {
+    formV = await FormV.findById(claim.formVId).lean();
+  }
+
+  const totals = {
+    totalSaleAmt: formV?.totalSaleAmt || 0,
+    totalRebateAmt: formV?.totalRebateAmt || 0,
+    sanctionAmount: claim.finalSanctionAmount || null
+  };
+
+  const allApproved = formStatuses.every(f => f.approval_status === 1);
+  const hasRejected = formStatuses.some(f => f.approval_status === -1);
+  const allSubmitted = formStatuses.length === 6 && formStatuses.every(f => f.submitted);
+
+  const approvalLevelNames = {
+    0: 'GMDIC',
+    1: 'DI',
+    2: 'Addl. Director'
+  };
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      claim: {
+        _id: claim._id,
+        status: claim.status,
+        approval_level: claim.approval_level,
+        currentApprovalLevel: approvalLevelNames[claim.approval_level] || 'Unknown',
+        currentApprover: claim.currentApprover ? { name: claim.currentApprover.name } : null,
+        submittedAt: claim.submittedAt,
+        createdAt: claim.createdAt,
+        finalSanctionAmount: claim.finalSanctionAmount,
+        sanctionOrderFile: claim.sanctionOrderFile,
+        disbursementDate: claim.disbursementDate,
+        disbursementReference: claim.disbursementReference
+      },
+      festival: claim.festivalId,
+      forms: formStatuses,
+      totals,
+      approvalHistory: claim.approvalHistory.map(h => ({
+        approverName: h.approver?.name,
+        approverRole: approvalLevelNames[h.approverRole],
+        action: h.action,
+        comments: h.comments,
+        sanctionAmount: h.sanctionAmount,
+        actionDate: h.actionDate
+      })),
+      summary: {
+        allFormsSubmitted: allSubmitted,
+        allFormsApproved: allApproved,
+        hasRejectedForms: hasRejected,
+        pendingFormsCount: formStatuses.filter(f => f.approval_status === 0).length,
+        approvedFormsCount: formStatuses.filter(f => f.approval_status === 1).length,
+        rejectedFormsCount: formStatuses.filter(f => f.approval_status === -1).length
+      }
+    }
+  });
+});
+
+export const getClaimSummary = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  const { festivalName } = req.body;
+
+  if (!festivalName) {
+    return next(new AppError('festivalName is required', 400));
+  }
+
+  const festival = await Holiday.findOne({ name: festivalName });
+  if (!festival) {
+    return next(new AppError('Festival not found', 404));
+  }
+
+  const claim = await ClaimApplication.findOne({ userId, festivalId: festival._id })
+    .populate('formVId')
+    .lean();
+
+  if (!claim) {
+    return res.status(200).json({
+      status: 'success',
+      message: 'No claim found for this festival',
+      data: {
+        festivalName: festival.name,
+        hasSubmittedClaim: false,
+        totals: null
+      }
+    });
+  }
+
+  const formStatuses = await getUserFormsStatus(claim);
+  const allSubmitted = formStatuses.length === 6 && formStatuses.every(f => f.submitted);
+  const allApproved = formStatuses.every(f => f.approval_status === 1);
+  const hasRejected = formStatuses.some(f => f.approval_status === -1);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      festivalName: festival.name,
+      hasSubmittedClaim: true,
+      claimId: claim._id,
+      status: claim.status,
+      totals: {
+        totalSaleAmt: claim.formVId?.totalSaleAmt || 0,
+        totalRebateAmt: claim.formVId?.totalRebateAmt || 0,
+        sanctionAmount: claim.finalSanctionAmount || null
+      },
+      formsSummary: {
+        total: 6,
+        submitted: formStatuses.filter(f => f.submitted).length,
+        approved: formStatuses.filter(f => f.approval_status === 1).length,
+        rejected: formStatuses.filter(f => f.approval_status === -1).length,
+        pending: formStatuses.filter(f => f.approval_status === 0).length
+      },
+      canFinalSubmit: allSubmitted && claim.status === 'draft',
+      allFormsApproved: allApproved,
+      hasRejectedForms: hasRejected
+    }
+  });
+});

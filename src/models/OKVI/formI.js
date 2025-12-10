@@ -22,6 +22,10 @@ const form1Schema = new mongoose.Schema({
   fromDate:         { type: Date,   required: true },
   toDate:           { type: Date,   required: true },
   approval_status:  { type: Number, required: true, default: 0},
+  approvedBy:       { type: mongoose.Schema.Types.ObjectId, ref: 'OkviAuth' },
+  approvedAt:       { type: Date },
+  rejectionReason:  { type: String },
+  reviewedByRole:   { type: Number, enum: [0, 1, 2] },
   retailSales: {
     type: [retailSaleDetailsSchema],
     validate: v => Array.isArray(v) && v.length > 0,

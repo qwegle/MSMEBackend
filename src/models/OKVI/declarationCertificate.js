@@ -16,7 +16,12 @@ const declarationCertificateSchema = new mongoose.Schema({
   month: { type: String, required: true },
   spellStartDate: { type: Date, required: true },
   spellEndDate: { type: Date, required: true },
-  status: {type: Number, required: true,default: 1,enum: [0, 1, 2]}, // 0 - Pending, 1 - Approved, 2 - Rejected
+  status: {type: Number, required: true,default: 1,enum: [0, 1, 2]},
+  approval_status:  { type: Number, required: true, default: 0},
+  approvedBy:       { type: mongoose.Schema.Types.ObjectId, ref: 'OkviAuth' },
+  approvedAt:       { type: Date },
+  rejectionReason:  { type: String },
+  reviewedByRole:   { type: Number, enum: [0, 1, 2] },
   declarations: {
     type: [clauseSchema],
     required: true,

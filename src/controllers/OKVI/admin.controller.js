@@ -5,6 +5,12 @@ import AppError from '../../utils/AppError.js';
 import mongoose from 'mongoose';
 import { sendEmail } from '../../utils/emailService.js';
 import Holiday from '../../models/OKVI/holidayFestival.js';
+import Form1 from '../../models/OKVI/formI.js';
+import FormV from '../../models/OKVI/formV.js';
+import FormVI from '../../models/OKVI/formVI.js';
+import DeclarationCertificate from '../../models/OKVI/declarationCertificate.js';
+import AuditCertificate from '../../models/OKVI/auditCertificate.js';
+import BankDepositProof from '../../models/OKVI/bankproof.js';
 // Role constants
 const ROLES = {
   GMDIC: 0,
@@ -540,10 +546,496 @@ export const getAdminDashboard = catchAsync(async (req, res) => {
       },
       recentClaims,
       sanctionAmount,
-      currentFestival,      // now includes status
-      upcomingHoliday,      // now includes status
+      currentFestival,
+      upcomingHoliday,
       users,
       holidays: holidaysWithStatus
+    }
+  });
+});
+
+const FORM_MODELS = {
+  form1: Form1,
+  formv: FormV,
+  formvi: FormVI,
+  declaration: DeclarationCertificate,
+  audit: AuditCertificate,
+  bank: BankDepositProof
+};
+
+const FORM_ID_FIELDS = {
+  form1: 'formIId',
+  formv: 'formVId',
+  formvi: 'formVIId',
+  declaration: 'declarationCertificateId',
+  audit: 'auditCertificateId',
+  bank: 'bankDepositProofId'
+};
+
+const FORM_NAMES = {
+  form1: 'Form I',
+  formv: 'Form V',
+  formvi: 'Form VI',
+  declaration: 'Declaration Certificate',
+  audit: 'Audit Certificate',
+  bank: 'Bank Deposit Proof'
+};
+
+const checkAllFormsApproved = async (claim, approverRole) => {
+  const formIds = [
+    { model: Form1, id: claim.formIId, name: 'Form I' },
+    { model: FormV, id: claim.formVId, name: 'Form V' },
+    { model: FormVI, id: claim.formVIId, name: 'Form VI' },
+    { model: DeclarationCertificate, id: claim.declarationCertificateId, name: 'Declaration Certificate' },
+    { model: AuditCertificate, id: claim.auditCertificateId, name: 'Audit Certificate' },
+    { model: BankDepositProof, id: claim.bankDepositProofId, name: 'Bank Deposit Proof' }
+  ];
+
+  const unapprovedForms = [];
+  for (const { model, id, name } of formIds) {
+    if (!id) {
+      unapprovedForms.push(name);
+      continue;
+    }
+    const form = await model.findById(id);
+    if (!form || form.approval_status !== 1) {
+      unapprovedForms.push(name);
+    } else if (form.reviewedByRole !== approverRole) {
+      unapprovedForms.push(`${name} (not reviewed at current level)`);
+    }
+  }
+  
+  return {
+    allApproved: unapprovedForms.length === 0,
+    unapprovedForms
+  };
+};
+
+const getFormsStatus = async (claim) => {
+  const forms = [];
+  
+  if (claim.formIId) {
+    const form = await Form1.findById(claim.formIId).populate('approvedBy', 'name email role').lean();
+    forms.push({
+      name: 'Form I',
+      type: 'form1',
+      id: form?._id,
+      submitted: !!form,
+      approval_status: form?.approval_status || 0,
+      approvedBy: form?.approvedBy ? { name: form.approvedBy.name, email: form.approvedBy.email, role: ROLE_NAMES[form.reviewedByRole] } : null,
+      approvedAt: form?.approvedAt,
+      rejectionReason: form?.rejectionReason
+    });
+  }
+
+  if (claim.formVId) {
+    const form = await FormV.findById(claim.formVId).populate('approvedBy', 'name email role').lean();
+    forms.push({
+      name: 'Form V',
+      type: 'formv',
+      id: form?._id,
+      submitted: !!form,
+      approval_status: form?.approval_status || 0,
+      approvedBy: form?.approvedBy ? { name: form.approvedBy.name, email: form.approvedBy.email, role: ROLE_NAMES[form.reviewedByRole] } : null,
+      approvedAt: form?.approvedAt,
+      rejectionReason: form?.rejectionReason,
+      totalSaleAmt: form?.totalSaleAmt,
+      totalRebateAmt: form?.totalRebateAmt
+    });
+  }
+
+  if (claim.formVIId) {
+    const form = await FormVI.findById(claim.formVIId).populate('approvedBy', 'name email role').lean();
+    forms.push({
+      name: 'Form VI',
+      type: 'formvi',
+      id: form?._id,
+      submitted: !!form,
+      approval_status: form?.approval_status || 0,
+      approvedBy: form?.approvedBy ? { name: form.approvedBy.name, email: form.approvedBy.email, role: ROLE_NAMES[form.reviewedByRole] } : null,
+      approvedAt: form?.approvedAt,
+      rejectionReason: form?.rejectionReason
+    });
+  }
+
+  if (claim.declarationCertificateId) {
+    const form = await DeclarationCertificate.findById(claim.declarationCertificateId).populate('approvedBy', 'name email role').lean();
+    forms.push({
+      name: 'Declaration Certificate',
+      type: 'declaration',
+      id: form?._id,
+      submitted: !!form,
+      approval_status: form?.approval_status || 0,
+      approvedBy: form?.approvedBy ? { name: form.approvedBy.name, email: form.approvedBy.email, role: ROLE_NAMES[form.reviewedByRole] } : null,
+      approvedAt: form?.approvedAt,
+      rejectionReason: form?.rejectionReason
+    });
+  }
+
+  if (claim.auditCertificateId) {
+    const form = await AuditCertificate.findById(claim.auditCertificateId).populate('approvedBy', 'name email role').lean();
+    forms.push({
+      name: 'Audit Certificate',
+      type: 'audit',
+      id: form?._id,
+      submitted: !!form,
+      approval_status: form?.approval_status || 0,
+      approvedBy: form?.approvedBy ? { name: form.approvedBy.name, email: form.approvedBy.email, role: ROLE_NAMES[form.reviewedByRole] } : null,
+      approvedAt: form?.approvedAt,
+      rejectionReason: form?.rejectionReason
+    });
+  }
+
+  if (claim.bankDepositProofId) {
+    const form = await BankDepositProof.findById(claim.bankDepositProofId).populate('approvedBy', 'name email role').lean();
+    forms.push({
+      name: 'Bank Deposit Proof',
+      type: 'bank',
+      id: form?._id,
+      submitted: !!form,
+      approval_status: form?.approval_status || 0,
+      approvedBy: form?.approvedBy ? { name: form.approvedBy.name, email: form.approvedBy.email, role: ROLE_NAMES[form.reviewedByRole] } : null,
+      approvedAt: form?.approvedAt,
+      rejectionReason: form?.rejectionReason
+    });
+  }
+
+  return forms;
+};
+
+export const approveForm = catchAsync(async (req, res, next) => {
+  const { claimId, formType, comments } = req.body;
+  const userRole = req.user.user_role;
+  const userId = req.user.id;
+
+  if (!claimId || !formType) {
+    return next(new AppError('claimId and formType are required', 400));
+  }
+
+  const formTypeLower = formType.toLowerCase();
+  const Model = FORM_MODELS[formTypeLower];
+  const idField = FORM_ID_FIELDS[formTypeLower];
+
+  if (!Model || !idField) {
+    return next(new AppError('Invalid form type. Valid types: form1, formv, formvi, declaration, audit, bank', 400));
+  }
+
+  if (!mongoose.isValidObjectId(claimId)) {
+    return next(new AppError('Invalid claim ID', 400));
+  }
+
+  const claim = await ClaimApplication.findById(claimId);
+  if (!claim) {
+    return next(new AppError('Claim not found', 404));
+  }
+
+  if (claim.approval_level !== userRole) {
+    return next(new AppError(`This claim is not at your approval level. Current level: ${ROLE_NAMES[claim.approval_level]}`, 403));
+  }
+
+  const formId = claim[idField];
+  if (!formId) {
+    return next(new AppError(`${FORM_NAMES[formTypeLower]} not found in this claim`, 404));
+  }
+
+  const form = await Model.findById(formId);
+  if (!form) {
+    return next(new AppError(`${FORM_NAMES[formTypeLower]} not found`, 404));
+  }
+
+  if (form.approval_status === 1 && form.reviewedByRole === userRole) {
+    return next(new AppError(`${FORM_NAMES[formTypeLower]} is already approved by ${ROLE_NAMES[userRole]}`, 400));
+  }
+
+  form.approval_status = 1;
+  form.approvedBy = userId;
+  form.approvedAt = new Date();
+  form.reviewedByRole = userRole;
+  form.rejectionReason = null;
+  await form.save();
+
+  const approvalCheck = await checkAllFormsApproved(claim, userRole);
+
+  res.status(200).json({
+    status: 'success',
+    message: `${FORM_NAMES[formTypeLower]} approved successfully`,
+    data: {
+      formType: formTypeLower,
+      approval_status: 1,
+      approvedBy: userId,
+      approvedAt: form.approvedAt,
+      allFormsApproved: approvalCheck.allApproved,
+      unapprovedForms: approvalCheck.unapprovedForms
+    }
+  });
+});
+
+export const rejectForm = catchAsync(async (req, res, next) => {
+  const { claimId, formType, rejectionReason } = req.body;
+  const userRole = req.user.user_role;
+  const userId = req.user.id;
+
+  if (!claimId || !formType) {
+    return next(new AppError('claimId and formType are required', 400));
+  }
+
+  if (!rejectionReason || !rejectionReason.trim()) {
+    return next(new AppError('Rejection reason is required', 400));
+  }
+
+  const formTypeLower = formType.toLowerCase();
+  const Model = FORM_MODELS[formTypeLower];
+  const idField = FORM_ID_FIELDS[formTypeLower];
+
+  if (!Model || !idField) {
+    return next(new AppError('Invalid form type. Valid types: form1, formv, formvi, declaration, audit, bank', 400));
+  }
+
+  if (!mongoose.isValidObjectId(claimId)) {
+    return next(new AppError('Invalid claim ID', 400));
+  }
+
+  const claim = await ClaimApplication.findById(claimId);
+  if (!claim) {
+    return next(new AppError('Claim not found', 404));
+  }
+
+  if (claim.approval_level !== userRole) {
+    return next(new AppError(`This claim is not at your approval level. Current level: ${ROLE_NAMES[claim.approval_level]}`, 403));
+  }
+
+  const formId = claim[idField];
+  if (!formId) {
+    return next(new AppError(`${FORM_NAMES[formTypeLower]} not found in this claim`, 404));
+  }
+
+  const form = await Model.findById(formId);
+  if (!form) {
+    return next(new AppError(`${FORM_NAMES[formTypeLower]} not found`, 404));
+  }
+
+  form.approval_status = -1;
+  form.approvedBy = userId;
+  form.approvedAt = new Date();
+  form.reviewedByRole = userRole;
+  form.rejectionReason = rejectionReason.trim();
+  await form.save();
+
+  res.status(200).json({
+    status: 'success',
+    message: `${FORM_NAMES[formTypeLower]} rejected`,
+    data: {
+      formType: formTypeLower,
+      approval_status: -1,
+      rejectedBy: userId,
+      rejectedAt: form.approvedAt,
+      rejectionReason: form.rejectionReason
+    }
+  });
+});
+
+export const approveAllFormsAndMoveClaim = catchAsync(async (req, res, next) => {
+  const { claimId, comments, sanctionAmount } = req.body;
+  const userRole = req.user.user_role;
+  const userId = req.user.id;
+
+  if (!claimId) {
+    return next(new AppError('claimId is required', 400));
+  }
+
+  if (!mongoose.isValidObjectId(claimId)) {
+    return next(new AppError('Invalid claim ID', 400));
+  }
+
+  const claim = await ClaimApplication.findById(claimId).populate('userId', 'name email');
+  if (!claim) {
+    return next(new AppError('Claim not found', 404));
+  }
+
+  if (claim.approval_level !== userRole) {
+    return next(new AppError(`This claim is not at your approval level. Current level: ${ROLE_NAMES[claim.approval_level]}`, 403));
+  }
+
+  const approvalCheck = await checkAllFormsApproved(claim, userRole);
+  if (!approvalCheck.allApproved) {
+    return next(new AppError(`All forms must be approved before moving claim to next level. Unapproved: ${approvalCheck.unapprovedForms.join(', ')}`, 400));
+  }
+
+  let newStatus, nextApprover, newApprovalLevel;
+  let finalSanctionAmount = null;
+  let calculationDetails = null;
+
+  switch (userRole) {
+    case ROLES.GMDIC:
+      newStatus = 'gmdic_approved';
+      newApprovalLevel = ROLES.DI;
+      const diUser = await OkviAuth.findOne({ role: ROLES.DI });
+      nextApprover = diUser?._id || null;
+      break;
+
+    case ROLES.DI:
+      newStatus = 'di_approved';
+      newApprovalLevel = ROLES.ADDL_DIRECTOR;
+      const addlDir = await OkviAuth.findOne({ role: ROLES.ADDL_DIRECTOR });
+      nextApprover = addlDir?._id || null;
+      break;
+
+    case ROLES.ADDL_DIRECTOR:
+      newStatus = 'sanctioned';
+      newApprovalLevel = claim.approval_level;
+      nextApprover = null;
+
+      if (sanctionAmount) {
+        finalSanctionAmount = sanctionAmount;
+      } else {
+        const calculation = await calculateSanctionAmount(claimId);
+        finalSanctionAmount = calculation.calculatedAmount;
+        calculationDetails = calculation;
+      }
+      break;
+
+    default:
+      return next(new AppError('Unauthorized to approve claims', 403));
+  }
+
+  const approvalEntry = {
+    approver: userId,
+    approverRole: userRole,
+    action: 'approved',
+    comments: comments || '',
+    sanctionAmount: finalSanctionAmount || undefined,
+    actionDate: new Date()
+  };
+
+  const updateData = {
+    status: newStatus,
+    approval_level: newApprovalLevel,
+    currentApprover: nextApprover,
+    $push: { approvalHistory: approvalEntry }
+  };
+
+  if (finalSanctionAmount) {
+    updateData.finalSanctionAmount = finalSanctionAmount;
+  }
+
+  const updatedClaim = await ClaimApplication.findByIdAndUpdate(claimId, updateData, { new: true }).populate('userId', 'name email');
+
+  try {
+    let emailSubject, emailMessage;
+
+    if (newStatus === 'sanctioned') {
+      emailSubject = 'Claim Application Sanctioned - OKVI';
+      emailMessage = `
+        Dear ${claim.userId.name},
+
+        Your claim application has been approved and sanctioned.
+
+        Sanction Amount: Rs. ${finalSanctionAmount}
+        ${calculationDetails ? `
+        Calculation Details:
+        - Base Rebate Amount: Rs. ${calculationDetails.baseRebateAmount}
+        - Applied Percentage: ${calculationDetails.appliedPercentage * 100}%
+        - Processing Fee Deducted: Rs. ${calculationDetails.processingFeeDeducted}
+        ` : ''}
+
+        Please upload the sanction order document to complete the process.
+
+        Best regards,
+        OKVI Admin Team
+      `;
+    } else {
+      emailSubject = `Claim Application Approved by ${ROLE_NAMES[userRole]} - OKVI`;
+      emailMessage = `
+        Dear ${claim.userId.name},
+
+        Your claim application has been approved by ${ROLE_NAMES[userRole]} and forwarded to ${ROLE_NAMES[newApprovalLevel]} for review.
+
+        Comments: ${comments || 'No comments'}
+
+        Best regards,
+        OKVI Admin Team
+      `;
+    }
+
+    await sendEmail({
+      to: claim.userId.email,
+      subject: emailSubject,
+      text: emailMessage
+    });
+  } catch (emailError) {
+    console.error('Email notification failed:', emailError);
+  }
+
+  res.status(200).json({
+    status: 'success',
+    message: `Claim approved by ${ROLE_NAMES[userRole]} and moved to ${newStatus === 'sanctioned' ? 'sanctioned' : ROLE_NAMES[newApprovalLevel]}`,
+    data: {
+      claim: updatedClaim,
+      newStatus,
+      newApprovalLevel,
+      ...(calculationDetails && { calculationDetails })
+    }
+  });
+});
+
+export const getClaimWithFormStatuses = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const userRole = req.user.user_role;
+
+  if (!mongoose.isValidObjectId(id)) {
+    return next(new AppError('Invalid claim ID', 400));
+  }
+
+  const claim = await ClaimApplication.findById(id)
+    .populate('userId', 'name email')
+    .populate('festivalId', 'name startDate endDate')
+    .populate('approvalHistory.approver', 'name email role')
+    .populate('currentApprover', 'name email role')
+    .lean();
+
+  if (!claim) {
+    return next(new AppError('Claim not found', 404));
+  }
+
+  const formStatuses = await getFormsStatus(claim);
+
+  let formV = null;
+  if (claim.formVId) {
+    formV = await FormV.findById(claim.formVId).lean();
+  }
+
+  const totals = {
+    totalSaleAmt: formV?.totalSaleAmt || 0,
+    totalRebateAmt: formV?.totalRebateAmt || 0,
+    sanctionAmount: claim.finalSanctionAmount || null
+  };
+
+  const allApproved = formStatuses.every(f => f.approval_status === 1);
+  const hasRejected = formStatuses.some(f => f.approval_status === -1);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      claim: {
+        _id: claim._id,
+        status: claim.status,
+        approval_status: claim.approval_status,
+        approval_level: claim.approval_level,
+        currentApprover: claim.currentApprover,
+        submittedAt: claim.submittedAt,
+        approvalHistory: claim.approvalHistory,
+        rejectionReason: claim.rejectionReason,
+        finalSanctionAmount: claim.finalSanctionAmount
+      },
+      user: claim.userId,
+      festival: claim.festivalId,
+      forms: formStatuses,
+      totals,
+      summary: {
+        allFormsApproved: allApproved,
+        hasRejectedForms: hasRejected,
+        canMoveToNextLevel: allApproved && !hasRejected
+      }
     }
   });
 });

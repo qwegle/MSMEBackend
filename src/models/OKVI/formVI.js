@@ -13,11 +13,14 @@ const formVISchema = new mongoose.Schema({
     required: true
   },
   approval_status:  { type: Number, required: true, default: 0},
+  approvedBy:       { type: mongoose.Schema.Types.ObjectId, ref: 'OkviAuth' },
+  approvedAt:       { type: Date },
+  rejectionReason:  { type: String },
+  reviewedByRole:   { type: Number, enum: [0, 1, 2] },
   centerBreakup: {
     type: [centerBreakupSchema],
     validate: v => Array.isArray(v) && v.length > 0
   },
-
   createdAt: { type: Date, default: Date.now }
 });
 

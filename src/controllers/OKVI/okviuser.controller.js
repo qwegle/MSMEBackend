@@ -218,6 +218,157 @@ export const logoutOkvi = (req, res, next) => {
   });
 };
 
+export const forgotPasswordSendOtp = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  if (!email) return next(new AppError('Email is required', 400));
+
+  const user = await OkviAuth.findOne({ email });
+  if (!user) {
+    return next(new AppError('No account found with this email', 404));
+  }
+
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const otpExpires = Date.now() + 10 * 60 * 1000;
+  const hashedOtp = createHash('sha256').update(otp).digest('hex');
+
+  const existing = await OkviOtpVerification.findOne({ email });
+  if (existing) {
+    existing.otp = hashedOtp;
+    existing.otpExpires = otpExpires;
+    existing.isVerified = false;
+    existing.purpose = 'password_reset';
+    await existing.save();
+  } else {
+    await OkviOtpVerification.create({
+      email,
+      otp: hashedOtp,
+      otpExpires,
+      purpose: 'password_reset'
+    });
+  }
+
+  await sendEmail({
+    to: email,
+    subject: 'Password Reset OTP - OKVI',
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 8px;">
+        <h2 style="text-align: center; color: #e53935;">OKVI Password Reset</h2>
+        <p style="font-size: 16px;">Hello ${user.name},</p>
+        <p style="font-size: 16px;">You requested to reset your password. Use the following OTP to proceed. This OTP is valid for <strong>10 minutes</strong>.</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <span style="font-size: 32px; font-weight: bold; color: #ffffff; background: #e53935; padding: 10px 20px; border-radius: 6px; display: inline-block; letter-spacing: 3px;">
+            ${otp}
+          </span>
+        </div>
+        <p style="font-size: 14px; color: #666;">If you didn't request this, you can safely ignore this email.</p>
+        <p style="margin-top: 30px; font-size: 14px; color: #999;">Best regards,<br/>The OKVI Team</p>
+      </div>
+    `
+  });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Password reset OTP sent to email'
+  });
+});
+
+export const forgotPasswordVerifyOtp = catchAsync(async (req, res, next) => {
+  const { email, otp } = req.body;
+  if (!email || !otp) return next(new AppError('Email and OTP are required', 400));
+
+  const hashedOtp = createHash('sha256').update(otp).digest('hex');
+  const entry = await OkviOtpVerification.findOne({
+    email,
+    otp: hashedOtp,
+    otpExpires: { $gt: Date.now() }
+  });
+
+  if (!entry) return next(new AppError('Invalid or expired OTP', 400));
+
+  entry.isVerified = true;
+  entry.purpose = 'password_reset';
+  await entry.save();
+
+  res.status(200).json({
+    status: 'success',
+    message: 'OTP verified successfully. You can now reset your password.'
+  });
+});
+
+export const resetPassword = catchAsync(async (req, res, next) => {
+  const { email, newPassword, confirmPassword } = req.body;
+
+  if (!email || !newPassword || !confirmPassword) {
+    return next(new AppError('Email, new password and confirm password are required', 400));
+  }
+
+  if (newPassword !== confirmPassword) {
+    return next(new AppError('Passwords do not match', 400));
+  }
+
+  if (newPassword.length < 6) {
+    return next(new AppError('Password must be at least 6 characters', 400));
+  }
+
+  const otpEntry = await OkviOtpVerification.findOne({ email, isVerified: true, purpose: 'password_reset' });
+  if (!otpEntry) {
+    return next(new AppError('Please verify OTP before resetting password', 400));
+  }
+
+  const user = await OkviAuth.findOne({ email });
+  if (!user) {
+    return next(new AppError('User not found', 404));
+  }
+
+  const hashedPassword = await hash(newPassword, 12);
+  user.password = hashedPassword;
+  user.sessionVersion = (user.sessionVersion || 0) + 1;
+  await user.save();
+
+  await OkviOtpVerification.deleteOne({ email });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Password reset successfully. Please login with your new password.'
+  });
+});
+
+export const changePassword = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    return next(new AppError('Current password, new password and confirm password are required', 400));
+  }
+
+  if (newPassword !== confirmPassword) {
+    return next(new AppError('New passwords do not match', 400));
+  }
+
+  if (newPassword.length < 6) {
+    return next(new AppError('Password must be at least 6 characters', 400));
+  }
+
+  const user = await OkviAuth.findById(userId).select('+password');
+  if (!user) {
+    return next(new AppError('User not found', 404));
+  }
+
+  const isMatch = await compare(currentPassword, user.password);
+  if (!isMatch) {
+    return next(new AppError('Current password is incorrect', 401));
+  }
+
+  const hashedPassword = await hash(newPassword, 12);
+  user.password = hashedPassword;
+  user.sessionVersion = (user.sessionVersion || 0) + 1;
+  await user.save();
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Password changed successfully. Please login again with your new password.'
+  });
+});
 
 export const getUserDashboard = catchAsync(async (req, res) => {
   const userId = req.user.id;
