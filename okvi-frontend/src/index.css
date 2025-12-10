@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Oriya:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-gov-blue: #003366;
+  --color-gov-blue-dark: #002244;
+  --color-gov-saffron: #FF9933;
+  --color-gov-green: #138808;
+  --color-gov-gold: #C5A02D;
+  
+  --font-family-odia: 'Noto Sans Oriya', sans-serif;
+  --font-family-sans: 'Inter', sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.font-odia {
+  font-family: 'Noto Sans Oriya', sans-serif;
+}
+
+.btn-primary {
+  @apply bg-gov-blue text-white px-6 py-2.5 rounded-lg hover:bg-gov-blue-dark transition-colors font-medium shadow-sm;
+}
+
+.btn-secondary {
+  @apply bg-white text-gov-blue border-2 border-gov-blue px-6 py-2 rounded-lg hover:bg-gray-50 transition-colors font-medium;
+}
+
+.btn-saffron {
+  @apply bg-gov-saffron text-white px-6 py-2.5 rounded-lg hover:bg-orange-600 transition-colors font-medium shadow-sm;
+}
+
+.input-field {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gov-blue focus:border-transparent outline-none transition-all bg-white;
+}
+
+.card {
+  @apply bg-white rounded-lg shadow-md p-6;
+}
+
+.tricolor-top {
+  background: linear-gradient(to right, #FF9933 33.33%, #FFFFFF 33.33%, #FFFFFF 66.66%, #138808 66.66%);
+  height: 4px;
+}
+
+.gov-gradient {
+  background: linear-gradient(135deg, #003366 0%, #004488 100%);
+}

@@ -16,15 +16,15 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Start application"
+args = "OKVI Frontend"
 
 [[workflows.workflow]]
-name = "Start application"
+name = "OKVI Frontend"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run dev"
+args = "cd okvi-frontend && npm run dev"
 waitForPort = 5000
 
 [workflows.workflow.metadata]
@@ -39,8 +39,12 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 33639
+localPort = 5001
 externalPort = 3000
+
+[[ports]]
+localPort = 43611
+externalPort = 3002
 
 [userenv]
 

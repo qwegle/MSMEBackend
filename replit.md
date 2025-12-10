@@ -2,20 +2,38 @@
 
 ## Overview
 This is an MSME (Micro, Small, and Medium Enterprises) management system for Odisha, India.
-- **Backend**: Node.js/Express API with MongoDB database
+- **Backend**: Node.js/Express API with MongoDB database (port 3000)
+- **Frontend**: React 19 + Vite + Tailwind CSS v4 (port 5000)
 
 ## Project Structure
 ```
-├── src/
-│   ├── app.js         # Main Express application
-│   ├── config/        # Database and Cloudinary configuration
-│   ├── controllers/   # API controllers (OKVI, OSFC, OSIC modules)
-│   ├── middlewares/   # Authentication, validation, error handling
-│   ├── models/        # Mongoose models
-│   ├── routes/        # API routes
-│   ├── services/      # Business logic services
-│   ├── utils/         # Utility functions (email, encryption, etc.)
-│   └── validations/   # Input validation schemas
+├── src/                      # Backend API source
+│   ├── app.js                # Main Express application
+│   ├── config/               # Database and Cloudinary configuration
+│   ├── controllers/          # API controllers (OKVI, OSFC, OSIC modules)
+│   ├── middlewares/          # Authentication, validation, error handling
+│   ├── models/               # Mongoose models
+│   ├── routes/               # API routes
+│   ├── services/             # Business logic services
+│   ├── utils/                # Utility functions (email, encryption, etc.)
+│   └── validations/          # Input validation schemas
+├── okvi-frontend/            # React frontend for OKVI module
+│   ├── src/
+│   │   ├── components/       # Reusable UI components
+│   │   │   ├── layout/       # GovHeader, Sidebar, Layout, AuthLayout
+│   │   │   └── ui/           # Button, Input, Select, Card, Modal, Table
+│   │   ├── features/         # Feature modules
+│   │   │   ├── auth/         # Login, Register, ForgotPassword
+│   │   │   ├── dashboard/    # Dashboard with festival calendar
+│   │   │   ├── stock/        # Opening/Closing stock entry and list
+│   │   │   ├── claims/       # Claim documents (6 forms)
+│   │   │   ├── sanction/     # Sanction order upload
+│   │   │   └── profile/      # Change password
+│   │   ├── locales/          # i18n translations (en, or)
+│   │   ├── services/api/     # Axios API services
+│   │   ├── store/            # Zustand stores (auth, language)
+│   │   └── routes/           # Protected route component
+│   └── public/assets/        # Static assets (logos, placeholders)
 └── package.json
 ```
 
@@ -23,6 +41,37 @@ This is an MSME (Micro, Small, and Medium Enterprises) management system for Odi
 - **OKVI**: Odisha Khadi and Village Industries - Rebate Management System
 - **OSFC**: Loans, certificates, acknowledgments, settlements
 - **OSIC**: Tenders, bidders, supply orders
+
+## OKVI Frontend Features
+
+### Design System
+- **Government of Odisha official styling** with tricolor band (saffron, white, green)
+- **CM Mohan Majhi** photo placeholder in header
+- **Bilingual support**: English and Odia (ଓଡ଼ିଆ) with language toggle
+- **Color palette**: Government blue (#003366), saffron (#FF9933), green (#138808)
+- **Typography**: Inter for English, Noto Sans Oriya for Odia text
+
+### Pages Implemented
+1. **Login** - Email/password with captcha verification
+2. **Register** - 8-step wizard (Email OTP → Institution → Registration → Bank → Secretary → President → Committee → Password)
+3. **Forgot Password** - OTP-based password reset
+4. **Dashboard** - Festival calendar with stock/claim status
+5. **Opening Stock** - Entry form and list view
+6. **Closing Stock** - Entry form and list view
+7. **Claim Documents** - 6 mandatory forms (Form I, V, VI, Declaration, Audit Certificate, Bank Deposit Proof)
+8. **Submitted Claims** - View claims with approval history
+9. **Sanction Order** - Upload documents for sanctioned claims
+10. **Change Password** - Update account password
+
+### Tech Stack
+- React 19 with Vite 7
+- Tailwind CSS v4 with custom @theme configuration
+- React Router v7 for navigation
+- React Query v5 for data fetching
+- Zustand v5 for state management
+- i18next for internationalization
+- React Hook Form for form handling
+- Lucide React for icons
 
 ## OKVI Module - Complete API Reference
 
@@ -40,33 +89,6 @@ This is an MSME (Micro, Small, and Medium Enterprises) management system for Odi
 | `/api/okvi/auth/forgot-password/verify-otp` | POST | No | Verify password reset OTP |
 | `/api/okvi/auth/forgot-password/reset` | POST | No | Reset password with verified OTP |
 | `/api/okvi/auth/change-password` | POST | Yes | Change password for logged-in user |
-
-### Claim Documents APIs
-| Endpoint | Method | Auth | Description |
-|----------|--------|------|-------------|
-| `/api/okvi/claim-documents/form-i` | POST | Yes | Create Form I |
-| `/api/okvi/claim-documents/form-v` | POST | Yes | Create Form V |
-| `/api/okvi/claim-documents/form-vi` | POST | Yes | Create Form VI |
-| `/api/okvi/claim-documents/declaration-certificate` | POST | Yes | Create Declaration Certificate |
-| `/api/okvi/claim-documents/upload-audit-certificate` | POST | Yes | Upload Audit Certificate |
-| `/api/okvi/claim-documents/upload-bank-deposit-proof` | POST | Yes | Upload Bank Deposit Proof |
-| `/api/okvi/claim-documents/final-submit` | POST | Yes | Final submit claim |
-| `/api/okvi/claim-documents/submitted-claim-document` | POST | Yes | Get submitted claim with all form statuses |
-| `/api/okvi/claim-documents/claim-summary` | POST | Yes | Get claim summary with totals |
-| `/api/okvi/claim-documents/getClaimData` | POST | Yes | Get filtered claim data |
-
-### Admin APIs (GMDIC/DI/Addl. Director)
-| Endpoint | Method | Auth | Role | Description |
-|----------|--------|------|------|-------------|
-| `/api/okvi/admin/dashboard` | GET | Yes | 0,1,2 | Get admin dashboard |
-| `/api/okvi/admin/claims/pending` | GET | Yes | 0,1,2 | Get pending claims |
-| `/api/okvi/admin/claims/:id` | GET | Yes | 0,1,2 | Get claim by ID |
-| `/api/okvi/admin/claims/:id/forms` | GET | Yes | 0,1,2 | Get claim with all form statuses |
-| `/api/okvi/admin/claims/approve` | POST | Yes | 0,1,2 | Approve entire claim |
-| `/api/okvi/admin/claims/reject` | POST | Yes | 0,1,2 | Reject entire claim |
-| `/api/okvi/admin/forms/approve` | POST | Yes | 0,1,2 | Approve individual form |
-| `/api/okvi/admin/forms/reject` | POST | Yes | 0,1,2 | Reject individual form |
-| `/api/okvi/admin/claims/approve-and-move` | POST | Yes | 0,1,2 | Approve all forms and move to next level |
 
 ### User Roles
 | Role | Value | Permissions |
@@ -94,7 +116,18 @@ This is an MSME (Micro, Small, and Medium Enterprises) management system for Odi
 - `EMAIL_*`: Email service configuration
 
 ## Development Setup
-The API runs on port 5000. Root endpoint returns API status.
+
+### Backend (port 3000)
+```bash
+npm run dev
+```
+
+### Frontend (port 5000)
+```bash
+cd okvi-frontend && npm run dev
+```
+
+The frontend proxies API calls to `http://localhost:3000`.
 
 ## Database
 This project uses MongoDB. Connection status is verified at startup.
@@ -106,9 +139,9 @@ This project uses MongoDB. Connection status is verified at startup.
 OKVI uses plain JSON for API calls (no encryption), unlike OSFC which uses EncDecInterceptor
 
 ## Recent Changes (Dec 2024)
-- Removed Flutter frontend - now pure API backend
-- Added individual form approval tracking (approvedBy, approvedAt, rejectionReason, reviewedByRole)
-- Implemented Forgot Password API with OTP-based verification
-- Implemented Change Password API for authenticated users
-- Added individual form approval/rejection APIs for admins
-- Updated approval flow to check all forms approved before moving to next level
+- Created complete React frontend for OKVI module with Government of Odisha styling
+- Implemented bilingual support (English/Odia) with i18next
+- Built all user-facing pages: Login, Register, Dashboard, Stock, Claims, Sanction
+- Configured Tailwind CSS v4 with custom government color theme
+- Set up React Router with protected routes
+- Integrated Zustand for auth and language state management
