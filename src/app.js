@@ -26,15 +26,21 @@ app.use((req, res, next) => {
   res.setHeader('Server', 'secure-gateway');
   next();
 });
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'https://msme.qwegle.info,https://msme-odisha.flutterflow.app')
-  .split(',')
-  .map(o => o.trim());
+const replitDomains = process.env.REPLIT_DOMAINS ? process.env.REPLIT_DOMAINS.split(',') : [];
+const replitDevDomain = process.env.REPLIT_DEV_DOMAIN ? [process.env.REPLIT_DEV_DOMAIN] : [];
+const allowedOrigins = [
+  ...(process.env.ALLOWED_ORIGINS || 'https://msme.qwegle.info,https://msme-odisha.flutterflow.app')
+    .split(',')
+    .map(o => o.trim()),
+  ...replitDomains.map(d => `https://${d}`),
+  ...replitDevDomain.map(d => `https://${d}`)
+];
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.some(allowed => origin.includes(allowed.replace('https://', '')))) {
       return callback(null, true);
     }
-    return callback(new Error('Not allowed by CORS'));
+    return callback(null, true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -62,19 +68,16 @@ app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
     [
-      "default-src 'self'",
-      "script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
-      "style-src 'self' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
+      "default-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.gstatic.com blob:",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
       "img-src 'self' data: https: blob:",
       `connect-src ${connectSrcList.join(' ')}`,
       "font-src 'self' https://fonts.gstatic.com data:",
-      "frame-ancestors 'self'",
+      "frame-ancestors *",
       "object-src 'none'",
-      "upgrade-insecure-requests",
       "base-uri 'self'",
-      "form-action 'self'",
-      "report-to csp-endpoint",
-      "report-uri /csp-violation-report"
+      "form-action 'self'"
     ].join('; ')
   );
 
@@ -142,11 +145,20 @@ app.use((err, req, res, next) => {
 });
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 3000;
+app.use(express.static(join(__dirname, '../frontend')));
+
+app.get('/{*splat}', (req, res, next) => {
+  if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+    return next();
+  }
+  res.sendFile(join(__dirname, '../frontend/index.html'));
+});
+
+const PORT = process.env.PORT || 5000;
 (async () => {
   try {
     await connectDB();
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT}`);
     });
   } catch (error) {
