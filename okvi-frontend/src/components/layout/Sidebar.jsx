@@ -4,13 +4,15 @@ import useLanguageStore from '../../store/languageStore';
 import {
   LayoutDashboard,
   Package,
-  PackageCheck,
   FileText,
-  FileCheck,
   Upload,
   Key,
   ChevronDown,
   ChevronRight,
+  PackageOpen,
+  PackageCheck,
+  FilePlus,
+  FileSearch,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -24,52 +26,46 @@ const Sidebar = () => {
   };
 
   const linkClass = ({ isActive }) =>
-    `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-      isActive
-        ? 'bg-gov-blue text-white'
-        : 'text-gray-700 hover:bg-gray-100'
-    } ${language === 'or' ? 'font-odia' : ''}`;
+    `sidebar-link ${isActive ? 'active' : ''} ${language === 'or' ? 'font-odia' : ''}`;
 
   const subLinkClass = ({ isActive }) =>
-    `flex items-center gap-3 px-4 py-2 pl-12 rounded-lg transition-colors text-sm ${
-      isActive
-        ? 'bg-gov-blue/10 text-gov-blue font-medium'
-        : 'text-gray-600 hover:bg-gray-50'
-    } ${language === 'or' ? 'font-odia' : ''}`;
+    `sidebar-submenu-link ${isActive ? 'active' : ''} ${language === 'or' ? 'font-odia' : ''}`;
 
   return (
-    <aside className="w-64 bg-white shadow-md min-h-screen">
-      <nav className="p-4 space-y-2">
+    <aside className="sidebar">
+      <nav className="sidebar-nav">
         <NavLink to="/dashboard" className={linkClass}>
-          <LayoutDashboard size={20} />
+          <LayoutDashboard size={20} className="sidebar-icon" />
           <span>{t('common:dashboard')}</span>
         </NavLink>
 
         <div>
           <button
             onClick={() => toggleMenu('stock')}
-            className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors ${
-              language === 'or' ? 'font-odia' : ''
-            }`}
+            className={`sidebar-link w-full justify-between ${language === 'or' ? 'font-odia' : ''}`}
           >
             <div className="flex items-center gap-3">
-              <Package size={20} />
-              <span>{t('stock:openingStock')}</span>
+              <Package size={20} className="sidebar-icon" />
+              <span>{t('stock:stockManagement', { defaultValue: 'Stock Management' })}</span>
             </div>
-            {openMenus.stock ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+            {openMenus.stock ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
           </button>
           {openMenus.stock && (
-            <div className="mt-1 space-y-1">
+            <div className="sidebar-submenu">
               <NavLink to="/opening-stock/entry" className={subLinkClass}>
+                <PackageOpen size={16} />
                 {t('stock:openingStockEntry')}
               </NavLink>
               <NavLink to="/opening-stock/list" className={subLinkClass}>
+                <FileSearch size={16} />
                 {t('stock:openingStockList')}
               </NavLink>
               <NavLink to="/closing-stock/entry" className={subLinkClass}>
+                <PackageCheck size={16} />
                 {t('stock:closingStockEntry')}
               </NavLink>
               <NavLink to="/closing-stock/list" className={subLinkClass}>
+                <FileSearch size={16} />
                 {t('stock:closingStockList')}
               </NavLink>
             </div>
@@ -79,22 +75,22 @@ const Sidebar = () => {
         <div>
           <button
             onClick={() => toggleMenu('claims')}
-            className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors ${
-              language === 'or' ? 'font-odia' : ''
-            }`}
+            className={`sidebar-link w-full justify-between ${language === 'or' ? 'font-odia' : ''}`}
           >
             <div className="flex items-center gap-3">
-              <FileText size={20} />
+              <FileText size={20} className="sidebar-icon" />
               <span>{t('claims:claimDocuments')}</span>
             </div>
-            {openMenus.claims ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+            {openMenus.claims ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
           </button>
           {openMenus.claims && (
-            <div className="mt-1 space-y-1">
+            <div className="sidebar-submenu">
               <NavLink to="/claims/entry" className={subLinkClass}>
+                <FilePlus size={16} />
                 {t('claims:claimDocumentEntry')}
               </NavLink>
               <NavLink to="/claims/submitted" className={subLinkClass}>
+                <FileSearch size={16} />
                 {t('claims:viewSubmittedClaims')}
               </NavLink>
             </div>
@@ -102,14 +98,16 @@ const Sidebar = () => {
         </div>
 
         <NavLink to="/sanction-order" className={linkClass}>
-          <Upload size={20} />
+          <Upload size={20} className="sidebar-icon" />
           <span>{t('sanction:uploadSanctionOrder')}</span>
         </NavLink>
 
-        <NavLink to="/change-password" className={linkClass}>
-          <Key size={20} />
-          <span>{t('common:changePassword')}</span>
-        </NavLink>
+        <div className="mt-auto pt-4 border-t border-gray-100">
+          <NavLink to="/change-password" className={linkClass}>
+            <Key size={20} className="sidebar-icon" />
+            <span>{t('common:changePassword')}</span>
+          </NavLink>
+        </div>
       </nav>
     </aside>
   );

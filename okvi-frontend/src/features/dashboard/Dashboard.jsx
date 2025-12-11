@@ -1,9 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Package, FileText, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
-import toast from 'react-hot-toast';
-import { Card, Button } from '../../components/ui';
+import { 
+  Calendar, 
+  FileText, 
+  TrendingUp, 
+  ChevronLeft, 
+  ChevronRight,
+  IndianRupee,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  Package,
+  ArrowRight,
+  CalendarDays
+} from 'lucide-react';
 import { authApi, masterApi } from '../../services/api';
 import useAuthStore from '../../store/authStore';
 import useLanguageStore from '../../store/languageStore';
@@ -58,168 +69,291 @@ const Dashboard = () => {
     return new Date(dateString).toLocaleDateString(language === 'or' ? 'or-IN' : 'en-IN', {
       day: '2-digit',
       month: 'short',
-      year: 'numeric',
     });
   };
 
   const getStatusBadge = (status) => {
-    const statusClasses = {
-      submitted: 'bg-blue-100 text-blue-800',
-      pending: 'bg-yellow-100 text-yellow-800',
-      approved: 'bg-green-100 text-green-800',
-      rejected: 'bg-red-100 text-red-800',
-      notSubmitted: 'bg-gray-100 text-gray-800',
+    const statusConfig = {
+      submitted: { class: 'badge-info', icon: Clock },
+      pending: { class: 'badge-warning', icon: AlertCircle },
+      approved: { class: 'badge-success', icon: CheckCircle2 },
+      rejected: { class: 'badge-danger', icon: AlertCircle },
+      notSubmitted: { class: 'badge-neutral', icon: AlertCircle },
     };
-    return statusClasses[status] || statusClasses.pending;
+    return statusConfig[status] || statusConfig.pending;
   };
+
+  const statCards = [
+    {
+      id: 'total',
+      label: t('dashboard:totalClaims'),
+      value: dashboardData?.totalClaims || 0,
+      icon: FileText,
+      color: 'navy',
+    },
+    {
+      id: 'pending',
+      label: t('dashboard:pendingClaims'),
+      value: dashboardData?.pendingClaims || 0,
+      icon: Clock,
+      color: 'saffron',
+    },
+    {
+      id: 'approved',
+      label: t('dashboard:approvedClaims'),
+      value: dashboardData?.approvedClaims || 0,
+      icon: CheckCircle2,
+      color: 'green',
+    },
+    {
+      id: 'rebate',
+      label: t('dashboard:totalRebate'),
+      value: `₹${(dashboardData?.totalRebate || 0).toLocaleString('en-IN')}`,
+      icon: IndianRupee,
+      color: 'purple',
+    },
+  ];
+
+  const recentActivities = [
+    {
+      id: 1,
+      type: 'claim',
+      title: 'New claim submitted',
+      desc: 'Claim for Durga Puja 2024 submitted successfully',
+      time: '2 hours ago',
+    },
+    {
+      id: 2,
+      type: 'stock',
+      title: 'Opening stock updated',
+      desc: 'Stock entry for Raja Festival completed',
+      time: '1 day ago',
+    },
+    {
+      id: 3,
+      type: 'approval',
+      title: 'Claim approved by GMDIC',
+      desc: 'Your claim has moved to DI for review',
+      time: '3 days ago',
+    },
+  ];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className={`text-2xl font-bold text-gray-900 ${language === 'or' ? 'font-odia' : ''}`}>
-          {t('dashboard:welcomeUser', { name: user?.name || user?.email })}
-        </h1>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-r from-gov-blue to-blue-700 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className={`text-sm opacity-80 ${language === 'or' ? 'font-odia' : ''}`}>
-                {t('dashboard:totalClaims')}
-              </p>
-              <p className="text-3xl font-bold">{dashboardData?.totalClaims || 0}</p>
-            </div>
-            <FileText size={40} className="opacity-50" />
-          </div>
-        </Card>
-
-        <Card className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className={`text-sm opacity-80 ${language === 'or' ? 'font-odia' : ''}`}>
-                {t('dashboard:pendingClaims')}
-              </p>
-              <p className="text-3xl font-bold">{dashboardData?.pendingClaims || 0}</p>
-            </div>
-            <Package size={40} className="opacity-50" />
-          </div>
-        </Card>
-
-        <Card className="bg-gradient-to-r from-green-500 to-emerald-600 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className={`text-sm opacity-80 ${language === 'or' ? 'font-odia' : ''}`}>
-                {t('dashboard:approvedClaims')}
-              </p>
-              <p className="text-3xl font-bold">{dashboardData?.approvedClaims || 0}</p>
-            </div>
-            <TrendingUp size={40} className="opacity-50" />
-          </div>
-        </Card>
-
-        <Card className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className={`text-sm opacity-80 ${language === 'or' ? 'font-odia' : ''}`}>
-                {t('dashboard:totalRebate')}
-              </p>
-              <p className="text-2xl font-bold">₹{dashboardData?.totalRebate?.toLocaleString() || 0}</p>
-            </div>
-            <Calendar size={40} className="opacity-50" />
-          </div>
-        </Card>
-      </div>
-
-      <Card 
-        title={t('dashboard:festivalCalendar')}
-        actions={
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => changeMonth(-1)}
-              className="p-2 hover:bg-gray-100 rounded-lg"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <span className="font-medium min-w-[120px] text-center">
-              {currentMonth.toLocaleDateString(language === 'or' ? 'or-IN' : 'en-IN', { 
-                month: 'long', 
-                year: 'numeric' 
-              })}
-            </span>
-            <button
-              onClick={() => changeMonth(1)}
-              className="p-2 hover:bg-gray-100 rounded-lg"
-            >
-              <ChevronRight size={20} />
-            </button>
-          </div>
-        }
-      >
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gov-blue"></div>
-          </div>
-        ) : festivals.length === 0 ? (
-          <p className={`text-center text-gray-500 py-8 ${language === 'or' ? 'font-odia' : ''}`}>
-            {t('dashboard:noFestivalsThisMonth')}
+        <div>
+          <h1 className={`text-2xl font-bold text-gray-900 ${language === 'or' ? 'font-odia' : ''}`}>
+            {t('dashboard:welcomeUser', { name: user?.name || 'User' })}
+          </h1>
+          <p className={`text-sm text-gray-500 mt-1 ${language === 'or' ? 'font-odia' : ''}`}>
+            {t('dashboard:dashboardSubtitle', { defaultValue: 'Here\'s your rebate management overview' })}
           </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase ${language === 'or' ? 'font-odia' : ''}`}>
-                    {t('dashboard:festival')}
-                  </th>
-                  <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase ${language === 'or' ? 'font-odia' : ''}`}>
-                    {t('dashboard:spellPeriod')}
-                  </th>
-                  <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase ${language === 'or' ? 'font-odia' : ''}`}>
-                    {t('dashboard:openingStockStatus')}
-                  </th>
-                  <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase ${language === 'or' ? 'font-odia' : ''}`}>
-                    {t('dashboard:closingStockStatus')}
-                  </th>
-                  <th className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase ${language === 'or' ? 'font-odia' : ''}`}>
-                    {t('common:actions')}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {festivals.map((festival) => (
-                  <tr key={festival._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="font-medium text-gray-900">{festival.name}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {formatDate(festival.spellStartDate)} - {formatDate(festival.spellEndDate)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadge(festival.openingStockStatus || 'notSubmitted')}`}>
-                        {t(`dashboard:${festival.openingStockStatus || 'notSubmitted'}`)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadge(festival.closingStockStatus || 'notSubmitted')}`}>
-                        {t(`dashboard:${festival.closingStockStatus || 'notSubmitted'}`)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <Button
-                        size="sm"
-                        onClick={() => navigate(`/claims/entry?festival=${festival._id}`)}
-                      >
-                        {t('dashboard:applyNow')}
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        </div>
+        <button
+          onClick={() => navigate('/claims/entry')}
+          className="quick-action-btn"
+        >
+          <FileText size={16} />
+          {t('dashboard:newClaim', { defaultValue: 'New Claim' })}
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        {statCards.map((stat) => (
+          <div key={stat.id} className={`stat-card ${stat.color}`}>
+            <div className={`stat-card-icon ${stat.color}`}>
+              <stat.icon size={24} />
+            </div>
+            <p className={`stat-card-label ${language === 'or' ? 'font-odia' : ''}`}>
+              {stat.label}
+            </p>
+            <p className="stat-card-value">{stat.value}</p>
           </div>
-        )}
-      </Card>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 dashboard-card">
+          <div className="dashboard-card-header">
+            <div className="dashboard-card-title">
+              <CalendarDays size={20} className="text-gov-navy" />
+              <span className={language === 'or' ? 'font-odia' : ''}>
+                {t('dashboard:festivalCalendar')}
+              </span>
+            </div>
+            <div className="calendar-nav">
+              <button onClick={() => changeMonth(-1)} className="calendar-nav-btn">
+                <ChevronLeft size={18} />
+              </button>
+              <span className={`calendar-month ${language === 'or' ? 'font-odia' : ''}`}>
+                {currentMonth.toLocaleDateString(language === 'or' ? 'or-IN' : 'en-IN', { 
+                  month: 'long', 
+                  year: 'numeric' 
+                })}
+              </span>
+              <button onClick={() => changeMonth(1)} className="calendar-nav-btn">
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+          <div className="dashboard-card-body p-0">
+            {loading ? (
+              <div className="flex items-center justify-center py-16">
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-gov-navy border-t-transparent"></div>
+              </div>
+            ) : festivals.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-state-icon">
+                  <Calendar size={28} />
+                </div>
+                <p className={`empty-state-title ${language === 'or' ? 'font-odia' : ''}`}>
+                  {t('dashboard:noFestivalsTitle', { defaultValue: 'No Festivals This Month' })}
+                </p>
+                <p className={`empty-state-text ${language === 'or' ? 'font-odia' : ''}`}>
+                  {t('dashboard:noFestivalsThisMonth')}
+                </p>
+              </div>
+            ) : (
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th className={language === 'or' ? 'font-odia' : ''}>
+                      {t('dashboard:festival')}
+                    </th>
+                    <th className={language === 'or' ? 'font-odia' : ''}>
+                      {t('dashboard:spellPeriod')}
+                    </th>
+                    <th className={language === 'or' ? 'font-odia' : ''}>
+                      {t('dashboard:openingStockStatus')}
+                    </th>
+                    <th className={language === 'or' ? 'font-odia' : ''}>
+                      {t('dashboard:closingStockStatus')}
+                    </th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {festivals.map((festival) => {
+                    const openingStatus = getStatusBadge(festival.openingStockStatus || 'notSubmitted');
+                    const closingStatus = getStatusBadge(festival.closingStockStatus || 'notSubmitted');
+                    return (
+                      <tr key={festival._id}>
+                        <td>
+                          <span className="font-semibold text-gray-900">{festival.name}</span>
+                        </td>
+                        <td className="text-gray-600">
+                          {formatDate(festival.spellStartDate)} - {formatDate(festival.spellEndDate)}
+                        </td>
+                        <td>
+                          <span className={`badge ${openingStatus.class}`}>
+                            {t(`dashboard:${festival.openingStockStatus || 'notSubmitted'}`)}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`badge ${closingStatus.class}`}>
+                            {t(`dashboard:${festival.closingStockStatus || 'notSubmitted'}`)}
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            onClick={() => navigate(`/claims/entry?festival=${festival._id}`)}
+                            className="quick-action-btn"
+                          >
+                            {t('dashboard:applyNow')}
+                            <ArrowRight size={14} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+
+        <div className="dashboard-card">
+          <div className="dashboard-card-header">
+            <div className="dashboard-card-title">
+              <TrendingUp size={20} className="text-gov-navy" />
+              <span className={language === 'or' ? 'font-odia' : ''}>
+                {t('dashboard:recentActivity', { defaultValue: 'Recent Activity' })}
+              </span>
+            </div>
+          </div>
+          <div className="dashboard-card-body">
+            <div className="activity-timeline">
+              {recentActivities.map((activity) => (
+                <div key={activity.id} className="activity-item">
+                  <div className={`activity-icon ${activity.type}`}>
+                    {activity.type === 'claim' && <FileText size={18} />}
+                    {activity.type === 'stock' && <Package size={18} />}
+                    {activity.type === 'approval' && <CheckCircle2 size={18} />}
+                  </div>
+                  <div className="activity-content">
+                    <p className="activity-title">{activity.title}</p>
+                    <p className="activity-desc">{activity.desc}</p>
+                    <p className="activity-time">{activity.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div 
+          className="dashboard-card cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => navigate('/opening-stock/entry')}
+        >
+          <div className="dashboard-card-body text-center py-8">
+            <div className="stat-card-icon navy mx-auto mb-4">
+              <Package size={24} />
+            </div>
+            <h3 className={`font-semibold text-gray-900 mb-2 ${language === 'or' ? 'font-odia' : ''}`}>
+              {t('dashboard:quickOpeningStock', { defaultValue: 'Opening Stock Entry' })}
+            </h3>
+            <p className={`text-sm text-gray-500 ${language === 'or' ? 'font-odia' : ''}`}>
+              {t('dashboard:quickOpeningStockDesc', { defaultValue: 'Submit your opening stock for upcoming festival' })}
+            </p>
+          </div>
+        </div>
+
+        <div 
+          className="dashboard-card cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => navigate('/closing-stock/entry')}
+        >
+          <div className="dashboard-card-body text-center py-8">
+            <div className="stat-card-icon green mx-auto mb-4">
+              <Package size={24} />
+            </div>
+            <h3 className={`font-semibold text-gray-900 mb-2 ${language === 'or' ? 'font-odia' : ''}`}>
+              {t('dashboard:quickClosingStock', { defaultValue: 'Closing Stock Entry' })}
+            </h3>
+            <p className={`text-sm text-gray-500 ${language === 'or' ? 'font-odia' : ''}`}>
+              {t('dashboard:quickClosingStockDesc', { defaultValue: 'Submit your closing stock after festival' })}
+            </p>
+          </div>
+        </div>
+
+        <div 
+          className="dashboard-card cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => navigate('/claims/submitted')}
+        >
+          <div className="dashboard-card-body text-center py-8">
+            <div className="stat-card-icon saffron mx-auto mb-4">
+              <FileText size={24} />
+            </div>
+            <h3 className={`font-semibold text-gray-900 mb-2 ${language === 'or' ? 'font-odia' : ''}`}>
+              {t('dashboard:quickViewClaims', { defaultValue: 'View Submitted Claims' })}
+            </h3>
+            <p className={`text-sm text-gray-500 ${language === 'or' ? 'font-odia' : ''}`}>
+              {t('dashboard:quickViewClaimsDesc', { defaultValue: 'Track your claim status and history' })}
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

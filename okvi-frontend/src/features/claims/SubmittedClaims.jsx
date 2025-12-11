@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Eye, CheckCircle, XCircle, Clock, Search } from 'lucide-react';
+import { Eye, CheckCircle, XCircle, Clock, Search, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { Card, Table, Modal } from '../../components/ui';
+import { Modal } from '../../components/ui';
 import { claimsApi } from '../../services/api';
 import useLanguageStore from '../../store/languageStore';
 
@@ -32,7 +32,11 @@ const SubmittedClaims = () => {
     }
   };
 
-  const formatDate = (dateString) => new Date(dateString).toLocaleDateString(language === 'or' ? 'or-IN' : 'en-IN');
+  const formatDate = (dateString) => new Date(dateString).toLocaleDateString(language === 'or' ? 'or-IN' : 'en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -43,124 +47,182 @@ const SubmittedClaims = () => {
       case 'rejected':
         return <XCircle className="text-red-600" size={16} />;
       default:
-        return <Clock className="text-yellow-600" size={16} />;
+        return <Clock className="text-amber-600" size={16} />;
     }
   };
 
   const getStatusBadge = (status) => {
     const config = {
-      submitted: 'bg-blue-100 text-blue-800',
-      gmdic_approved: 'bg-indigo-100 text-indigo-800',
-      di_approved: 'bg-purple-100 text-purple-800',
-      sanctioned: 'bg-green-100 text-green-800',
-      disbursed: 'bg-emerald-100 text-emerald-800',
-      rejected: 'bg-red-100 text-red-800',
+      submitted: 'badge-info',
+      gmdic_approved: 'badge-info',
+      di_approved: 'badge-info',
+      sanctioned: 'badge-success',
+      disbursed: 'badge-success',
+      rejected: 'badge-danger',
     };
-    return config[status] || 'bg-gray-100 text-gray-800';
+    return config[status] || 'badge-warning';
   };
 
   const filteredClaims = claims.filter(claim =>
     claim.festival?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const columns = [
-    { header: t('common:serialNo'), render: (_, i) => i + 1 },
-    { header: t('dashboard:festival'), render: (row) => row.festival?.name || '-' },
-    { header: t('claims:totalSale'), render: (row) => `₹${row.totalSaleAmount?.toLocaleString() || 0}` },
-    { header: t('claims:totalRebate'), render: (row) => `₹${row.totalRebateAmount?.toLocaleString() || 0}` },
-    { header: t('common:date'), render: (row) => formatDate(row.submittedAt || row.createdAt) },
-    {
-      header: t('common:status'),
-      render: (row) => (
-        <div className="flex items-center gap-2">
-          {getStatusIcon(row.status)}
-          <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadge(row.status)}`}>
-            {row.status?.replace('_', ' ') || 'pending'}
-          </span>
-        </div>
-      ),
-    },
-    {
-      header: t('common:actions'),
-      render: (row) => (
-        <button
-          onClick={() => { setSelectedClaim(row); setShowModal(true); }}
-          className="p-2 text-gov-blue hover:bg-gray-100 rounded-lg"
-        >
-          <Eye size={18} />
-        </button>
-      ),
-    },
-  ];
-
   return (
     <div className="space-y-6">
-      <h1 className={`text-2xl font-bold text-gray-900 ${language === 'or' ? 'font-odia' : ''}`}>
-        {t('claims:viewSubmittedClaims')}
-      </h1>
+      <div className="page-header">
+        <h1 className={`page-title ${language === 'or' ? 'font-odia' : ''}`}>
+          {t('claims:viewSubmittedClaims')}
+        </h1>
+        <p className={`page-subtitle ${language === 'or' ? 'font-odia' : ''}`}>
+          {t('claims:submittedClaimsDesc', { defaultValue: 'Track your claim status and approval history' })}
+        </p>
+      </div>
 
-      <Card>
-        <div className="flex items-center gap-4 mb-6">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+      <div className="dashboard-card">
+        <div className="dashboard-card-header">
+          <div className="dashboard-card-title">
+            <FileText size={20} className="text-gov-navy" />
+            <span className={language === 'or' ? 'font-odia' : ''}>
+              {t('claims:allClaims', { defaultValue: 'All Claims' })}
+            </span>
+          </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
               type="text"
               placeholder={t('common:search')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="input-field pl-10"
+              className="input-field pl-10 w-64"
             />
           </div>
         </div>
-
-        <Table columns={columns} data={filteredClaims} loading={loading} />
-      </Card>
+        <div className="p-0">
+          {loading ? (
+            <div className="flex items-center justify-center py-16">
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-gov-navy border-t-transparent"></div>
+            </div>
+          ) : filteredClaims.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-state-icon">
+                <FileText size={28} />
+              </div>
+              <p className={`empty-state-title ${language === 'or' ? 'font-odia' : ''}`}>
+                {t('claims:noClaimsFound', { defaultValue: 'No Claims Found' })}
+              </p>
+              <p className={`empty-state-text ${language === 'or' ? 'font-odia' : ''}`}>
+                {t('claims:noClaimsDesc', { defaultValue: 'You have not submitted any claims yet.' })}
+              </p>
+            </div>
+          ) : (
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>{t('common:serialNo')}</th>
+                  <th className={language === 'or' ? 'font-odia' : ''}>{t('dashboard:festival')}</th>
+                  <th className={language === 'or' ? 'font-odia' : ''}>{t('claims:totalSale')}</th>
+                  <th className={language === 'or' ? 'font-odia' : ''}>{t('claims:totalRebate')}</th>
+                  <th className={language === 'or' ? 'font-odia' : ''}>{t('common:date')}</th>
+                  <th className={language === 'or' ? 'font-odia' : ''}>{t('common:status')}</th>
+                  <th className={language === 'or' ? 'font-odia' : ''}>{t('common:actions')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredClaims.map((claim, index) => (
+                  <tr key={claim._id}>
+                    <td className="font-medium">{index + 1}</td>
+                    <td className="font-semibold text-gray-900">{claim.festival?.name || '-'}</td>
+                    <td className="font-semibold text-gov-navy">₹{claim.totalSaleAmount?.toLocaleString() || 0}</td>
+                    <td className="font-semibold text-gov-green">₹{claim.totalRebateAmount?.toLocaleString() || 0}</td>
+                    <td className="text-gray-500">{formatDate(claim.submittedAt || claim.createdAt)}</td>
+                    <td>
+                      <div className="flex items-center gap-2">
+                        {getStatusIcon(claim.status)}
+                        <span className={`badge ${getStatusBadge(claim.status)}`}>
+                          {claim.status?.replace('_', ' ') || 'pending'}
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      <button
+                        onClick={() => { setSelectedClaim(claim); setShowModal(true); }}
+                        className="p-2 text-gov-navy hover:bg-gov-navy/10 rounded-lg transition-colors"
+                        title="View Details"
+                      >
+                        <Eye size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
 
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={t('claims:viewClaimDetails')} size="lg">
         {selectedClaim && (
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className={`text-sm text-gray-500 ${language === 'or' ? 'font-odia' : ''}`}>{t('dashboard:festival')}</p>
-                <p className="font-medium">{selectedClaim.festival?.name}</p>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <p className={`text-sm text-gray-500 mb-1 ${language === 'or' ? 'font-odia' : ''}`}>{t('dashboard:festival')}</p>
+                <p className="font-semibold text-gray-900">{selectedClaim.festival?.name}</p>
               </div>
-              <div>
-                <p className={`text-sm text-gray-500 ${language === 'or' ? 'font-odia' : ''}`}>{t('common:status')}</p>
-                <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadge(selectedClaim.status)}`}>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <p className={`text-sm text-gray-500 mb-1 ${language === 'or' ? 'font-odia' : ''}`}>{t('common:status')}</p>
+                <span className={`badge ${getStatusBadge(selectedClaim.status)}`}>
                   {selectedClaim.status?.replace('_', ' ')}
                 </span>
               </div>
-              <div>
-                <p className={`text-sm text-gray-500 ${language === 'or' ? 'font-odia' : ''}`}>{t('claims:totalSale')}</p>
-                <p className="font-medium text-gov-blue">₹{selectedClaim.totalSaleAmount?.toLocaleString()}</p>
+              <div className="p-4 bg-blue-50 rounded-xl">
+                <p className={`text-sm text-blue-600 mb-1 ${language === 'or' ? 'font-odia' : ''}`}>{t('claims:totalSale')}</p>
+                <p className="font-bold text-xl text-gov-navy">₹{selectedClaim.totalSaleAmount?.toLocaleString()}</p>
               </div>
-              <div>
-                <p className={`text-sm text-gray-500 ${language === 'or' ? 'font-odia' : ''}`}>{t('claims:totalRebate')}</p>
-                <p className="font-medium text-green-600">₹{selectedClaim.totalRebateAmount?.toLocaleString()}</p>
+              <div className="p-4 bg-green-50 rounded-xl">
+                <p className={`text-sm text-green-600 mb-1 ${language === 'or' ? 'font-odia' : ''}`}>{t('claims:totalRebate')}</p>
+                <p className="font-bold text-xl text-gov-green">₹{selectedClaim.totalRebateAmount?.toLocaleString()}</p>
               </div>
             </div>
 
             <div>
-              <h4 className={`font-medium mb-3 ${language === 'or' ? 'font-odia' : ''}`}>{t('claims:claimApprovalHistory')}</h4>
+              <h4 className={`font-semibold text-gray-900 mb-4 ${language === 'or' ? 'font-odia' : ''}`}>
+                {t('claims:claimApprovalHistory')}
+              </h4>
               <div className="space-y-3">
-                {['gmdic', 'di', 'addlDirector'].map((level, index) => {
-                  const approval = selectedClaim.approvals?.[level];
+                {[
+                  { key: 'gmdic', label: 'GMDIC Review' },
+                  { key: 'di', label: 'DI Review' },
+                  { key: 'addlDirector', label: 'Addl. Director Review' }
+                ].map(({ key, label }) => {
+                  const approval = selectedClaim.approvals?.[key];
+                  const isApproved = approval?.approved;
+                  const isRejected = approval?.rejected;
+                  const isPending = !isApproved && !isRejected;
+                  
                   return (
-                    <div key={level} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        approval?.approved ? 'bg-green-100' : approval?.rejected ? 'bg-red-100' : 'bg-gray-200'
+                    <div key={key} className={`flex items-center gap-4 p-4 rounded-xl border ${
+                      isApproved ? 'bg-green-50 border-green-200' :
+                      isRejected ? 'bg-red-50 border-red-200' :
+                      'bg-gray-50 border-gray-200'
+                    }`}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        isApproved ? 'bg-green-100' : isRejected ? 'bg-red-100' : 'bg-gray-200'
                       }`}>
-                        {approval?.approved ? <CheckCircle className="text-green-600" size={16} /> :
-                         approval?.rejected ? <XCircle className="text-red-600" size={16} /> :
-                         <Clock className="text-gray-400" size={16} />}
+                        {isApproved ? <CheckCircle className="text-green-600" size={20} /> :
+                         isRejected ? <XCircle className="text-red-600" size={20} /> :
+                         <Clock className="text-gray-400" size={20} />}
                       </div>
                       <div className="flex-1">
-                        <p className={`font-medium ${language === 'or' ? 'font-odia' : ''}`}>
-                          {t(`claims:${level}Approval`)}
+                        <p className={`font-semibold ${
+                          isApproved ? 'text-green-800' : isRejected ? 'text-red-800' : 'text-gray-600'
+                        } ${language === 'or' ? 'font-odia' : ''}`}>
+                          {label}
                         </p>
-                        {approval?.approvedAt && (
-                          <p className="text-sm text-gray-500">{formatDate(approval.approvedAt)}</p>
-                        )}
+                        <p className="text-sm text-gray-500">
+                          {isApproved ? `Approved on ${formatDate(approval.approvedAt)}` :
+                           isRejected ? `Rejected on ${formatDate(approval.rejectedAt)}` :
+                           'Pending review'}
+                        </p>
                       </div>
                     </div>
                   );
@@ -169,9 +231,11 @@ const SubmittedClaims = () => {
             </div>
 
             {selectedClaim.sanctionAmount && (
-              <div className="p-4 bg-green-50 rounded-lg">
-                <p className={`text-sm text-green-700 ${language === 'or' ? 'font-odia' : ''}`}>{t('claims:sanctionAmount')}</p>
-                <p className="text-2xl font-bold text-green-800">₹{selectedClaim.sanctionAmount?.toLocaleString()}</p>
+              <div className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
+                <p className={`text-sm text-green-700 mb-1 ${language === 'or' ? 'font-odia' : ''}`}>
+                  {t('claims:sanctionAmount')}
+                </p>
+                <p className="text-3xl font-bold text-green-800">₹{selectedClaim.sanctionAmount?.toLocaleString()}</p>
               </div>
             )}
           </div>

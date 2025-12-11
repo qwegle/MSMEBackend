@@ -29,7 +29,7 @@ const Input = forwardRef(({
         <input
           ref={ref}
           type={type}
-          className={`w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-gov-blue/10 focus:border-gov-blue outline-none transition-all bg-white text-gray-800 placeholder-gray-400 hover:border-gray-300 ${icon ? 'pl-10' : ''} ${error ? 'border-red-400 focus:border-red-500 focus:ring-red-500/10' : ''} ${className}`}
+          className={`w-full px-4 py-3 border-1.5 border-gray-200 rounded-xl focus:ring-4 focus:ring-gov-navy/10 focus:border-gov-navy outline-none transition-all bg-white text-gray-800 placeholder-gray-400 hover:border-gray-300 ${icon ? 'pl-10' : ''} ${error ? 'border-red-400 focus:border-red-500 focus:ring-red-500/10' : ''} ${className}`}
           {...props}
         />
       </div>

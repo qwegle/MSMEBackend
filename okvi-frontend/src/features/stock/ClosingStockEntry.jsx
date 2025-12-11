@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, PackageCheck, Save, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { Card, Button, Select } from '../../components/ui';
+import { Button, Select } from '../../components/ui';
 import { stockApi, masterApi } from '../../services/api';
 import useLanguageStore from '../../store/languageStore';
 
@@ -89,126 +89,146 @@ const ClosingStockEntry = () => {
     }
   };
 
+  const addItem = () => {
+    append({ headType: '', subHead: '', quantity: '', unitType: '', rate: '', amount: '' });
+  };
+
   return (
     <div className="space-y-6">
-      <h1 className={`text-2xl font-bold text-gray-900 ${language === 'or' ? 'font-odia' : ''}`}>
-        {t('stock:closingStockEntry')}
-      </h1>
+      <div className="page-header">
+        <h1 className={`page-title ${language === 'or' ? 'font-odia' : ''}`}>
+          {t('stock:closingStockEntry')}
+        </h1>
+        <p className={`page-subtitle ${language === 'or' ? 'font-odia' : ''}`}>
+          {t('stock:closingStockEntryDesc', { defaultValue: 'Submit your closing stock details after the festival ends' })}
+        </p>
+      </div>
 
-      <Card>
-        <div className={`p-4 bg-yellow-50 border border-yellow-200 rounded-lg mb-6 ${language === 'or' ? 'font-odia' : ''}`}>
-          <p className="text-yellow-800 text-sm">
+      <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
+        <AlertTriangle className="text-amber-600 flex-shrink-0 mt-0.5" size={20} />
+        <div>
+          <p className={`font-semibold text-amber-800 ${language === 'or' ? 'font-odia' : ''}`}>
+            {t('stock:importantNote', { defaultValue: 'Important Note' })}
+          </p>
+          <p className={`text-amber-700 text-sm ${language === 'or' ? 'font-odia' : ''}`}>
             {t('stock:closingStockDeadline')}
           </p>
         </div>
+      </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <Select
-            label={t('stock:selectFestival')}
-            value={selectedFestival}
-            onChange={(e) => setSelectedFestival(e.target.value)}
-            options={festivals.map(f => ({ value: f._id, label: f.name }))}
-            placeholder={t('stock:selectFestival')}
-            required
-          />
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className={`font-medium ${language === 'or' ? 'font-odia' : ''}`}>
-                {t('stock:addStock')}
-              </h3>
-              <Button 
-                type="button" 
-                variant="secondary" 
-                size="sm" 
-                onClick={() => append({ headType: '', subHead: '', quantity: '', unitType: '', rate: '', amount: '' })}
-              >
-                <Plus size={16} /> {t('common:add')}
-              </Button>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className={`px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase ${language === 'or' ? 'font-odia' : ''}`}>
-                      {t('stock:headType')}
-                    </th>
-                    <th className={`px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase ${language === 'or' ? 'font-odia' : ''}`}>
-                      {t('stock:subHead')}
-                    </th>
-                    <th className={`px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase ${language === 'or' ? 'font-odia' : ''}`}>
-                      {t('stock:quantity')}
-                    </th>
-                    <th className={`px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase ${language === 'or' ? 'font-odia' : ''}`}>
-                      {t('stock:unitType')}
-                    </th>
-                    <th className={`px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase ${language === 'or' ? 'font-odia' : ''}`}>
-                      {t('stock:rate')}
-                    </th>
-                    <th className={`px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase ${language === 'or' ? 'font-odia' : ''}`}>
-                      {t('stock:amount')}
-                    </th>
-                    <th className="px-4 py-3"></th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {fields.map((field, index) => (
-                    <tr key={field.id}>
-                      <td className="px-4 py-3">
-                        <select {...register(`items.${index}.headType`)} className="input-field text-sm">
-                          <option value="">Select</option>
-                          {headTypes.map(h => <option key={h._id} value={h._id}>{h.name}</option>)}
-                        </select>
-                      </td>
-                      <td className="px-4 py-3">
-                        <input {...register(`items.${index}.subHead`)} className="input-field text-sm" />
-                      </td>
-                      <td className="px-4 py-3">
-                        <input type="number" {...register(`items.${index}.quantity`)} className="input-field text-sm w-24" />
-                      </td>
-                      <td className="px-4 py-3">
-                        <select {...register(`items.${index}.unitType`)} className="input-field text-sm">
-                          <option value="">Select</option>
-                          {unitTypes.map(u => <option key={u._id} value={u._id}>{u.name}</option>)}
-                        </select>
-                      </td>
-                      <td className="px-4 py-3">
-                        <input type="number" {...register(`items.${index}.rate`)} className="input-field text-sm w-24" />
-                      </td>
-                      <td className="px-4 py-3">
-                        <input type="text" {...register(`items.${index}.amount`)} className="input-field text-sm w-28 bg-gray-50" readOnly />
-                      </td>
-                      <td className="px-4 py-3">
-                        {fields.length > 1 && (
-                          <button type="button" onClick={() => remove(index)} className="text-red-500 hover:text-red-700">
-                            <Trash2 size={18} />
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot className="bg-gray-50">
-                  <tr>
-                    <td colSpan="5" className={`px-4 py-3 text-right font-medium ${language === 'or' ? 'font-odia' : ''}`}>
-                      {t('stock:totalAmount')}:
-                    </td>
-                    <td className="px-4 py-3 font-bold text-gov-blue">₹{calculateTotal()}</td>
-                    <td></td>
-                  </tr>
-                </tfoot>
-              </table>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <div className="form-section">
+          <div className="form-section-header">
+            <div className="form-section-title">
+              <PackageCheck size={18} className="text-gov-green" />
+              <span className={language === 'or' ? 'font-odia' : ''}>
+                {t('stock:festivalDetails', { defaultValue: 'Festival Details' })}
+              </span>
             </div>
           </div>
+          <div className="form-section-body">
+            <div className="max-w-md">
+              <Select
+                label={t('stock:selectFestival')}
+                value={selectedFestival}
+                onChange={(e) => setSelectedFestival(e.target.value)}
+                options={festivals.map(f => ({ value: f._id, label: f.name }))}
+                placeholder={t('stock:selectFestival')}
+                required
+              />
+            </div>
+          </div>
+        </div>
 
-          <div className="flex justify-end">
-            <Button type="submit" loading={loading}>
-              {t('stock:submitStock')}
+        <div className="form-section">
+          <div className="form-section-header flex items-center justify-between">
+            <div className="form-section-title">
+              <PackageCheck size={18} className="text-gov-green" />
+              <span className={language === 'or' ? 'font-odia' : ''}>
+                {t('stock:stockItems', { defaultValue: 'Stock Items' })}
+              </span>
+            </div>
+            <Button type="button" variant="outline" size="sm" onClick={addItem}>
+              <Plus size={16} /> {t('common:addItem', { defaultValue: 'Add Item' })}
             </Button>
           </div>
-        </form>
-      </Card>
+          <div className="overflow-x-auto">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th className={language === 'or' ? 'font-odia' : ''}>{t('stock:headType')}</th>
+                  <th className={language === 'or' ? 'font-odia' : ''}>{t('stock:subHead')}</th>
+                  <th className={language === 'or' ? 'font-odia' : ''}>{t('stock:quantity')}</th>
+                  <th className={language === 'or' ? 'font-odia' : ''}>{t('stock:unitType')}</th>
+                  <th className={language === 'or' ? 'font-odia' : ''}>{t('stock:rate')} (₹)</th>
+                  <th className={language === 'or' ? 'font-odia' : ''}>{t('stock:amount')} (₹)</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {fields.map((field, index) => (
+                  <tr key={field.id}>
+                    <td>
+                      <select {...register(`items.${index}.headType`)} className="input-field">
+                        <option value="">Select</option>
+                        {headTypes.map(h => <option key={h._id} value={h._id}>{h.name}</option>)}
+                      </select>
+                    </td>
+                    <td>
+                      <input {...register(`items.${index}.subHead`)} className="input-field" placeholder="Enter sub head" />
+                    </td>
+                    <td>
+                      <input type="number" {...register(`items.${index}.quantity`)} className="input-field w-24" placeholder="0" />
+                    </td>
+                    <td>
+                      <select {...register(`items.${index}.unitType`)} className="input-field">
+                        <option value="">Select</option>
+                        {unitTypes.map(u => <option key={u._id} value={u._id}>{u.name}</option>)}
+                      </select>
+                    </td>
+                    <td>
+                      <input type="number" {...register(`items.${index}.rate`)} className="input-field w-28" placeholder="0.00" step="0.01" />
+                    </td>
+                    <td>
+                      <input type="text" {...register(`items.${index}.amount`)} className="input-field w-28 bg-gray-50 font-semibold" readOnly />
+                    </td>
+                    <td>
+                      {fields.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => remove(index)}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="bg-gov-green/5">
+                  <td colSpan="5" className={`text-right font-semibold text-gray-700 ${language === 'or' ? 'font-odia' : ''}`}>
+                    {t('stock:totalAmount')}:
+                  </td>
+                  <td className="font-bold text-gov-green text-lg">₹{calculateTotal()}</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-4">
+          <Button type="button" variant="outline" onClick={() => reset()}>
+            {t('common:reset', { defaultValue: 'Reset' })}
+          </Button>
+          <Button type="submit" variant="success" loading={loading}>
+            <Save size={18} />
+            {t('stock:submitStock')}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };
