@@ -1,7 +1,9 @@
 import api from './axios';
 
 export const masterApi = {
-  getHolidays: (params) => api.get('/holidays', { params }),
+  getHolidays: (params) => api.get('/holidays/getAllHolidays', { params }),
+  
+  getCalendarHolidays: () => api.get('/holidays/getCalendarHolidays'),
   
   getHeadTypes: (params) => api.get('/head-types', { params }),
   
